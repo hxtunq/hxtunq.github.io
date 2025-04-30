@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Miscellanous
+title: Miscellaneous
 description: Random pictures.
 img: assets/img/9.jpg
 importance: 3
