@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Resources
+title: resources
 permalink: /resources/
 description: Take a look at some fascinating and valuable communities, channels & textbooks I've discovered through my experience
 nav: true
