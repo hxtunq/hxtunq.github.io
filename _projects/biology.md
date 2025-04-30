@@ -47,6 +47,12 @@ I love the nature, hence I learn life sciences.
 
 #### Supplementary materials
 
-- My recommended biology articles for undergraduates: [List of Articles](/list-of-articles/biology-article.html).
+| Journal | Title | Year |
+|---------|-------|------|
+| Nat. Commun. | [Galectin-9 binds IgM-BCR to regulate B cell signaling](https://doi.org/10.1038/s41467-018-05771-8) | 2018 |
+| PNAS | [IL-1 is required for tumor invasiveness and angiogenesis](https://doi.org/10.1073/pnas.0437939100) | 2003 |
+| Biochem. Eng. J. | [Fed-batch production of L-lysine by *Corynebacterium glutamicum*](https://doi.org/10.1038/s41467-018-05771-8) | 2018 |
+| Microbiol. Res. | [Industrial production of L-lysine in *Corynebacterium glutamicum*: Progress and prospects](https://doi.org/10.1016/j.micres.2022.127101) | 2022 |
+| Nat. Biotechnol. | [Carbon-negative production of acetone and isopropanol by gas fermentation at industrial pilot scale](https://doi.org/10.1038/s41587-021-01195-w) | 2021 |
 
 ---
