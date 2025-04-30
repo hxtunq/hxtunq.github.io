@@ -1,10 +1,4 @@
-# github_users:
-#   - hxtunq
-#   - orionanseaweed
+github_users:
+  - hxtunq
 
-# repo_description_lines_max: 2
-
-# github_repos:
-#   - orionanseaweed/latex-template
-#   - orionanseaweed/HUST-BF3702
-#   - orionanseaweed/r-data-visualization
+github_repos:
