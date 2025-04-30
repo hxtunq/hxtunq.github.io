@@ -1,7 +1,7 @@
 ---
 layout: default
 permalink: /contact/
-title: contact
+title: Contact
 nav: true
 nav_order: 6
 ---
@@ -12,7 +12,8 @@ nav_order: 6
         <h2 class="post-title">Contact Information</h2>
         </header>
         <ul>
-            <li><strong>Email:</strong> <a href="mailto:mtucker@gatech.edu">hxtunq@gmail.com</a></li>    
+            <li><strong>Email:</strong> <a href="mailto:hxtunq@gmail.com">hxtunq@gmail.com</a></li>
+            <li><strong>Email:</strong> <a href="mailto:concealedcharacterx@gmail.com">concealedcharacterx@gmail.com</a><li>
         </ul>
         <p>If you will contact me for a meeting or hang out, etc., here is my (likely incomplete) availability.</p>
     </div>
