@@ -1,6 +1,6 @@
-# al-folio
+## al-folio
 
-**A simple, clean, and responsive [Jekyll](https://jekyllrb.com/) theme for academics.**
+A simple, clean, and responsive Jekyll theme for academics.
 
 ## License
 
