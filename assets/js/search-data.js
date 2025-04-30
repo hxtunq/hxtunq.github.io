@@ -432,9 +432,9 @@ ninja.data = [{
           description: "with background image",
           section: "Projects",handler: () => {
               window.location.href = "/projects/1_biology/";
-            },},{id: "projects-project-7",
-          title: 'project 7',
-          description: "with background image",
+            },},{id: "projects-microbiology",
+          title: 'Microbiology',
+          description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/1_microbiology/";
             },},{id: "projects-project-4",
