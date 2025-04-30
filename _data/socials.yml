@@ -7,20 +7,20 @@
 # bluesky_url: # your bluesky URL
 # dblp_url: # your DBLP profile url
 # discord_id: # your discord id (18-digit unique numerical identifier)
-email: you@example.com # your email address
-# facebook_id: # your facebook id
+email: hxtunq@gmail.com # your email address
+facebook_id: hxtunq # your facebook id
 # flickr_id: # your flickr id
-# github_username: # your GitHub user name
+github_username: hxtunq # your GitHub user name
 # gitlab_username: # your GitLab user name
 # ieee_id: # your ieeexplore.ieee.org/author/id
-inspirehep_id: 1010907 # Inspire HEP author ID
-# instagram_id: # your instagram id
+# inspirehep_id: 1010907 # Inspire HEP author ID
+instagram_id: lemarid_an # your instagram id
 # kaggle_id: # your kaggle id
 # keybase_username: # your keybase user name
 # lastfm_id: # your lastfm id
 # lattes_id: # your ID on Lattes (Brazilian Lattes CV)
 # leetcode_id: # your LeetCode id
-# linkedin_username: # your LinkedIn user name
+linkedin_username: hxtunq # your LinkedIn user name
 # mastodon_username: # your mastodon instance+username in the format instance.tld/@username
 # medium_username: # your Medium username
 # orcid_id: # your ORCID ID
@@ -46,6 +46,6 @@ scholar_userid: qc6CJjYAAAAJ # your Google Scholar ID
 # youtube_id: # your youtube channel id (youtube.com/@<youtube_id>)
 # zotero_username: # your zotero username
 custom_social: # can be any name here other than the ones already defined above
-  logo: https://www.alberteinstein.com/wp-content/uploads/2024/03/cropped-favicon-192x192.png # can be png, svg, jpg
-  title: Custom Social
-  url: https://www.alberteinstein.com/
+  logo: web-icon.png # can be png, svg, jpg
+  title: Other Website
+  url: https://orionanseaweed.github.io/
