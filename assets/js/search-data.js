@@ -441,7 +441,7 @@ ninja.data = [{
           section: "Projects",handler: () => {
               window.location.href = "/projects/microbiology/";
             },},{id: "projects-random-pictures",
-          title: 'Random pictures.',
+          title: 'Random pictures',
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/misc_photo/";
