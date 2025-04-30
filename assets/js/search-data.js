@@ -457,6 +457,11 @@ ninja.data = [{
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/presentation/";
+            },},{id: "projects-undergraduate",
+          title: 'Undergraduate',
+          description: "Photos taken during undergraduate at HUST.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/undergraduate/";
             },},{id: "projects-web-design",
           title: 'Web Design',
           description: "",
