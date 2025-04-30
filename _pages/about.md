@@ -34,7 +34,7 @@ I'm an undergraduate majoring in Biological engineering at the School of Chemist
 
 My research interests focus on the identification and preservation of microbial strains, microbial diversity, metagenomics, genome breeding, and systems metabolic engineering.
 
-I am also interested in applying biological approaches to tackle questions at the intersection of biology and other disciplines, including astrobiology, biophysics, environmental biology, evolutionary biology, and geomicrobiology. Kindly refer [here](assets\pdf\Statement of Interest.pdf) for details.
+I am also interested in applying biological approaches to tackle questions at the intersection of biology and other disciplines, including astrobiology, biophysics, environmental biology, evolutionary biology, and geomicrobiology. Kindly refer [here](assets\pdf\Statement_of_Interest.pdf) for details.
 
 In my spare time, I often immerse myself in books and [musics](https://open.spotify.com/playlist/1Vpenzl2qq0ya9ipYPRt40?si=4abd837320504070), play badminton, or go [trekking](/figures/my_fig/trekking_with_friends.jpg). My favorite anime character at the moment is Binchou-tan.
 
