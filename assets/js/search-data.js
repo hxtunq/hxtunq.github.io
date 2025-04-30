@@ -38,7 +38,7 @@ ninja.data = [{
             window.location.href = "/contact/";
           },
         },{id: "dropdown-bookshelf",
-              title: "bookshelf",
+              title: "Bookshelf",
               description: "",
               section: "Dropdown",
               handler: () => {
@@ -440,8 +440,8 @@ ninja.data = [{
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/microbiology/";
-            },},{id: "projects-miscellanous",
-          title: 'Miscellanous',
+            },},{id: "projects-miscellaneous",
+          title: 'Miscellaneous',
           description: "Random pictures.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/misc_photo/";
