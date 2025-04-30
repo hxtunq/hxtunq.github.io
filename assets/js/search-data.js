@@ -23,13 +23,6 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/blog/";
           },
-        },{id: "nav-gallery",
-          title: "Gallery",
-          description: "A collection of my most favourite figures/pictures.",
-          section: "Navigation",
-          handler: () => {
-            window.location.href = "/gallery/";
-          },
         },{id: "nav-resources",
           title: "Resources",
           description: "Take a look at some fascinating and valuable communities, channels &amp; textbooks I&#39;ve discovered through my experience.",
@@ -447,6 +440,11 @@ ninja.data = [{
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/microbiology/";
+            },},{id: "projects-miscellanous",
+          title: 'Miscellanous',
+          description: "Random pictures.",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/misc_photo/";
             },},{id: "projects-oceanography",
           title: 'Oceanography',
           description: "",
@@ -459,7 +457,7 @@ ninja.data = [{
               window.location.href = "/projects/presentation/";
             },},{id: "projects-undergraduate",
           title: 'Undergraduate',
-          description: "Photos taken during undergraduate at HUST.",
+          description: "Photos taken during undergraduate.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/undergraduate/";
             },},{id: "projects-web-design",
