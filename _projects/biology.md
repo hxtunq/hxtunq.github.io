@@ -1,8 +1,7 @@
 ---
 layout: page
 title: Biology Textbook
-description:
-img: assets/img/12.jpg
+img: assets/img/2.jpg
 importance: 1
 category: Life Sciences
 ---

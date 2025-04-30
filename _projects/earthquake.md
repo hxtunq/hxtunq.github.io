@@ -1,8 +1,8 @@
 ---
 layout: page
-title: Earthquake
+title: Geology
 description:
-img: assets/img/7.jpg
+img: assets/img/4.jpg
 redirect: https://unsplash.com
 importance: 1
 category: Planetary Science

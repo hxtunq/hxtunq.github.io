@@ -1,8 +1,7 @@
 ---
 layout: page
 title: Presentation
-description:
-img: assets/img/6.jpg
+img: assets/img/8.jpg
 importance: 2
 category: Soft Skills
 ---

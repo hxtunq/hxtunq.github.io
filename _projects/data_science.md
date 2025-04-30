@@ -1,23 +1,10 @@
 ---
 layout: page
 title: Data Science with R
-description:
-img:
+description: 
+img: assets/img/3.jpg
 importance: 1
 category: Data Science
----
-
----
-title: Data Science — Xuan Tung Hoang
----
-
-# Data Science
-
-<!--
-Back to the landing page:
-[Back](https://orionanseaweed.github.io/).
--->
-
 ---
 
 #### Introduction to R
@@ -33,6 +20,8 @@ Back to the landing page:
 
 - [Posit Cheatsheets](https://rstudio.github.io/cheatsheets/) are concise reference guides that summarize essential R functions and syntax from the 'tidyverse' package for quick and efficient coding.
 
+---
+
 #### Documents Focusing on Visualization
 
 - [Fundamentals of Data Visualization](https://clauswilke.com/dataviz/index.html) by Claus O. Wilke.  
@@ -47,6 +36,8 @@ Back to the landing page:
 
 - [Modern Data Visualization with R](https://rkabacoff.github.io/datavis/index.html) by Robert Kabacoff.
 
+---
+
 #### R Packages
 
 - The [ggplot2 extensions](https://exts.ggplot2.tidyverse.org/gallery/) website
@@ -58,6 +49,8 @@ Back to the landing page:
 
 - You can build professional __interactive web apps__ using the shiny package ([Mastering Shiny](https://mastering-shiny.org/preface.html) & [Shiny for R Gallery](https://shiny.posit.co/r/gallery/)) via RStudio and [ShinyApps](https://www.shinyapps.io/)
   or more simply with [flexdashboard](https://pkgs.rstudio.com/flexdashboard/index.html) via R Markdown.
+
+  ---
 
 #### Advanced R
 
