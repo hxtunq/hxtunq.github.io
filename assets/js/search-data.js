@@ -417,7 +417,7 @@ ninja.data = [{
           description: "",
           section: "News",},{id: "projects-bioinformatics",
           title: 'Bioinformatics',
-          description: "",
+          description: "Sometimes Computational Biology.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/bioinformatics/";
             },},{id: "projects-biology-textbook",
@@ -430,14 +430,14 @@ ninja.data = [{
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/data_science/";
-            },},{id: "projects-earthquake",
-          title: 'Earthquake',
+            },},{id: "projects-geology",
+          title: 'Geology',
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/earthquake/";
             },},{id: "projects-microbiology",
           title: 'Microbiology',
-          description: "",
+          description: "Fun fact: We are living in a microbial planet :)",
           section: "Projects",handler: () => {
               window.location.href = "/projects/microbiology/";
             },},{id: "projects-miscellaneous",
@@ -447,7 +447,7 @@ ninja.data = [{
               window.location.href = "/projects/misc_photo/";
             },},{id: "projects-oceanography",
           title: 'Oceanography',
-          description: "",
+          description: "Related to Marine Biology.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/oceanography/";
             },},{id: "projects-presentation",
@@ -462,7 +462,7 @@ ninja.data = [{
               window.location.href = "/projects/undergraduate/";
             },},{id: "projects-web-design",
           title: 'Web Design',
-          description: "",
+          description: "Tutorial on creating a basic GitHub website via HTML/CSS/Jekyll template.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/web_design/";
             },},{id: "projects-writing",
