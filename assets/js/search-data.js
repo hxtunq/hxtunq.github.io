@@ -424,49 +424,49 @@ ninja.data = [{
           description: "",
           section: "News",},{id: "projects-bioinformatics",
           title: 'Bioinformatics',
-          description: "a project with a background image and giscus comments",
+          description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/1_bioinformatics/";
+              window.location.href = "/projects/bioinformatics/";
             },},{id: "projects-biology-textbook",
           title: 'Biology Textbook',
-          description: "with background image",
+          description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/1_biology/";
+              window.location.href = "/projects/biology/";
+            },},{id: "projects-data-science-with-r",
+          title: 'Data Science with R',
+          description: "",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/data-science/";
+            },},{id: "projects-earthquake",
+          title: 'Earthquake',
+          description: "",
+          section: "Projects",handler: () => {
+              window.location.href = "/projects/earthquake/";
             },},{id: "projects-microbiology",
           title: 'Microbiology',
           description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/1_microbiology/";
-            },},{id: "projects-project-4",
-          title: 'project 4',
-          description: "another without an image",
+              window.location.href = "/projects/microbiology/";
+            },},{id: "projects-oceanography",
+          title: 'Oceanography',
+          description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/2_datascience_R/";
-            },},{id: "projects-earthquake",
-          title: 'Earthquake',
-          description: "a project that redirects to another website",
+              window.location.href = "/projects/oceanography/";
+            },},{id: "projects-presentation",
+          title: 'Presentation',
+          description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/3_earthquake/";
-            },},{id: "projects-project-5",
-          title: 'project 5',
-          description: "a project with a background image",
+              window.location.href = "/projects/presentation/";
+            },},{id: "projects-web-design",
+          title: 'Web Design',
+          description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/4_oceanography/";
-            },},{id: "projects-project-9",
-          title: 'project 9',
-          description: "another project with an image 🎉",
+              window.location.href = "/projects/web-design/";
+            },},{id: "projects-academic-writing",
+          title: 'Academic Writing',
+          description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/A_presentation/";
-            },},{id: "projects-project-8",
-          title: 'project 8',
-          description: "an other project with a background image and giscus comments",
-          section: "Projects",handler: () => {
-              window.location.href = "/projects/A_webdesign/";
-            },},{id: "projects-project-6",
-          title: 'project 6',
-          description: "a project with no image",
-          section: "Projects",handler: () => {
-              window.location.href = "/projects/A_writing/";
+              window.location.href = "/projects/writing/";
             },},{
         id: 'social-github',
         title: 'GitHub',
