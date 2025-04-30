@@ -4,20 +4,20 @@ const ninja = document.querySelector('ninja-keys');
 // add the home and posts menu items
 ninja.data = [{
     id: "nav-about",
-    title: "About",
+    title: "about",
     section: "Navigation",
     handler: () => {
       window.location.href = "/";
     },
-  },{id: "nav-bio-cv",
-          title: "Bio/CV",
+  },{id: "nav-cv",
+          title: "cv",
           description: "",
           section: "Navigation",
           handler: () => {
             window.location.href = "/cv/";
           },
         },{id: "nav-blog",
-          title: "Blog",
+          title: "blog",
           description: "",
           section: "Navigation",
           handler: () => {
@@ -31,14 +31,14 @@ ninja.data = [{
             window.location.href = "/gallery/";
           },
         },{id: "nav-resources",
-          title: "Resources",
+          title: "resources",
           description: "Take a look at some fascinating and valuable communities, channels &amp; textbooks I&#39;ve discovered through my experience",
           section: "Navigation",
           handler: () => {
             window.location.href = "/resources/";
           },
         },{id: "nav-contact",
-          title: "Contact",
+          title: "contact",
           description: "",
           section: "Navigation",
           handler: () => {
@@ -468,20 +468,6 @@ ninja.data = [{
           section: "Projects",handler: () => {
               window.location.href = "/projects/9_project/";
             },},{
-        id: 'social-email',
-        title: 'email',
-        section: 'Socials',
-        handler: () => {
-          window.open("mailto:%68%78%74%75%6E%71@%67%6D%61%69%6C.%63%6F%6D", "_blank");
-        },
-      },{
-        id: 'social-facebook',
-        title: 'Facebook',
-        section: 'Socials',
-        handler: () => {
-          window.open("https://facebook.com/hxtunq", "_blank");
-        },
-      },{
         id: 'social-github',
         title: 'GitHub',
         section: 'Socials',
@@ -501,27 +487,6 @@ ninja.data = [{
         section: 'Socials',
         handler: () => {
           window.open("https://www.linkedin.com/in/hxtunq", "_blank");
-        },
-      },{
-        id: 'social-rss',
-        title: 'RSS Feed',
-        section: 'Socials',
-        handler: () => {
-          window.open("/feed.xml", "_blank");
-        },
-      },{
-        id: 'social-scholar',
-        title: 'Google Scholar',
-        section: 'Socials',
-        handler: () => {
-          window.open("https://scholar.google.com/citations?user=qc6CJjYAAAAJ", "_blank");
-        },
-      },{
-        id: 'social-custom_social',
-        title: 'Custom_social',
-        section: 'Socials',
-        handler: () => {
-          window.open("https://orionanseaweed.github.io/", "_blank");
         },
       },{
       id: 'light-theme',
