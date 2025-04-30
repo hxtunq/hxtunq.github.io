@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Miscellaneous
+title: Misc
 nav: true
 nav_order: 8
 dropdown: true
