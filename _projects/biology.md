@@ -4,6 +4,7 @@ title: Biology Textbook
 img: assets/img/2.jpg
 importance: 1
 category: Life Sciences
+pretty_table: true
 ---
 
 ---
