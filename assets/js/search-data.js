@@ -422,7 +422,7 @@ ninja.data = [{
               window.location.href = "/projects/bioinformatics/";
             },},{id: "projects-biology-textbook",
           title: 'Biology Textbook',
-          description: "",
+          description: "I love the nature, hence I learn life sciences.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/biology/";
             },},{id: "projects-data-science-with-r",
@@ -437,7 +437,7 @@ ninja.data = [{
               window.location.href = "/projects/earthquake/";
             },},{id: "projects-microbiology",
           title: 'Microbiology',
-          description: "Fun fact: We are living in a microbial planet :)",
+          description: "Fun fact: Earth is a microbial planet :)",
           section: "Projects",handler: () => {
               window.location.href = "/projects/microbiology/";
             },},{id: "projects-random-pictures",
