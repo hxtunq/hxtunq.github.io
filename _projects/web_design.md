@@ -6,3 +6,5 @@ img: assets/img/10.jpg
 importance: 3
 category: Soft Skills
 ---
+
+---

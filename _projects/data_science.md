@@ -7,6 +7,8 @@ importance: 1
 category: Data Science
 ---
 
+---
+
 #### Introduction to R
 
 - [R for Data Science (2e)](https://r4ds.hadley.nz/) by Hadley Wickham, Mine Cetinkaya-Rundel, and Garrett Grolemund.  
