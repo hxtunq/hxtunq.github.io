@@ -4,20 +4,20 @@ const ninja = document.querySelector('ninja-keys');
 // add the home and posts menu items
 ninja.data = [{
     id: "nav-about",
-    title: "about",
+    title: "About",
     section: "Navigation",
     handler: () => {
       window.location.href = "/";
     },
   },{id: "nav-cv",
-          title: "cv",
+          title: "CV",
           description: "",
           section: "Navigation",
           handler: () => {
             window.location.href = "/cv/";
           },
         },{id: "nav-blog",
-          title: "blog",
+          title: "Blog",
           description: "",
           section: "Navigation",
           handler: () => {
@@ -31,14 +31,14 @@ ninja.data = [{
             window.location.href = "/gallery/";
           },
         },{id: "nav-resources",
-          title: "resources",
+          title: "Resources",
           description: "Take a look at some fascinating and valuable communities, channels &amp; textbooks I&#39;ve discovered through my experience",
           section: "Navigation",
           handler: () => {
             window.location.href = "/resources/";
           },
         },{id: "nav-contact",
-          title: "contact",
+          title: "Contact",
           description: "",
           section: "Navigation",
           handler: () => {
