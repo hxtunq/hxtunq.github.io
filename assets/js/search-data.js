@@ -429,7 +429,7 @@ ninja.data = [{
               window.location.href = "/projects/bioinformatics/";
             },},{id: "projects-biology-textbook",
           title: 'Biology Textbook',
-          description: "",
+          description: "I love the nature, hence I learn life sciences.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/biology/";
             },},{id: "projects-data-science-with-r",
