@@ -436,7 +436,7 @@ ninja.data = [{
           title: 'Data Science with R',
           description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/data-science/";
+              window.location.href = "/projects/data_science/";
             },},{id: "projects-earthquake",
           title: 'Earthquake',
           description: "",
@@ -466,7 +466,7 @@ ninja.data = [{
           title: 'Web Design',
           description: "",
           section: "Projects",handler: () => {
-              window.location.href = "/projects/web-design/";
+              window.location.href = "/projects/web_design/";
             },},{id: "projects-writing",
           title: 'Writing',
           description: "",
