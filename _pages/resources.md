@@ -2,7 +2,7 @@
 layout: page
 title: Resources
 permalink: /resources/
-description: Take a look at some fascinating and valuable communities, channels & textbooks I've discovered through my experience.
+description: Take a look at some valuable insights and discoveries from my journey.
 nav: true
 nav_order: 4
 display_categories: [Life Sciences, Data Science, Planetary Science, Soft Skills, Photograph]

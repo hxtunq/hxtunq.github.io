@@ -7,4 +7,6 @@ dropdown: true
 children:
   - title: Bookshelf
     permalink: /books/
+  - title: News
+    permalink: /news/
 ---
