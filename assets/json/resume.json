@@ -1,47 +1,41 @@
 {
   "basics": {
-    "name": "Albert Einstein",
-    "label": "Scientist",
+    "name": "Xuan Tung Hoang",
+    "label": "Undergraduate Student",
     "image": "",
-    "email": "albert@einstein.de",
-    "phone": "(912) 123-4567",
-    "url": "https://alshedivat.github.io/al-folio/",
+    "email": "hxtunq@gmail.com",
     "summary": "A German-born theoretical physicist, widely ranked among the greatest and most influential scientists of all time",
-    "location": {
-      "address": "2712 Broadway St",
-      "postalCode": "CA 94115",
-      "city": "San Francisco",
-      "countryCode": "US",
-      "region": "California"
-    },
-    "profiles": [
-      {
-        "network": "Twitter",
-        "username": "AlbertEinstein",
-        "url": "https://twitter.com/AlbertEinstein"
-      }
-    ]
   },
   "work": [
     {
-      "name": "Institute for Advanced Study, Princeton University",
-      "position": "Professor of Theoretical Physics",
+      "name": "Microbial Ecology Lab",
+      "position": "Undergraduate Research",
       "url": "https://example.com",
-      "startDate": "1933-01-01",
-      "endDate": "1955-01-01",
+      "startDate": "2024-10",
+      "endDate": "2026-07",
       "summary": "Teaching at Palmer Physical Laboratory (now 302 Frist Campus Center). While not a professor at Princeton, I associated with the physics professors and continued to give lectures on campus.",
-      "highlights": ["Relativity"]
+      "highlights": [""]
     }
   ],
   "volunteer": [
     {
-      "organization": "People's Climate March",
-      "location": "Zurich, Switzerland",
-      "position": "Lead Organizer",
-      "url": "https://example.com",
-      "startDate": "2014-04-01",
-      "endDate": "2015-07-01",
-      "summary": "Lead organizer for the New York City branch of the People's Climate March, the largest climate march in history.",
+      "organization": "xPhO Physics Club",
+      "location": "Hanoi, Vietnam",
+      "position": "Les Misérable / Technician",
+      "url": "https://www.facebook.com/xPhO.org",
+      "startDate": "2012-07",
+      "endDate": "now",
+      "summary": "Since entering xPhO in 2022, I gradually became more engaged in discussions on astronomy, eventually expanding into other branches of physics and sciences in general. Through these conversations, I had the chance to connect with many talented individuals and gain insights from their inspiring academic journeys. It is no exaggeration to say that this was the moment when my mind truly began to embrace and shape the passion for scientific pursuit that would stay with me for years to come.",
+      "highlights": ["📁 Supplementary material (YTB): xPhO's astronomy presentation playlist.", "📁 Supplementary material (GitHub): Savelyev Project - draft version."]
+    }
+    {
+      "organization": "D Free Book",
+      "location": "Hanoi, Vietnam",
+      "position": "Head Librarian",
+      "url": "https://dfreebook.com/",
+      "startDate": "2023-12",
+      "endDate": "2024-10",
+      "summary": " led a team of 15 members in managing the library's collection and data entry, as well as coordinating the circulation of over 1,000 donated books (excluding event sources) to other organizations, schools and libraries across the country.",
       "highlights": ["Awarded 'Climate Hero' award by Greenpeace for my efforts organizing the march.", "Men of the year 2014 by Time magazine"]
     }
   ],
