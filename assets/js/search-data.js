@@ -266,8 +266,8 @@ ninja.data = [{
           description: "Sometimes Computational Biology.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/bioinformatics/";
-            },},{id: "projects-biology-textbook",
-          title: 'Biology Textbook',
+            },},{id: "projects-biology",
+          title: 'Biology',
           description: "I love the nature, hence I learn life sciences.",
           section: "Projects",handler: () => {
               window.location.href = "/projects/biology/";
