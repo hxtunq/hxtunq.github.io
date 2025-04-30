@@ -467,8 +467,8 @@ ninja.data = [{
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/web-design/";
-            },},{id: "projects-academic-writing",
-          title: 'Academic Writing',
+            },},{id: "projects-writing",
+          title: 'Writing',
           description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/writing/";
