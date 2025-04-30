@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Undergraduate
-description: Photos taken during undergraduate at HUST.
+description: Photos taken during undergraduate.
 img: assets/img/9.jpg
 importance: 1
-category: Photography
+category: Photograph
 ---

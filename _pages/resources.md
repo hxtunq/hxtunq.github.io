@@ -4,8 +4,8 @@ title: Resources
 permalink: /resources/
 description: Take a look at some fascinating and valuable communities, channels & textbooks I've discovered through my experience.
 nav: true
-nav_order: 5
-display_categories: [Life Sciences, Data Science, Planetary Science, Soft Skills, Photography]
+nav_order: 4
+display_categories: [Life Sciences, Data Science, Planetary Science, Soft Skills, Photograph]
 horizontal: false
 ---
 
