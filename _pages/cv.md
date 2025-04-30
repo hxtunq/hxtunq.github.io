@@ -1,7 +1,7 @@
 ---
 layout: cv
 permalink: /cv/
-title: CV
+title: Bio/CV
 nav: true
 nav_order: 1
 cv_pdf: CV_HXT.pdf # you can also use external links here
