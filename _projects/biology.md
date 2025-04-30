@@ -53,6 +53,7 @@ I love the nature, hence I learn life sciences.
 #### My recommended biology articles for undergraduates
 
 <table
+  data-click-to-select="true"
   data-height="460"
   data-pagination="true"
   data-search="true"
