@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Academic Writing
+title: Writing
 description:
 img:
 importance: 4
