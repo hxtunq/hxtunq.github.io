@@ -9,7 +9,7 @@ profile:
   image: prof_pic.jpg
   # image_circular: false # crops the image to make it circular
   more_info: >
-    <p>Picture of me and my fluffy friend Dee Boo.</p>
+    <p>2024 - Picture of me and my fluffy friend Dee Boo.</p>
 
 selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
@@ -25,7 +25,7 @@ latest_posts:
   limit: 3 # leave blank to include all the blog posts
 ---
 
-I'm an undergraduate majoring in Biological engineering at the School of Chemistry and Life Sciences ([url](https://scls.hust.edu.vn/)), Hanoi University of Science and Technology, Vietnam. Throughout my journey, I've been fortunate to be surrounded by inspiring mentors and talented peers, which has fueled my deep passion for various scientific fields, especially [microbiology](https://en.wikipedia.org/wiki/Microbiology) and [astrobiology](https://astrobiology.nasa.gov/about/).
+I'm an undergraduate majoring in Biological Engineering at Hanoi University of Science and Technology, Vietnam. Throughout my journey, I've been fortunate to be surrounded by inspiring mentors and talented peers, which has fueled my deep passion for various scientific fields, especially [microbiology](https://en.wikipedia.org/wiki/Microbiology) and [astrobiology](https://astrobiology.nasa.gov/about/).
 
 My research interests focus on the identification and preservation of microbial strains, microbial diversity, metagenomics, genome breeding, and systems metabolic engineering.
 

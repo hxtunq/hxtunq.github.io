@@ -2,10 +2,10 @@
 layout: page
 title: Resources
 permalink: /resources/
-description: Take a look at some fascinating and valuable communities, channels & textbooks I've discovered through my experience
+description: Take a look at some fascinating and valuable communities, channels & textbooks I've discovered through my experience.
 nav: true
 nav_order: 5
-display_categories: [Life Sciences, Data Science, Geology and Oceanography, Soft Skills]
+display_categories: [Biology, Data Science, Geology, Oceanography, Soft Skills]
 horizontal: false
 ---
 
