@@ -2,7 +2,7 @@
 layout: page
 title: Writing
 description:
-img: assets/img/11.jpg
+img: assets/img/12.jpg
 importance: 4
 category: Soft Skills
 ---

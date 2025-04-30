@@ -1,16 +1,11 @@
 ---
 layout: page
 title: Biology Textbook
-img: assets/img/2.jpg
+description: I love the nature, hence I learn life sciences.
+img: assets/img/12.jpg
 importance: 1
 category: Life Sciences
 pretty_table: true
----
-
----
-
-I love the nature, hence I learn life sciences.
-
 ---
 
 #### General Biology
