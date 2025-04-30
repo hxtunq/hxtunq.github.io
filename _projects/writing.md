@@ -1,11 +1,10 @@
 ---
 layout: page
-title: Earthquake
-description: a project that redirects to another website
-img: assets/img/7.jpg
-redirect: https://unsplash.com
-importance: 1
-category: Geology
+title: Academic Writing
+description:
+img:
+importance: 4
+category: Soft Skills
 ---
 
 Every project has a beautiful feature showcase page.

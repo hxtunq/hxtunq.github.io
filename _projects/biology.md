@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Biology Textbook
-description: with background image
+description:
 img: assets/img/12.jpg
 importance: 1
 category: Biology
