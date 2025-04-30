@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Biology Textbook
+title: Biology
 description: I love the nature, hence I learn life sciences.
 img: assets/img/12.jpg
 importance: 1
