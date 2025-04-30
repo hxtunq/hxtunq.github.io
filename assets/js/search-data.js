@@ -440,9 +440,9 @@ ninja.data = [{
           description: "Fun fact: We are living in a microbial planet :)",
           section: "Projects",handler: () => {
               window.location.href = "/projects/microbiology/";
-            },},{id: "projects-miscellaneous",
-          title: 'Miscellaneous',
-          description: "Random pictures.",
+            },},{id: "projects-random-pictures",
+          title: 'Random pictures.',
+          description: "",
           section: "Projects",handler: () => {
               window.location.href = "/projects/misc_photo/";
             },},{id: "projects-oceanography",
