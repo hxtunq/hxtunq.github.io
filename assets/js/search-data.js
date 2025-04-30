@@ -25,7 +25,7 @@ ninja.data = [{
           },
         },{id: "nav-resources",
           title: "Resources",
-          description: "Take a look at some fascinating and valuable communities, channels &amp; textbooks I&#39;ve discovered through my experience.",
+          description: "Take a look at some valuable insights and discoveries from my journey.",
           section: "Navigation",
           handler: () => {
             window.location.href = "/resources/";
@@ -43,6 +43,13 @@ ninja.data = [{
               section: "Dropdown",
               handler: () => {
                 window.location.href = "/books/";
+              },
+            },{id: "dropdown-news",
+              title: "News",
+              description: "",
+              section: "Dropdown",
+              handler: () => {
+                window.location.href = "/news/";
               },
             },{id: "post-a-post-with-plotly-js",
         
