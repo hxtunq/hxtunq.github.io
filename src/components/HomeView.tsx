@@ -33,7 +33,26 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showCV, setShowCV] = useState(false);
   const [themeMode, setThemeMode] = useState<"abstract" | "custom">("abstract");
-  const [customImageUrl, setCustomImageUrl] = useState("");
+
+  const staticStars = React.useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      left: `${(i * 13 + 7) % 96 + 2}%`,
+      top: `${(i * 17 + 11) % 96 + 2}%`,
+      size: `${0.8 + (i * 0.4) % 1.5}px`,
+      duration: `${2 + (i * 0.7) % 4}s`,
+    }));
+  }, []);
+
+  const fallingStars = React.useMemo(() => {
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      left: `${(i * 19 + 15) % 90 + 5}%`,
+      delay: `${(i * 1.8) % 10}s`,
+      duration: `${5 + (i * 1.2) % 6}s`,
+      size: `${1.5 + (i * 0.5) % 2.5}px`,
+    }));
+  }, []);
 
   const handleCopyDoi = (id: string, doi: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -128,38 +147,299 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
             </div>
 
             {themeMode === "abstract" ? (
-              /* A gorgeous CSS/SVG neural biophysics network rendering */
-              <div className="w-full h-full bg-brand-primary relative flex flex-col justify-between p-6 overflow-hidden rounded-[0.125rem]">
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0e213b] to-transparent opacity-60 z-0"></div>
+              /* A gorgeous CSS space scene with a pixel-art explorer spaceship and meteor shower rendering */
+              <div className="w-full h-full bg-[#030712] relative flex flex-col justify-between p-6 overflow-hidden rounded-[0.125rem] border border-slate-800">
+                <style>{`
+                  @keyframes starTwinkle {
+                    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+                    50% { opacity: 1; transform: scale(1.2); }
+                  }
+                  @keyframes starFall {
+                    0% {
+                      transform: translateY(-20px) translateX(-50px);
+                      opacity: 0;
+                    }
+                    10% {
+                      opacity: 0.8;
+                    }
+                    90% {
+                      opacity: 0.8;
+                    }
+                    100% {
+                      transform: translateY(340px) translateX(120px);
+                      opacity: 0;
+                    }
+                  }
+                  @keyframes spaceCruise {
+                    0% {
+                      transform: translateY(0px) translateX(-8px);
+                    }
+                    50% {
+                      transform: translateY(-6px) translateX(8px);
+                    }
+                    100% {
+                      transform: translateY(0px) translateX(-8px);
+                    }
+                  }
+                  @keyframes scanBeam {
+                    0% {
+                      transform: rotate(-10deg);
+                      opacity: 0.25;
+                    }
+                    50% {
+                      opacity: 0.55;
+                    }
+                    100% {
+                      transform: rotate(10deg);
+                      opacity: 0.25;
+                    }
+                  }
+                  @keyframes microbeWiggle {
+                    0% {
+                      transform: translateY(0px) translateX(0px) rotate(0deg);
+                    }
+                    100% {
+                      transform: translateY(-1.5px) translateX(1px) rotate(6deg);
+                    }
+                  }
+                  @keyframes laserBolt {
+                    0% {
+                      stroke-dashoffset: 48;
+                      opacity: 0;
+                    }
+                    3% {
+                      opacity: 1;
+                    }
+                    72% {
+                      stroke-dashoffset: -85;
+                      opacity: 1;
+                    }
+                    75%, 100% {
+                      stroke-dashoffset: -85;
+                      opacity: 0;
+                    }
+                  }
+                  .custom-static-star {
+                    position: absolute;
+                    background-color: #ffffff;
+                    border-radius: 50%;
+                    animation: starTwinkle ease-in-out infinite alternate;
+                  }
+                  .custom-falling-star {
+                    position: absolute;
+                    top: -20px;
+                    background-color: #ffffff;
+                    border-radius: 50%;
+                    box-shadow: 0 0 6px 1.5px rgba(255, 255, 255, 0.7);
+                    animation: starFall linear infinite;
+                  }
+                `}</style>
 
-                {/* Animated bio-grid visual layout */}
-                <svg className="absolute inset-0 w-full h-full opacity-25" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#ffffff" strokeWidth="0.5" />
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#grid)" />
-                </svg>
+                {/* Glowing cosmic nebula background */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-[#0b132b] via-[#1c2541] to-[#030712] opacity-90 z-0"></div>
+                <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-purple-600/10 rounded-full filter blur-[50px] pointer-events-none"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-cyan-600/10 rounded-full filter blur-[40px] pointer-events-none"></div>
 
-                {/* Simulated network nodes */}
-                <div className="absolute top-1/3 left-1/4 w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
-                <div className="absolute bottom-1/3 right-1/4 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+                {/* Static twinkling stars */}
+                {staticStars.map((star) => (
+                  <div
+                    key={`static-${star.id}`}
+                    className="custom-static-star"
+                    style={{
+                      left: star.left,
+                      top: star.top,
+                      width: star.size,
+                      height: star.size,
+                      animationDuration: star.duration,
+                    }}
+                  />
+                ))}
 
-                {/* Animated custom graphic: stylized biophysical protein model */}
+                {/* Falling stars */}
+                {fallingStars.map((star) => (
+                  <div
+                    key={`falling-${star.id}`}
+                    className="custom-falling-star"
+                    style={{
+                      left: star.left,
+                      width: star.size,
+                      height: star.size,
+                      animationDelay: star.delay,
+                      animationDuration: star.duration,
+                    }}
+                  />
+                ))}
+
+                {/* Centerpiece: Pixel Spacecraft cruising and scanning */}
                 <div className="flex-1 flex items-center justify-center relative z-10 py-4">
-                  <svg viewBox="0 0 100 100" className="w-32 h-32 text-white">
-                    <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" strokeWidth="0.75" strokeDasharray="3 3" className="animate-spin" style={{ animationDuration: "16s" }} />
-                    <circle cx="50" cy="50" r="20" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                    {/* Helix/nodes */}
-                    <line x1="30" y1="50" x2="70" y2="50" stroke="currentColor" strokeWidth="1.25" />
-                    <line x1="50" y1="30" x2="50" y2="70" stroke="currentColor" strokeWidth="1.25" />
-                    <circle cx="30" cy="50" r="4" fill="currentColor" />
-                    <circle cx="70" cy="50" r="4" fill="currentColor" />
-                    <circle cx="50" cy="30" r="4" fill="currentColor" />
-                    <circle cx="50" cy="70" r="4" fill="currentColor" />
-                    <circle cx="50" cy="50" r="6" fill="#e2e8f0" stroke="currentColor" strokeWidth="2" />
-                  </svg>
+                  <div
+                    className="relative flex items-center justify-center animate-[spaceCruise_6s_ease-in-out_infinite]"
+                    style={{ transformOrigin: "center" }}
+                  >
+                    {/* Spaceship and Crew */}
+                    <div className="relative z-10 drop-shadow-[0_4px_10px_rgba(56,189,248,0.3)]">
+                      <svg viewBox="0 -10 40 20" className="w-40 h-20 overflow-visible" shapeRendering="crispEdges">
+                        <defs>
+                          <linearGradient id="scanBeamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+                          </linearGradient>
+                          <filter id="laserGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+                            <feGaussianBlur stdDeviation="0.4" result="blur" />
+                          </filter>
+                        </defs>
+
+                        {/* Scanning Beam — symmetric fan from nose tip at (30.5, 5) */}
+                        <polygon
+                          points="30.5,5 40,-1 40,11"
+                          fill="url(#scanBeamGrad)"
+                          style={{ transformOrigin: "30.5px 5px" }}
+                          className="animate-[scanBeam_3s_ease-in-out_infinite_alternate] pointer-events-none"
+                        />
+
+                        {/* Twin Ion Engine Plumes (symmetric: upper at y=4, lower at y=6) */}
+                        <g className="animate-pulse">
+                          <polygon points="-1,4 0,3 0,5" fill="rgba(6, 182, 212, 0.4)" />
+                          <line x1="-3" y1="4" x2="0" y2="4" stroke="#ffffff" strokeWidth="0.8" />
+                          <polygon points="-1,6 0,5 0,7" fill="rgba(6, 182, 212, 0.4)" />
+                          <line x1="-3" y1="6" x2="0" y2="6" stroke="#ffffff" strokeWidth="0.8" />
+                        </g>
+
+                        {/* Rear Engine Nozzles (symmetric: y=3-5 and y=5-7) */}
+                        <rect x="0" y="3" width="2" height="2" fill="#475569" />
+                        <rect x="0" y="3.5" width="1" height="1" fill="#1e293b" />
+                        <rect x="0" y="5" width="2" height="2" fill="#475569" />
+                        <rect x="0" y="5.5" width="1" height="1" fill="#1e293b" />
+
+                        {/* ======= SHIP (bottom half, y=1.5 to y=8.5, slightly scaled up) ======= */}
+                        {/* Main chassis block */}
+                        <rect x="2" y="2.5" width="22" height="5" fill="#94a3b8" />
+                        {/* Top armored deck */}
+                        <rect x="4" y="1.5" width="16" height="1" fill="#cbd5e1" />
+                        {/* Bottom armor plate */}
+                        <rect x="4" y="7.5" width="14" height="1" fill="#475569" />
+                        {/* Blocky Nose Prow block */}
+                        <rect x="24" y="3" width="3.5" height="4" fill="#cbd5e1" />
+                        <polygon points="27.5,3.5 30.5,4.5 30.5,5.5 27.5,6.5" fill="#94a3b8" />
+
+                        {/* Greebles & Windows */}
+                        <rect x="8" y="6" width="5" height="0.5" fill="#334155" />
+                        <rect x="15" y="6" width="4" height="0.5" fill="#334155" />
+                        <rect x="10" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
+                        <rect x="13.5" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
+                        <rect x="17" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
+
+                        {/* Red Accent Stripe */}
+                        <rect x="6" y="4.5" width="12" height="1" fill="#ef4444" />
+
+                        {/* Front Scanning Beam Emitter */}
+                        <rect x="30.5" y="4.7" width="2" height="0.6" fill="#38bdf8" />
+
+                        {/* Ventral Heavy Laser Cannon */}
+                        <g>
+                          {/* Cannon Base (Dark sloped armor) */}
+                          <path d="M 8.5,8.5 L 12.5,8.5 L 11.5,9.1 L 9.5,9.1 Z" fill="#334155" />
+
+                          {/* Status LEDs on the turret base */}
+                          <rect x="9.8" y="8.7" width="0.5" height="0.3" fill="#06b6d4" />
+                          <rect x="11.2" y="8.7" width="0.5" height="0.3" fill="#ef4444" className="animate-pulse" />
+
+                          {/* Swivel Pivot */}
+                          <circle cx="10.5" cy="9.1" r="0.6" fill="#1e293b" />
+
+                          {/* Background Barrel (Shadow barrel) */}
+                          <line x1="11.0" y1="8.8" x2="14.5" y2="8.8" stroke="#1e293b" strokeWidth="0.8" strokeLinecap="round" />
+                          <circle cx="14.5" cy="8.8" r="0.35" fill="#ef4444" opacity="0.6" />
+
+                          {/* Foreground Barrel */}
+                          <line x1="10.5" y1="9.2" x2="14.0" y2="9.2" stroke="#64748b" strokeWidth="0.8" strokeLinecap="round" />
+                          <circle cx="14.0" cy="9.2" r="0.4" fill="#ff4757" className="animate-pulse" />
+                        </g>
+
+                        {/* Laser Bolt glow */}
+                        <line
+                          x1="14.0"
+                          y1="9.2"
+                          x2="48.0"
+                          y2="9.2"
+                          stroke="#ff0000"
+                          strokeWidth="1.2"
+                          strokeLinecap="round"
+                          strokeDasharray="8 40"
+                          filter="url(#laserGlowFilter)"
+                          className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
+                          style={{ opacity: 0.9 }}
+                        />
+                        {/* Laser Bolt core */}
+                        <line
+                          x1="14.0"
+                          y1="9.2"
+                          x2="48.0"
+                          y2="9.2"
+                          stroke="#ffffff"
+                          strokeWidth="0.4"
+                          strokeLinecap="round"
+                          strokeDasharray="8 40"
+                          className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
+                        />
+
+                        {/* Safety Tether — from deck (5, 1.5) curving up to astronaut's oxygen tank */}
+                        <path d="M 5,1.5 Q 10,-3.5 17,-4" fill="none" stroke="#94a3b8" strokeWidth="0.5" strokeDasharray="1 1" />
+
+                        {/* ======= ASTRONAUT (upper area, y=-7 to y=-2, clearly above ship) ======= */}
+                        {/* Legs (trailing left, floating horizontal pose) */}
+                        <rect x="16" y="-4" width="2" height="1" fill="#1e293b" />
+                        <rect x="17" y="-3" width="2" height="1" fill="#1e293b" />
+
+                        {/* Torso */}
+                        <rect x="18" y="-5" width="4" height="3" fill="#ea580c" />
+                        <rect x="19" y="-5" width="2" height="3" fill="#ff7849" />
+
+                        {/* Oxygen Tank (on back) */}
+                        <rect x="17" y="-5" width="1" height="2" fill="#475569" />
+
+                        {/* Helmet & Visor (facing right toward Astrophage) */}
+                        <rect x="21" y="-7" width="3" height="3" fill="#ffffff" />
+                        <rect x="23" y="-7" width="1" height="3" fill="#fbbf24" />
+
+                        {/* Arm reaching right */}
+                        <rect x="22" y="-4" width="2" height="1" fill="#ea580c" />
+                        <rect x="24" y="-5" width="1" height="1" fill="#475569" />
+
+                        {/* Robotic Claw / Gripper (reaching toward Astrophage) */}
+                        <rect x="25" y="-6" width="1" height="1" fill="#475569" />
+                        <rect x="26" y="-7" width="1" height="1" fill="#475569" />
+                        <rect x="27" y="-7" width="1" height="1" fill="#94a3b8" />
+                        <rect x="28" y="-8" width="1" height="1" fill="#cbd5e1" />  {/* Upper pincer */}
+                        <rect x="29" y="-8" width="1" height="1" fill="#cbd5e1" />
+                        <rect x="28" y="-6" width="1" height="1" fill="#cbd5e1" />  {/* Lower pincer */}
+                        <rect x="29" y="-6" width="1" height="1" fill="#cbd5e1" />
+
+                        {/* ======= ASTROPHAGE (far right, shifted by +2x, +2y) ======= */}
+                        <g className="animate-[microbeWiggle_0.8s_ease-in-out_infinite_alternate]" style={{ transformOrigin: "37.5px -5px" }}>
+                          {/* Glowing Gold Aura */}
+                          <circle cx="37.5" cy="-5" r="3.5" fill="rgba(245, 158, 11, 0.25)" />
+
+                          {/* Main Astrophage Body */}
+                          <rect x="36" y="-6" width="3" height="3" fill="#fbbf24" rx="0.5" />
+                          <rect x="37" y="-6" width="1" height="1" fill="#ffffff" />
+                          <rect x="37" y="-5" width="1" height="1" fill="#ea580c" />
+
+                          {/* Cilia */}
+                          <rect x="35" y="-5" width="1" height="1" fill="#f59e0b" />
+                          <rect x="39" y="-5" width="1" height="1" fill="#f59e0b" />
+                          <rect x="37" y="-7" width="1" height="1" fill="#f59e0b" />
+                          <rect x="37" y="-3" width="1" height="1" fill="#f59e0b" />
+
+                          {/* Eyes */}
+                          <rect x="37" y="-6" width="1" height="1" fill="#ffffff" />
+                          <rect x="38" y="-6" width="1" height="1" fill="#ffffff" />
+                          <rect x="37" y="-5" width="1" height="1" fill="#000000" />
+                          <rect x="38" y="-5" width="1" height="1" fill="#000000" />
+                        </g>
+                      </svg>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Visual Label */}
@@ -171,25 +451,11 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
             ) : (
               /* High-fidelity Photo fallback interface */
               <div className="w-full h-full bg-slate-200 relative flex flex-col justify-end p-4 rounded-[0.125rem] overflow-hidden group">
-                {customImageUrl ? (
-                  <img
-                    src={customImageUrl}
-                    alt="Xuan Tung Hoang"
-                    referrerPolicy="no-referrer"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={() => setCustomImageUrl("")}
-                  />
-                ) : (
-                  /* Stylized Vector Portrait Avatar when no direct photo URL */
-                  <div className="absolute inset-0 bg-slate-800 flex flex-col items-center justify-center p-6 text-center text-white">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="w-20 h-20 text-slate-400 mb-2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                    <div className="font-serif text-sm font-semibold text-slate-300">No Image Configured</div>
-                    <p className="font-sans text-[10px] text-slate-400 max-w-[200px] mt-1">Paste any profile image URL below to dynamic swap</p>
-                  </div>
-                )}
+                <img
+                  src="/assets/images/profile_pic.png"
+                  alt="Xuan Tung Hoang"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
 
                 <div className="relative z-10 bg-slate-900/85 backdrop-blur-sm p-3 border border-slate-700">
                   <div className="font-serif text-white font-bold text-sm">Xuan Tung Hoang</div>
@@ -198,19 +464,6 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
               </div>
             )}
           </motion.div>
-
-          {/* Dynamic swapper input */}
-          {themeMode === "custom" && (
-            <div className="w-full max-w-[340px] mt-3">
-              <input
-                type="text"
-                placeholder="Paste profile photo image URL..."
-                value={customImageUrl}
-                onChange={(e) => setCustomImageUrl(e.target.value)}
-                className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none px-3 py-1.5 text-[10px] font-mono text-brand-on-surface placeholder:text-brand-on-surface-variant/40"
-              />
-            </div>
-          )}
         </div>
       </div>
 
@@ -295,15 +548,15 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Extracurricular Activities</h4>
-                  <p className="font-sans text-xs text-brand-on-surface-variant">
-                    xPhO Physics Club, D Free Book library.
-                  </p>
-                </div>
-                <div>
                   <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Community & Network</h4>
                   <p className="font-sans text-xs text-brand-on-surface-variant">
                     Innovative BioScience Club, Vietnam Omics Society.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Extracurricular Activities</h4>
+                  <p className="font-sans text-xs text-brand-on-surface-variant">
+                    xPhO Physics Club, D Free Book library.
                   </p>
                 </div>
               </div>
