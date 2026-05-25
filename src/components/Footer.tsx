@@ -15,7 +15,7 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
       <div className="max-w-container-max mx-auto px-4 md:px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-6">
         {/* Left Side: Serif Wordmark */}
         <div className="font-serif font-bold text-xl text-brand-primary tracking-tight">
-          Academic Portfolio
+          Xuan Tung Hoang
         </div>
 
         {/* Center: Social links with consistent layout spacing */}
@@ -30,16 +30,7 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
             ORCID
           </a>
           <a
-            href="https://scholar.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={onLinkHighlight}
-            className="font-sans text-[11px] font-bold tracking-wider text-brand-on-surface-variant hover:text-brand-primary uppercase underline-offset-4 hover:underline transition-all duration-200"
-          >
-            Google Scholar
-          </a>
-          <a
-            href="https://github.com"
+            href="https://github.com/hxtunq"
             target="_blank"
             rel="noopener noreferrer"
             onClick={onLinkHighlight}
@@ -48,7 +39,7 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
             GitHub
           </a>
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/hxtung/"
             target="_blank"
             rel="noopener noreferrer"
             onClick={onLinkHighlight}
@@ -60,7 +51,7 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
 
         {/* Right Side: Copyright */}
         <div className="font-sans text-[11px] font-medium text-brand-on-surface-variant tracking-wider uppercase text-center md:text-right">
-          © 2026 Academic Professional. All rights reserved.
+          © 2026 Xuan Tung Hoang. All rights reserved.
         </div>
       </div>
     </footer>

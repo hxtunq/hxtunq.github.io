@@ -8,27 +8,27 @@ import { SelectedPublication, ResearchFocusItem, BookItem } from "./types";
 export const focusItems: ResearchFocusItem[] = [
   {
     id: "focus-1",
-    title: "Network Dynamics",
-    description: "Investigating the temporal evolution of interconnected systems to predict cascading failures in biological pathways.",
-    iconName: "network"
+    title: "Microbiology",
+    description: "",
+    iconName: "microscope"
   },
   {
     id: "focus-2",
-    title: "Generative Models in Biophysics",
-    description: "Developing novel deep learning architectures designed specifically to respect the physical constraints of molecular dynamics, enabling faster exploration of protein folding landscapes.",
-    iconName: "flask"
+    title: "Multi-Omics Science",
+    description: "",
+    iconName: "dna"
   },
   {
     id: "focus-3",
-    title: "High-Dimensional Data Inference",
-    description: "Creating robust statistical tools for extracting meaningful signals from noisy, sparsely sampled experimental datasets in modern genomics.",
-    iconName: "grid"
+    title: "Astrobiology",
+    description: "",
+    iconName: "orbit"
   },
   {
     id: "focus-4",
-    title: "Open Science Tools",
-    description: "Maintaining open-source R and Python packages for reproducible research methodologies.",
-    iconName: "microscope"
+    title: "Biological Circuit Design",
+    description: "",
+    iconName: "circuit-board"
   }
 ];
 
@@ -43,15 +43,6 @@ export const selectedPublications: SelectedPublication[] = [
     pdfUrl: "#",
     githubUrl: "#"
   },
-  {
-    id: "pub-2",
-    journal: "Journal of Computational Biology",
-    year: 2023,
-    title: "Scalable inference of gene regulatory networks via deep unrolling",
-    abstract: "We introduce a novel architecture that unrolls iterative optimization algorithms into a deep neural network to predict regulatory links.",
-    doi: "10.1089/cmb.2023",
-    githubUrl: "https://github.com/academic/deep-unrolling"
-  }
 ];
 
 export const bookItems: BookItem[] = [

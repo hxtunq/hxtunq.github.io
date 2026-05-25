@@ -6,9 +6,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  Network,
-  FlaskConical,
-  Database,
+  Dna,
+  Orbit,
+  CircuitBoard,
   Microscope,
   ArrowRight,
   ExternalLink,
@@ -44,12 +44,12 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
 
   const getFocusIcon = (iconName: string) => {
     switch (iconName) {
-      case "network":
-        return <Network className="w-5 h-5 text-brand-primary" />;
-      case "flask":
-        return <FlaskConical className="w-5 h-5 text-brand-primary" />;
-      case "grid":
-        return <Database className="w-5 h-5 text-brand-primary" />;
+      case "circuit-board":
+        return <CircuitBoard className="w-5 h-5 text-brand-primary" />;
+      case "orbit":
+        return <Orbit className="w-5 h-5 text-brand-primary" />;
+      case "dna":
+        return <Dna className="w-5 h-5 text-brand-primary" />;
       case "microscope":
         return <Microscope className="w-5 h-5 text-brand-primary" />;
       default:
@@ -69,7 +69,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
             transition={{ duration: 0.5 }}
             className="font-serif text-3.5xl sm:text-5xl lg:text-6xl text-brand-primary font-bold tracking-tight leading-[1.1] mb-6"
           >
-            Advancing computational models for complex systems.
+            Deciphering biological complexity through data and computation.
           </motion.h1>
 
           <motion.p
@@ -78,7 +78,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
             transition={{ duration: 0.5, delay: 0.15 }}
             className="font-sans text-brand-on-surface-variant text-base sm:text-lg leading-relaxed mb-8 max-w-2xl"
           >
-            I am a postdoctoral researcher focusing on the intersection of machine learning and biophysics. My work aims to unravel the emergent properties of complex molecular networks using data-driven methodologies and rigorous statistical frameworks.
+            I am a student focusing on the intersection of biology, astrobiology and bioinformatics.
           </motion.p>
 
           <motion.div
@@ -109,21 +109,19 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
             <div className="absolute top-4 right-4 z-10 flex gap-2">
               <button
                 onClick={() => setThemeMode("abstract")}
-                className={`px-2 py-1 text-[9px] font-mono tracking-widest uppercase transition-colors select-none ${
-                  themeMode === "abstract"
-                    ? "bg-brand-primary text-white font-bold"
-                    : "bg-white/80 text-brand-secondary hover:bg-white"
-                }`}
+                className={`px-2 py-1 text-[9px] font-mono tracking-widest uppercase transition-colors select-none ${themeMode === "abstract"
+                  ? "bg-brand-primary text-white font-bold"
+                  : "bg-white/80 text-brand-secondary hover:bg-white"
+                  }`}
               >
                 Simulation
               </button>
               <button
                 onClick={() => setThemeMode("custom")}
-                className={`px-2 py-1 text-[9px] font-mono tracking-widest uppercase transition-colors select-none ${
-                  themeMode === "custom"
-                    ? "bg-brand-primary text-white font-bold"
-                    : "bg-white/80 text-brand-secondary hover:bg-white"
-                }`}
+                className={`px-2 py-1 text-[9px] font-mono tracking-widest uppercase transition-colors select-none ${themeMode === "custom"
+                  ? "bg-brand-primary text-white font-bold"
+                  : "bg-white/80 text-brand-secondary hover:bg-white"
+                  }`}
               >
                 Photo
               </button>
@@ -166,8 +164,8 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
 
                 {/* Visual Label */}
                 <div className="relative z-10">
-                  <div className="font-serif text-white font-bold text-lg leading-tight">Dr. E. Sterling</div>
-                  <div className="font-mono text-cyan-200 text-[10px] uppercase tracking-widest mt-1">BIOPHYSICS HUB // SIM_ACTIVE</div>
+                  <div className="font-serif text-white font-bold text-lg leading-tight">Xuan Tung Hoang</div>
+                  <div className="font-mono text-cyan-200 text-[10px] uppercase tracking-widest mt-1">Undergraduate, Bioengineering</div>
                 </div>
               </div>
             ) : (
@@ -176,7 +174,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                 {customImageUrl ? (
                   <img
                     src={customImageUrl}
-                    alt="Dr. E. Sterling"
+                    alt="Xuan Tung Hoang"
                     referrerPolicy="no-referrer"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={() => setCustomImageUrl("")}
@@ -194,8 +192,8 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                 )}
 
                 <div className="relative z-10 bg-slate-900/85 backdrop-blur-sm p-3 border border-slate-700">
-                  <div className="font-serif text-white font-bold text-sm">Dr. E. Sterling</div>
-                  <div className="font-mono text-slate-300 text-[9px] uppercase tracking-wider">Postdoctoral Fellow, Complex Networks</div>
+                  <div className="font-serif text-white font-bold text-sm">Xuan Tung Hoang</div>
+                  <div className="font-mono text-slate-300 text-[9px] uppercase tracking-wider">Undergraduate, Bioengineering</div>
                 </div>
               </div>
             )}
@@ -231,7 +229,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
               </div>
 
               <h2 className="font-serif font-bold text-2xl text-brand-primary mb-8 border-b border-brand-surface-highest pb-3">
-                Academic Curriculum Vitae
+                Curriculum Vitae
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -245,24 +243,16 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                   <div className="border-l-2 border-brand-surface-highest pl-4 space-y-4">
                     <div className="relative">
                       <div className="absolute -left-[21px] top-1 w-2 h-2 bg-brand-primary rounded-full"></div>
-                      <div className="font-mono text-[10px] text-brand-secondary mb-1">2024 - PRESENT</div>
-                      <div className="font-serif text-sm font-bold text-brand-primary">Postdoctoral Research Fellow</div>
-                      <div className="font-sans text-xs text-brand-on-surface-variant">Division of Biophysics & Machine Learning, Institute of Complex Systems</div>
+                      <div className="font-mono text-[10px] text-brand-secondary mb-1">2025 - PRESENT</div>
+                      <div className="font-serif text-sm font-bold text-brand-primary">Research Assistant</div>
+                      <div className="font-sans text-xs text-brand-on-surface-variant">Vietnam Academy of Science and Technology</div>
                     </div>
 
                     <div className="relative">
                       <div className="absolute -left-[21px] top-1 w-2 h-2 bg-brand-surface-highest rounded-full"></div>
-                      <div className="font-mono text-[10px] text-brand-secondary mb-1">2019 - 2024</div>
-                      <div className="font-serif text-sm font-bold text-brand-primary">Doctor of Philosophy in Computational Biology</div>
-                      <div className="font-sans text-xs text-brand-on-surface-variant">Department of Bioengineering, University of Cambridge</div>
-                      <div className="italic text-[11px] text-brand-on-surface-variant/60 mt-1">Thesis: Topological constraints on bio-pathway robustness</div>
-                    </div>
-
-                    <div className="relative">
-                      <div className="absolute -left-[21px] top-1 w-2 h-2 bg-brand-surface-highest rounded-full"></div>
-                      <div className="font-mono text-[10px] text-brand-secondary mb-1">2015 - 2019</div>
-                      <div className="font-serif text-sm font-bold text-brand-primary">B.S. in Physics (with Honors)</div>
-                      <div className="font-sans text-xs text-brand-on-surface-variant">Massachusetts Institute of Technology</div>
+                      <div className="font-mono text-[10px] text-brand-secondary mb-1">2021 - PRESENT</div>
+                      <div className="font-serif text-sm font-bold text-brand-primary">Bachelor in Bioengineering</div>
+                      <div className="font-sans text-xs text-brand-on-surface-variant">Hanoi University of Science and Technology</div>
                     </div>
                   </div>
                 </div>
@@ -279,17 +269,8 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                       <Calendar className="w-4 h-4 text-brand-secondary shrink-0 mt-0.5" />
                       <div>
                         <div className="font-mono text-[10px] text-brand-secondary">2025</div>
-                        <div className="font-serif text-sm font-bold text-brand-primary">NIH Pathways to Independence Award (K99/R00)</div>
-                        <div className="font-sans text-xs text-brand-on-surface-variant">Project total funding: $950,000 for modeling protein topologies.</div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-4 items-start border-b border-brand-surface-highest/50 pb-3">
-                      <Calendar className="w-4 h-4 text-brand-secondary shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-mono text-[10px] text-brand-secondary">2024</div>
-                        <div className="font-serif text-sm font-bold text-brand-primary">Outstanding PhD Dissertation Prize</div>
-                        <div className="font-sans text-xs text-brand-on-surface-variant">Awarded by the Biomedical Computational Science Society.</div>
+                        <div className="font-serif text-sm font-bold text-brand-primary">Not available</div>
+                        <div className="font-sans text-xs text-brand-on-surface-variant">Not available</div>
                       </div>
                     </div>
 
@@ -297,8 +278,8 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                       <Calendar className="w-4 h-4 text-brand-secondary shrink-0 mt-0.5" />
                       <div>
                         <div className="font-mono text-[10px] text-brand-secondary">2021</div>
-                        <div className="font-serif text-sm font-bold text-brand-primary">Wellcome Trust PhD Fellowship</div>
-                        <div className="font-sans text-xs text-brand-on-surface-variant">Full academic funding & residency fellowship in London.</div>
+                        <div className="font-serif text-sm font-bold text-brand-primary">Not available</div>
+                        <div className="font-sans text-xs text-brand-on-surface-variant">Not available</div>
                       </div>
                     </div>
                   </div>
@@ -308,33 +289,23 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
               {/* Service & Mentorship */}
               <div className="mt-8 pt-6 border-t border-brand-surface-highest grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Editorial Service</h4>
+                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Technical Skills</h4>
                   <p className="font-sans text-xs text-brand-on-surface-variant">
-                    Ad-hoc reviewer for: Physical Review Letters, Journal of Royal Society Interface, Bioinformatics, and Biophysical Journal.
+                    Python, R, Git, Linux/Bash and LaTeX.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Teaching Portfolio</h4>
+                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Extracurricular Activities</h4>
                   <p className="font-sans text-xs text-brand-on-surface-variant">
-                    Guest lecturer for "Biostatistical Machine Learning" and lead teaching assistant for "Physiological Systems Engineering".
+                    xPhO Physics Club, D Free Book library.
                   </p>
                 </div>
                 <div>
-                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Active Affiliations</h4>
+                  <h4 className="font-serif text-sm font-bold text-brand-primary mb-2">Community & Network</h4>
                   <p className="font-sans text-xs text-brand-on-surface-variant">
-                    American Physical Society, Society of Mathematical Biology, International Society for Computational Biology (ISCB).
+                    Innovative BioScience Club, Vietnam Omics Society.
                   </p>
                 </div>
-              </div>
-
-              {/* PDF Print Option */}
-              <div className="mt-8 flex justify-end">
-                <button
-                  onClick={onContactClick}
-                  className="font-sans font-bold text-[10px] tracking-widest uppercase border border-brand-primary py-2 px-6 rounded-none hover:bg-brand-primary hover:text-white transition-colors"
-                >
-                  Request Printed Copy
-                </button>
               </div>
             </div>
           </motion.div>
@@ -371,6 +342,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
       </div>
 
       {/* SECTION 3: SELECTED PUBLICATIONS */}
+      {/* 
       <div className="mb-12">
         <div className="flex justify-between items-end mb-2">
           <h2 className="font-serif text-2xl font-bold text-brand-primary">
@@ -406,7 +378,6 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                 {pub.abstract}
               </p>
 
-              {/* Publication Links Row */}
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   onClick={(e) => handleCopyDoi(pub.id, pub.doi, e)}
@@ -452,7 +423,6 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
           ))}
         </div>
 
-        {/* View Full Publication List anchor footer action */}
         <div className="mt-10 text-center">
           <button
             onClick={() => setActiveTab("blog")}
@@ -463,6 +433,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
           </button>
         </div>
       </div>
+      */}
     </div>
   );
 }

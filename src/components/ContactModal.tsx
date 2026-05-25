@@ -81,7 +81,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     Message Dispatched Successfully
                   </h4>
                   <p className="font-sans text-sm text-brand-on-surface-variant max-w-sm">
-                    Thank you, your collaborative request has been logged in Dr. Sterling's queue. A response will be returned to <span className="font-mono text-xs font-semibold">{email}</span> within 72 hours.
+                    Thank you, your collaborative request has been logged in Tung's queue. A response will be returned to <span className="font-mono text-xs font-semibold">{email}</span> within 72 hours.
                   </p>
                 </div>
               ) : (

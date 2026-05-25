@@ -32,38 +32,35 @@ export default function Navbar({
           }}
           className="font-serif font-bold text-xl md:text-2xl text-brand-primary hover:opacity-80 transition-opacity text-left outline-none cursor-pointer"
         >
-          Academic Portfolio
+          Xuan Tung Hoang
         </button>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           <button
             onClick={() => setActiveTab("home")}
-            className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${
-              activeTab === "home"
-                ? "border-brand-primary text-brand-primary font-bold"
-                : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
-            }`}
+            className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${activeTab === "home"
+              ? "border-brand-primary text-brand-primary font-bold"
+              : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
+              }`}
           >
             Home
           </button>
           <button
             onClick={() => setActiveTab("blog")}
-            className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${
-              activeTab === "blog"
-                ? "border-brand-primary text-brand-primary font-bold"
-                : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
-            }`}
+            className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${activeTab === "blog"
+              ? "border-brand-primary text-brand-primary font-bold"
+              : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
+              }`}
           >
             Blog
           </button>
           <button
             onClick={() => setActiveTab("bookdown")}
-            className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${
-              activeTab === "bookdown"
-                ? "border-brand-primary text-brand-primary font-bold"
-                : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
-            }`}
+            className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${activeTab === "bookdown"
+              ? "border-brand-primary text-brand-primary font-bold"
+              : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
+              }`}
           >
             Bookdown
           </button>
@@ -73,7 +70,7 @@ export default function Navbar({
         <div className="flex items-center gap-3">
           <button
             onClick={onSearchToggle}
-            aria-label="Search publications"
+            aria-label="Search posts"
             className="w-9 h-9 flex items-center justify-center text-brand-on-surface-variant hover:text-brand-primary hover:bg-brand-surface-low rounded-full transition-colors cursor-pointer"
           >
             <Search className="w-[18px] h-[18px]" />
@@ -108,9 +105,8 @@ export default function Navbar({
               setActiveTab("home");
               setMobileMenuOpen(false);
             }}
-            className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${
-              activeTab === "home" ? "text-brand-primary" : "text-brand-on-surface-variant"
-            }`}
+            className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${activeTab === "home" ? "text-brand-primary" : "text-brand-on-surface-variant"
+              }`}
           >
             Home
           </button>
@@ -119,9 +115,8 @@ export default function Navbar({
               setActiveTab("blog");
               setMobileMenuOpen(false);
             }}
-            className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${
-              activeTab === "blog" ? "text-brand-primary" : "text-brand-on-surface-variant"
-            }`}
+            className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${activeTab === "blog" ? "text-brand-primary" : "text-brand-on-surface-variant"
+              }`}
           >
             Blog
           </button>
@@ -130,9 +125,8 @@ export default function Navbar({
               setActiveTab("bookdown");
               setMobileMenuOpen(false);
             }}
-            className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${
-              activeTab === "bookdown" ? "text-brand-primary" : "text-brand-on-surface-variant"
-            }`}
+            className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${activeTab === "bookdown" ? "text-brand-primary" : "text-brand-on-surface-variant"
+              }`}
           >
             Bookdown
           </button>

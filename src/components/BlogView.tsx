@@ -25,23 +25,164 @@ interface BlogViewProps {
   onLinkHighlight?: () => void;
 }
 
+interface MarkdownBlock {
+  type: 'heading' | 'paragraph' | 'code' | 'quote' | 'image' | 'list';
+  level?: number;
+  text?: string;
+  items?: string[];
+  language?: string;
+  code?: string;
+  src?: string;
+  alt?: string;
+  caption?: string;
+}
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // remove Vietnamese accents
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+}
+
+function parseMarkdown(md: string): MarkdownBlock[] {
+  const blocks: MarkdownBlock[] = [];
+  const lines = md.split('\n');
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    if (!line.trim()) {
+      i++;
+      continue;
+    }
+
+    // Code blocks
+    if (line.trim().startsWith('```')) {
+      const lang = line.trim().slice(3).trim();
+      let code = '';
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        code += lines[i] + '\n';
+        i++;
+      }
+      blocks.push({ type: 'code', language: lang || 'text', code: code.trim() });
+      i++; // skip closing ```
+      continue;
+    }
+
+    // Blockquotes
+    if (line.trim().startsWith('>')) {
+      let quoteText = '';
+      while (i < lines.length && lines[i].trim().startsWith('>')) {
+        quoteText += lines[i].trim().replace(/^>\s*/, '') + ' ';
+        i++;
+      }
+      blocks.push({ type: 'quote', text: quoteText.trim() });
+      continue;
+    }
+
+    // Headings
+    if (line.trim().startsWith('#')) {
+      const match = line.trim().match(/^(#{1,6})\s+(.*)/);
+      if (match) {
+        blocks.push({
+          type: 'heading',
+          level: match[1].length,
+          text: match[2].trim()
+        });
+        i++;
+        continue;
+      }
+    }
+
+    // Bullet lists
+    if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+      const items: string[] = [];
+      while (i < lines.length && (lines[i].trim().startsWith('- ') || lines[i].trim().startsWith('* '))) {
+        items.push(lines[i].trim().slice(2).trim());
+        i++;
+      }
+      blocks.push({ type: 'list', items });
+      continue;
+    }
+
+    // Images
+    if (line.trim().startsWith('![') && line.trim().includes('](')) {
+      const match = line.trim().match(/^!\[(.*?)\]\((.*?)(?:\s+"(.*?)"\s*)?\)$/);
+      if (match) {
+        blocks.push({
+          type: 'image',
+          alt: match[1],
+          src: match[2],
+          caption: match[3] || ''
+        });
+        i++;
+        continue;
+      }
+    }
+
+    // Paragraph
+    let pText = '';
+    while (
+      i < lines.length &&
+      lines[i].trim() &&
+      !lines[i].trim().startsWith('#') &&
+      !lines[i].trim().startsWith('```') &&
+      !lines[i].trim().startsWith('>') &&
+      !lines[i].trim().startsWith('- ') &&
+      !lines[i].trim().startsWith('* ') &&
+      !(lines[i].trim().startsWith('![') && lines[i].trim().includes(']('))
+    ) {
+      pText += (pText ? ' ' : '') + lines[i].trim();
+      i++;
+    }
+    if (pText.trim()) {
+      blocks.push({ type: 'paragraph', text: pText.trim() });
+    }
+  }
+
+  return blocks;
+}
+
+function renderInlineStyles(text: string) {
+  const html = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/`(.*?)`/g, "<code class='font-mono bg-brand-surface-low px-1.5 py-0.5 rounded text-xs text-brand-secondary'>$1</code>");
+
+  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+}
+
 export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewProps) {
   // State managers
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [activeLanguage, setActiveLanguage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
-  
-  // Bookdown TOC active section tracking
-  const [activeTOCSection, setActiveTOCSection] = useState("introduction");
 
-  // Element reference pointers for scrolling simulation in detail view
-  const introRef = useRef<HTMLDivElement>(null);
-  const methodRef = useRef<HTMLDivElement>(null);
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const codeRef = useRef<HTMLDivElement>(null);
+  // Dynamic TOC items based on Markdown content headings (H2)
+  const tocItems = useMemo(() => {
+    if (!selectedPost || !selectedPost.contentMarkdown) return [];
+    const blocks = parseMarkdown(selectedPost.contentMarkdown);
+    return blocks
+      .filter((b) => b.type === "heading" && b.level === 2)
+      .map((b) => ({
+        id: slugify(b.text || ""),
+        title: b.text || "",
+      }));
+  }, [selectedPost]);
+
+  const [activeTOCSection, setActiveTOCSection] = useState("");
 
   // Auto-scroll to top when active post shifts
   useEffect(() => {
@@ -50,36 +191,60 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
 
   // Handle active post detection based on scroll position in detail view
   useEffect(() => {
-    if (!selectedPost) return;
+    if (!selectedPost || tocItems.length === 0) return;
 
     const handleScroll = () => {
-      const scrollPos = window.scrollY + 200;
-      
-      if (resultsRef.current && scrollPos >= resultsRef.current.offsetTop) {
-        setActiveTOCSection("results");
-      } else if (methodRef.current && scrollPos >= methodRef.current.offsetTop) {
-        setActiveTOCSection("methodology");
-      } else {
-        setActiveTOCSection("introduction");
+      const scrollPos = window.scrollY + 220; // offset for navbar
+      let currentSection = tocItems[0].id;
+
+      for (const item of tocItems) {
+        const el = document.getElementById(item.id);
+        if (el && scrollPos >= el.offsetTop) {
+          currentSection = item.id;
+        }
       }
+      setActiveTOCSection(currentSection);
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll(); // initial check
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [selectedPost]);
+  }, [selectedPost, tocItems]);
 
   // Compute stats dynamically
   const categoriesList = useMemo(() => {
-    const stats: Record<string, number> = {
-      "Methodology": 24,
-      "Data Visualization": 18,
-      "Machine Learning": 12,
-      "Theory & Ethics": 9
-    };
+    const stats: Record<string, number> = {};
+    blogPosts.forEach((post) => {
+      const rawCat = post.category || "METHODOLOGY";
+      const displayName = rawCat
+        .toLowerCase()
+        .split(/[\s_]+/)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+        .replace(/\bAnd\b/g, "&");
+      stats[displayName] = (stats[displayName] || 0) + 1;
+    });
     return stats;
   }, []);
 
-  const keywordsList = ["R", "Python", "ggplot2", "Bayesian", "Causal Inference", "Networks"];
+  // Compute keywords list dynamically from tags of active blog posts
+  const keywordsList = useMemo(() => {
+    const tagsSet = new Set<string>();
+    blogPosts.forEach((post) => {
+      post.tags.forEach((tag) => tagsSet.add(tag));
+    });
+    return Array.from(tagsSet);
+  }, []);
+
+  // Compute languages list dynamically from active blog posts
+  const languagesList = useMemo(() => {
+    const stats: Record<string, number> = {};
+    blogPosts.forEach((post) => {
+      const lang = post.language || "English";
+      stats[lang] = (stats[lang] || 0) + 1;
+    });
+    return stats;
+  }, []);
 
   // Perform client-side querying over blog dataset
   const filteredPosts = useMemo(() => {
@@ -90,16 +255,131 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
         post.contentMarkdown?.toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesCategory = activeCategory
-        ? post.category.toLowerCase() === activeCategory.toLowerCase()
+        ? post.category.toLowerCase().replace(/[\s_]+/g, "") === activeCategory.toLowerCase().replace(/[\s_&]+/g, "")
         : true;
 
       const matchesTag = activeTag
         ? post.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase())
         : true;
 
-      return matchesSearch && matchesCategory && matchesTag;
+      const matchesLanguage = activeLanguage
+        ? (post.language || "English").toLowerCase() === activeLanguage.toLowerCase()
+        : true;
+
+      return matchesSearch && matchesCategory && matchesTag && matchesLanguage;
     });
-  }, [searchQuery, activeCategory, activeTag]);
+  }, [searchQuery, activeCategory, activeTag, activeLanguage]);
+
+  const renderMarkdownContent = (markdown: string) => {
+    const blocks = parseMarkdown(markdown);
+    return (
+      <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
+        {blocks.map((block, index) => {
+          switch (block.type) {
+            case "heading": {
+              if (block.level === 2) {
+                return (
+                  <h2
+                    key={index}
+                    id={slugify(block.text || "")}
+                    className="font-serif text-2xl font-bold text-brand-primary mb-4 mt-12 pb-2 border-b border-brand-surface-highest scroll-mt-24"
+                  >
+                    {block.text}
+                  </h2>
+                );
+              }
+              return (
+                <h3
+                  key={index}
+                  id={slugify(block.text || "")}
+                  className="font-serif text-xl font-bold text-brand-primary mb-3 mt-8 scroll-mt-24"
+                >
+                  {block.text}
+                </h3>
+              );
+            }
+            case "paragraph":
+              return (
+                <p key={index} className="font-sans text-[14px] leading-relaxed mb-6">
+                  {renderInlineStyles(block.text || "")}
+                </p>
+              );
+            case "code":
+              return (
+                <div
+                  key={index}
+                  className="border border-brand-surface-highest bg-[#111827] text-[#f9fafb] rounded-[0.25rem] my-8 overflow-hidden font-mono"
+                >
+                  <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-[#0b0f19] font-mono text-[10px]">
+                    <span className="text-slate-400 font-mono uppercase">{block.language}</span>
+                    <button
+                      onClick={() => handleCopyCode(block.code || "")}
+                      className="text-slate-400 hover:text-white flex items-center gap-1 font-mono hover:bg-slate-800/60 px-2 py-1 outline-none transition-all cursor-pointer"
+                    >
+                      {copyCodeSuccess ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy Code</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="p-4 overflow-x-auto text-xs leading-relaxed max-h-[400px]">
+                    <pre className="font-mono text-left whitespace-pre">{block.code}</pre>
+                  </div>
+                </div>
+              );
+            case "quote":
+              return (
+                <blockquote
+                  key={index}
+                  className="my-8 pl-6 pr-6 py-4 border-l-4 border-brand-secondary bg-brand-surface-low/60 rounded-r-md"
+                >
+                  <p className="font-serif italic text-base sm:text-lg text-brand-on-surface leading-relaxed font-medium">
+                    {block.text}
+                  </p>
+                </blockquote>
+              );
+            case "image":
+              return (
+                <figure key={index} className="my-8">
+                  <div className="w-full bg-brand-surface-low rounded-lg overflow-hidden border border-brand-surface-highest">
+                    <img
+                      alt={block.alt || ""}
+                      className="w-full h-auto object-cover max-h-[500px]"
+                      src={block.src}
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  {block.caption && (
+                    <figcaption className="mt-2 font-mono text-[10px] text-brand-on-surface-variant tracking-wider uppercase text-center">
+                      {block.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              );
+            case "list":
+              return (
+                <ul key={index} className="list-disc pl-5 my-4 space-y-2 mb-6">
+                  {block.items?.map((item, idx) => (
+                    <li key={idx} className="font-sans text-[14px] leading-relaxed">
+                      {renderInlineStyles(item)}
+                    </li>
+                  ))}
+                </ul>
+              );
+            default:
+              return null;
+          }
+        })}
+      </div>
+    );
+  };
 
   // Pagination bounds (simulate 4 items per page)
   const postsPerPage = 3;
@@ -115,15 +395,11 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
     setTimeout(() => setCopyCodeSuccess(false), 2000);
   };
 
-  const scrollToSection = (section: string) => {
-    setActiveTOCSection(section);
-    let targetRef;
-    if (section === "introduction") targetRef = introRef;
-    if (section === "methodology") targetRef = methodRef;
-    if (section === "results") targetRef = resultsRef;
-
-    if (targetRef?.current) {
-      targetRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+  const scrollToSection = (sectionId: string) => {
+    setActiveTOCSection(sectionId);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -150,7 +426,6 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                     Archive
                   </h1>
                   <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed">
-                    Exploring methodology, data analysis, and peer-reviewed insights.
                   </p>
                 </div>
 
@@ -164,7 +439,7 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    placeholder="Search publications..."
+                    placeholder="Search posts..."
                     className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none py-3.5 pl-10 pr-4 text-xs font-sans tracking-wide text-brand-on-surface transition-all placeholder:text-brand-on-surface-variant/40"
                   />
                   {searchQuery && (
@@ -189,24 +464,18 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                         setActiveCategory(null);
                         setCurrentPage(1);
                       }}
-                      className={`flex justify-between items-center text-left text-xs tracking-wide py-1 border-b border-transparent hover:border-brand-surface-highest group transition-all ${
-                        activeCategory === null
-                          ? "font-bold text-brand-primary border-brand-primary"
-                          : "text-brand-on-surface-variant"
-                      }`}
+                      className={`flex justify-between items-center text-left text-xs tracking-wide py-1 border-b border-transparent hover:border-brand-surface-highest group transition-all ${activeCategory === null
+                        ? "font-bold text-brand-primary border-brand-primary"
+                        : "text-brand-on-surface-variant"
+                        }`}
                     >
-                      <span className="group-hover:translate-x-0.5 transition-transform">All Academic Papers</span>
+                      <span className="group-hover:translate-x-0.5 transition-transform">All Posts</span>
                       <span className="font-mono text-[10px] bg-brand-surface-low px-1.5 py-0.5 text-brand-secondary">
                         {blogPosts.length}
                       </span>
                     </button>
 
-                    {Object.entries(categoriesList).map(([catName, fallbackCount]) => {
-                      // Dynamically count posts belonging to category
-                      const count = blogPosts.filter(
-                        (p) => p.category.toLowerCase() === catName.toLowerCase()
-                      ).length;
-
+                    {Object.entries(categoriesList).map(([catName, count]) => {
                       const isActive = activeCategory?.toLowerCase() === catName.toLowerCase();
 
                       return (
@@ -216,15 +485,14 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                             setActiveCategory(catName);
                             setCurrentPage(1);
                           }}
-                          className={`flex justify-between items-center text-left text-xs tracking-wide py-1 border-b border-transparent hover:border-brand-surface-highest group transition-all cursor-pointer ${
-                            isActive
-                              ? "font-bold text-brand-primary border-brand-primary"
-                              : "text-brand-on-surface-variant"
-                          }`}
+                          className={`flex justify-between items-center text-left text-xs tracking-wide py-1 border-b border-transparent hover:border-brand-surface-highest group transition-all cursor-pointer ${isActive
+                            ? "font-bold text-brand-primary border-brand-primary"
+                            : "text-brand-on-surface-variant"
+                            }`}
                         >
                           <span className="group-hover:translate-x-0.5 transition-transform">{catName}</span>
                           <span className="font-mono text-[10px] bg-brand-surface-low px-1.5 py-0.5 text-brand-secondary">
-                            {count || fallbackCount}
+                            {count}
                           </span>
                         </button>
                       );
@@ -247,11 +515,10 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                             setActiveTag(isActive ? null : tag);
                             setCurrentPage(1);
                           }}
-                          className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${
-                            isActive
-                              ? "border-brand-primary bg-brand-primary text-white font-bold"
-                              : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
-                          }`}
+                          className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
+                            ? "border-brand-primary bg-brand-primary text-white font-bold"
+                            : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
+                            }`}
                         >
                           {tag}
                         </button>
@@ -260,12 +527,40 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                   </div>
                 </div>
 
+                {/* Language filtering */}
+                <div className="space-y-4">
+                  <h3 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-2">
+                    LANGUAGE
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(languagesList).map(([langName, count]) => {
+                      const isActive = activeLanguage?.toLowerCase() === langName.toLowerCase();
+                      return (
+                        <button
+                          key={langName}
+                          onClick={() => {
+                            setActiveLanguage(isActive ? null : langName);
+                            setCurrentPage(1);
+                          }}
+                          className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
+                            ? "border-brand-primary bg-brand-primary text-white font-bold"
+                            : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
+                            }`}
+                        >
+                          {langName} ({count})
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* Helper reset prompt */}
-                {(activeCategory || activeTag || searchQuery) && (
+                {(activeCategory || activeTag || activeLanguage || searchQuery) && (
                   <button
                     onClick={() => {
                       setActiveCategory(null);
                       setActiveTag(null);
+                      setActiveLanguage(null);
                       setSearchQuery("");
                       setCurrentPage(1);
                     }}
@@ -284,7 +579,7 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                     FEATURED
                   </span>
                   <p className="font-sans text-xs text-emerald-950">
-                    The latest research preprint <strong>"Generative AI in Academic Research Contexts"</strong> is loaded into the interactive Bookdown detail module. Click on it to inspect mathematical notes, blockquotes, and Figure 1 networks.
+                    The latest post <strong>"Generative AI in Academic Research Contexts"</strong> is out now. Take a look!
                   </p>
                 </div>
 
@@ -377,79 +672,59 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="w-full"
+            className="max-w-container-max mx-auto px-4 md:px-6 py-12"
           >
-            {/* BOOKDOWN-STYLE NAVIGATION DRAWER ON DESKTOP (Width: 280px) */}
-            <aside className="hidden md:flex flex-col bg-brand-surface-low border-r border-brand-surface-highest fixed left-0 top-0 h-screen w-[280px] z-40 pt-[90px] px-6 pb-8 justify-between">
-              <div className="space-y-6">
-                {/* Meta details */}
-                <div className="mb-6">
-                  <h2 className="font-serif font-bold text-lg text-brand-primary leading-tight">
-                    {selectedPost.id === "featured-ai" ? "Research Publication" : "Archived Section"}
-                  </h2>
-                  <span className="font-mono text-[9px] tracking-wider text-brand-on-surface-variant inline-block mt-1 uppercase bg-brand-surface-highest/60 px-2 py-0.5">
-                    {selectedPost.id === "featured-ai" ? "v1.0.4" : "REV 2026.04"}
-                  </span>
+            <div className="flex flex-col md:flex-row gap-12 relative">
+              {/* BOOKDOWN-STYLE NAVIGATION DRAWER ON DESKTOP (Width: 280px) */}
+              <aside className="hidden md:flex flex-col bg-brand-surface-low/40 border border-brand-surface-highest w-full md:w-[280px] shrink-0 p-6 md:sticky md:top-24 h-[calc(100vh-120px)] rounded-[0.25rem] justify-between">
+                <div className="space-y-6">
+                  {/* Table of Contents Header */}
+                  <div className="mb-6 border-b border-brand-surface-highest pb-2">
+                    <h2 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase">
+                      Table of Contents
+                    </h2>
+                  </div>
+
+                  {/* Interactive Table of Contents */}
+                  {tocItems.length > 0 && (
+                    <nav className="flex flex-col gap-1 w-full">
+                      {tocItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => scrollToSection(item.id)}
+                          className={`flex items-center gap-3 text-left w-full px-3 py-2 text-xs font-sans font-medium transition-all cursor-pointer ${activeTOCSection === item.id
+                              ? "bg-brand-surface-lowest text-brand-primary font-bold border-l-2 border-brand-primary"
+                              : "text-brand-on-surface-variant hover:bg-brand-surface-lowest/50"
+                            }`}
+                        >
+                          <span>{item.title}</span>
+                        </button>
+                      ))}
+                    </nav>
+                  )}
                 </div>
 
-                {/* Interactive Table of Contents */}
-                <nav className="flex flex-col gap-1 w-full">
+                {/* Sidebar bottom action */}
+                <div className="space-y-3 pt-6 border-t border-brand-surface-highest">
                   <button
-                    onClick={() => scrollToSection("introduction")}
-                    className={`flex items-center gap-3 text-left w-full px-3 py-2 text-xs font-sans font-medium transition-all cursor-pointer ${
-                      activeTOCSection === "introduction"
-                        ? "bg-brand-surface-lowest text-brand-primary font-bold border-l-2 border-brand-primary"
-                        : "text-brand-on-surface-variant hover:bg-brand-surface-lowest/50"
-                    }`}
+                    onClick={onContactClick}
+                    className="w-full font-sans font-bold text-[9px] tracking-widest uppercase border border-brand-primary py-2 px-3 hover:bg-brand-primary hover:text-white transition-colors"
                   >
-                    <span>Introduction</span>
+                    Download PDF
                   </button>
-
                   <button
-                    onClick={() => scrollToSection("methodology")}
-                    className={`flex items-center gap-3 text-left w-full px-3 py-2 text-xs font-sans font-medium transition-all cursor-pointer ${
-                      activeTOCSection === "methodology"
-                        ? "bg-brand-surface-lowest text-brand-primary font-bold border-l-2 border-brand-primary"
-                        : "text-brand-on-surface-variant hover:bg-brand-surface-lowest/50"
-                    }`}
+                    onClick={() => setSelectedPost(null)}
+                    className="w-full font-sans text-[10px] text-brand-on-surface-variant hover:text-brand-primary flex items-center justify-center gap-1.5 transition-colors py-1 cursor-pointer"
                   >
-                    <span>Methodology</span>
+                    <ArrowLeft className="w-3 h-3" />
+                    <span>Back to Blog Directory</span>
                   </button>
+                </div>
+              </aside>
 
-                  <button
-                    onClick={() => scrollToSection("results")}
-                    className={`flex items-center gap-3 text-left w-full px-3 py-2 text-xs font-sans font-medium transition-all cursor-pointer ${
-                      activeTOCSection === "results"
-                        ? "bg-brand-surface-lowest text-brand-primary font-bold border-l-2 border-brand-primary"
-                        : "text-brand-on-surface-variant hover:bg-brand-surface-lowest/50"
-                    }`}
-                  >
-                    <span>Results</span>
-                  </button>
-                </nav>
-              </div>
-
-              {/* Sidebar bottom action */}
-              <div className="space-y-3 pt-6 border-t border-brand-surface-highest">
-                <button
-                  onClick={onContactClick}
-                  className="w-full font-sans font-bold text-[9px] tracking-widest uppercase border border-brand-primary py-2 px-3 hover:bg-brand-primary hover:text-white transition-colors"
-                >
-                  Download PDF
-                </button>
-                <button
-                  onClick={() => setSelectedPost(null)}
-                  className="w-full font-sans text-[10px] text-brand-on-surface-variant hover:text-brand-primary flex items-center justify-center gap-1.5 transition-colors py-1 cursor-pointer"
-                >
-                  <ArrowLeft className="w-3 h-3" />
-                  <span>Archive View</span>
-                </button>
-              </div>
-            </aside>
-
-            {/* MAIN ARTICLE READING CANVAS */}
-            <div className="md:ml-[280px] pt-8 pb-20 px-4 md:px-12 flex flex-col items-center">
-              <article className="w-full max-w-reading-width">
+              {/* MAIN ARTICLE READING CANVAS */}
+              <div className="flex-1 max-w-reading-width min-w-0">
+                <article className="w-full">
                 {/* Top Return navigation link on mobile */}
                 <div className="md:hidden mb-6">
                   <button
@@ -461,41 +736,31 @@ export default function BlogView({ onContactClick, onLinkHighlight }: BlogViewPr
                   </button>
                 </div>
 
-                {/* Back Link on Desktop (Optional but extremely high workflow value) */}
-                <div className="hidden md:block mb-8">
-                  <button
-                    onClick={() => setSelectedPost(null)}
-                    className="group flex items-center gap-2 font-sans font-bold text-[10px] tracking-wider uppercase text-brand-secondary hover:text-brand-primary border-b border-transparent hover:border-brand-primary/40 pb-0.5 transition-all"
-                  >
-                    <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
-                    <span>Back to Publication Directory</span>
-                  </button>
-                </div>
-
-                {/* YAML-STYLE METADATA DISPLAY WINDOW (Image 1 Accent) */}
-                <div className="border border-brand-surface-highest bg-brand-surface-low p-6 mb-12 font-mono text-xs text-brand-on-surface-variant overflow-x-auto relative">
-                  <div className="absolute top-2 right-4 text-[9px] uppercase tracking-wider text-brand-on-surface-variant/40 font-mono select-none">
-                    YAML_HEADER
-                  </div>
-                  <pre className="whitespace-pre m-0 leading-relaxed font-mono">
-                    {selectedPost.yamlHeader || `---
-title: "${selectedPost.title}"
-date: "${selectedPost.date}"
-author: "Dr. E. Sterling"
-tags: [${selectedPost.tags.join(", ")}]
-status: "Published"
----`}
-                  </pre>
-                </div>
-
                 {/* ARTICLE HEADER CONTAINER */}
                 <header className="mb-12">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-mono text-brand-on-surface-variant/70 mb-4 uppercase tracking-wider">
+                    <span className="font-bold text-brand-secondary">{selectedPost.category}</span>
+                    <span>•</span>
+                    <span>{selectedPost.date}</span>
+                  </div>
                   <h1 className="font-serif text-3xl sm:text-4.5xl leading-[1.1] text-brand-primary font-bold tracking-tight mb-6">
                     {selectedPost.title}
                   </h1>
-                  <p className="font-sans text-brand-on-surface-variant text-base sm:text-lg leading-relaxed font-light">
+                  <p className="font-sans text-brand-on-surface-variant text-base sm:text-lg leading-relaxed font-light mb-6">
                     {selectedPost.abstract}
                   </p>
+                  {selectedPost.tags && selectedPost.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedPost.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="font-mono text-[10px] text-brand-on-surface-variant/80 bg-brand-surface-low px-2.5 py-1 rounded"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </header>
 
                 {/* FEATURED DIAGRAM CONTAINER (Active if featured, fallback styling otherwise) */}
@@ -520,119 +785,19 @@ status: "Published"
                 )}
 
                 {/* DETAILED CONTENT SECTIONS */}
-                <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
-                  {/* Dynamic render of content sections simulating Image 1 */}
-                  <div ref={introRef} id="introduction" className="mb-12 scroll-mt-20">
-                    <h2 className="font-serif text-2xl font-bold text-brand-primary mb-4 pb-2 border-b border-brand-surface-highest">
-                      Introduction
-                    </h2>
-                    <p className="font-sans text-[14px] leading-relaxed mb-6 gap-y-4">
-                      The integration of Generative Artificial Intelligence (GenAI) into academic research workflows represents a paradigm shift comparable to the advent of digital databases. While the acceleration of initial literature discovery and data structuring is undeniable, the epistemic reliance on black-box models introduces significant challenges to traditional methodologies.
-                    </p>
-                    <p className="font-sans text-[14px] leading-relaxed mb-6">
-                      In this paper, we establish a theoretical framework for assessing the utility of GenAI tools while strictly bounding their application to prevent the erosion of critical analysis and original thought.
-                    </p>
+                {selectedPost.contentMarkdown ? (
+                  renderMarkdownContent(selectedPost.contentMarkdown)
+                ) : (
+                  <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
+                    <p>No content available.</p>
                   </div>
+                )}
 
-                  {/* METHODOLOGY SECTION (Featuring Blockquote and Custom Code Blocks) */}
-                  <div ref={methodRef} id="methodology" className="mb-12 scroll-mt-20">
-                    <h2 className="font-serif text-2xl font-bold text-brand-primary mb-4 pb-2 border-b border-brand-surface-highest">
-                      Methodology
-                    </h2>
-                    <p className="font-sans text-[14px] leading-relaxed mb-6">
-                      Our approach utilizes a mixed-methods design, surveying 450 active researchers across STEM and Humanities disciplines regarding their current GenAI integration practices. This quantitative data is contextualized through 25 semi-structured interviews focusing on the perceived impact on academic rigor.
-                    </p>
 
-                    {/* Styled quotes block exactly matching Image 1 layout */}
-                    <blockquote className="border-l-4 border-brand-secondary bg-brand-surface-low p-5 my-8 rounded-r-none relative">
-                      <Quote className="absolute top-2 right-4 w-10 h-10 text-brand-secondary/10 pointer-events-none" />
-                      <p className="font-serif italic text-base text-brand-secondary leading-relaxed mb-2 font-medium">
-                        "{selectedPost.quote || "The tool does not think; it predicts. The danger arises when the researcher conflates the eloquence of the output with the validity of the underlying logic."}"
-                      </p>
-                      <cite className="block font-mono text-[10px] tracking-widest text-brand-on-surface-variant font-bold uppercase not-italic">
-                        — {selectedPost.quoteAuthor || "Interviewee #14"}
-                      </cite>
-                    </blockquote>
-
-                    <p className="font-sans text-[14px] leading-relaxed mb-6">
-                      Data cleaning and preliminary thematic clustering were performed using Python, specifically leveraging the pandas and scikit-learn libraries to handle the qualitative text responses before human-in-the-loop verification.
-                    </p>
-
-                    {/* Embedded Code block mockup corresponding to the Python code snippet */}
-                    {selectedPost.detailedCodeBlock && (
-                      <div ref={codeRef} className="border border-brand-surface-highest bg-[#111827] text-[#f9fafb] rounded-[0.25rem] my-8 overflow-hidden font-mono">
-                        {/* Title header bar */}
-                        <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-[#0b0f19] font-mono text-[10px]">
-                          <span className="text-slate-400 font-mono">thematic_extraction.py</span>
-                          <button
-                            onClick={() => handleCopyCode(selectedPost.detailedCodeBlock!)}
-                            className="text-slate-400 hover:text-white flex items-center gap-1 font-mono hover:bg-slate-800/60 px-2 py-1 outline-none transition-all"
-                          >
-                            {copyCodeSuccess ? (
-                              <>
-                                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                                <span>Copied!</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-3.5 h-3.5" />
-                                <span>Copy Code</span>
-                              </>
-                            )}
-                          </button>
-                        </div>
-                        {/* Source code */}
-                        <div className="p-4 overflow-x-auto text-xs leading-relaxed max-h-[300px]">
-                          <pre className="font-mono text-left whitespace-pre">
-                            {selectedPost.detailedCodeBlock}
-                          </pre>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* RESULTS SECTION */}
-                  <div ref={resultsRef} id="results" className="mb-12 scroll-mt-20">
-                    <h2 className="font-serif text-2xl font-bold text-brand-primary mb-4 pb-2 border-b border-brand-surface-highest">
-                      Results
-                    </h2>
-                    <p className="font-sans text-[14px] leading-relaxed mb-6">
-                      Preliminary findings indicate a stark disciplinary divide. While 72% of computer science researchers report daily use of LLMs for code generation and debugging, only 18% of history researchers utilize them, citing concerns over factual hallucination and narrative homogenization.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bibliography Citation helpers container */}
-                <div className="border border-brand-surface-highest p-6 bg-brand-surface-low rounded-none mt-12 space-y-4">
-                  <h4 className="font-serif font-bold text-brand-primary text-sm uppercase tracking-wide">
-                    Document Citation
-                  </h4>
-                  <div className="font-mono text-xs text-brand-on-surface-variant leading-normal select-all bg-brand-surface-lowest border border-brand-surface-highest/60 p-4">
-                    Sterling, E. (2024). "Generative AI in Academic Research Contexts: Opportunities and Ethical Boundaries." Journal of Advanced Academic Ethics, 15(2), 104-118. DOI: 10.1038/s41567-024
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigator.clipboard.writeText(`@article{sterling2024generative, title={Generative AI in Academic Research Contexts: Opportunities and Ethical Boundaries}, author={Sterling, E.}, journal={Journal of Advanced Academic Ethics}, volume={15}, number={2}, pages={104--118}, year={2024}}`);
-                        setCopyCodeSuccess(true);
-                        setTimeout(() => setCopyCodeSuccess(false), 2000);
-                      }}
-                      className="font-sans font-bold text-[10px] tracking-widest text-[#1e293b] border border-brand-surface-highest bg-white hover:border-brand-primary px-4 py-2 transition-colors uppercase"
-                    >
-                      Export BibTeX
-                    </button>
-                    <button
-                      onClick={onContactClick}
-                      className="font-sans font-bold text-[10px] tracking-widest text-brand-primary border border-brand-primary hover:bg-brand-primary hover:text-white px-4 py-2 transition-colors uppercase"
-                    >
-                      Request Reprint
-                    </button>
-                  </div>
-                </div>
               </article>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
         )}
       </AnimatePresence>
     </div>

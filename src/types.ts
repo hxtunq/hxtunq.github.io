@@ -18,12 +18,12 @@ export interface ResearchFocusItem {
   id: string;
   title: string;
   description: string;
-  iconName: "network" | "flask" | "grid" | "microscope";
+  iconName: "network" | "flask" | "grid" | "microscope" | "dna" | "orbit" | "circuit-board";
 }
 
 export interface BlogPost {
   id: string;
-  category: "METHODOLOGY" | "DATA VISUALIZATION" | "THEORY & ETHICS" | "MACHINE LEARNING";
+  category: string;
   date: string;
   title: string;
   abstract: string;
@@ -35,6 +35,8 @@ export interface BlogPost {
   detailedCodeBlock?: string;
   quote?: string;
   quoteAuthor?: string;
+  language?: string;
+  author?: string;
 }
 
 export interface BookItem {

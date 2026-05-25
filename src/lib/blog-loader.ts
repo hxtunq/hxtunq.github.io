@@ -46,7 +46,10 @@ function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: s
       }
     }
 
-    const match = line.match(/^([a-zA-Z_][\w]*)\s*:\s*(.*)/);
+    // Strip inline comments starting with whitespace and # (e.g. "  # comment")
+    const cleanLine = line.replace(/\s+#.*$/, "");
+
+    const match = cleanLine.match(/^([a-zA-Z_][\w]*)\s*:\s*(.*)/);
     if (!match) continue;
 
     const key = match[1];
@@ -94,7 +97,7 @@ function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: s
  * Reconstructs the YAML header display string from frontmatter metadata.
  */
 function buildYamlHeader(meta: Record<string, unknown>): string {
-  const displayKeys = ["title", "date", "author", "tags", "status"];
+  const displayKeys = ["title", "date", "author", "tags", "status", "language"];
   const lines = ["---"];
 
   for (const key of displayKeys) {
@@ -135,7 +138,11 @@ for (const [, raw] of Object.entries(markdownModules)) {
     date: (meta.dateDisplay as string) || (meta.date as string) || "",
     title: (meta.title as string) || "Untitled",
     abstract: (meta.abstract as string) || "",
-    tags: (meta.tags as string[]) || [],
+    tags: Array.isArray(meta.tags)
+      ? (meta.tags as string[])
+      : typeof meta.tags === "string"
+      ? (meta.tags as string).split(",").map((t) => t.trim()).filter(Boolean)
+      : [],
     yamlHeader: buildYamlHeader(meta),
     contentMarkdown: body,
     // Optional featured-post fields
@@ -144,6 +151,8 @@ for (const [, raw] of Object.entries(markdownModules)) {
     quote: (meta.quote as string) || undefined,
     quoteAuthor: (meta.quoteAuthor as string) || undefined,
     detailedCodeBlock: (meta.detailedCodeBlock as string) || undefined,
+    language: (meta.language as string) || (meta.lang as string) || "English",
+    author: (meta.author as string) || undefined,
   };
 
   posts.push(post);

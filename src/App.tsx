@@ -189,7 +189,7 @@ export default function App() {
               <div className="mt-6 max-h-[360px] overflow-y-auto space-y-6 pr-1 whitespace-normal">
                 {globalSearchQuery === "" ? (
                   <div className="text-center py-8 text-brand-on-surface-variant/60">
-                    <span className="font-mono text-xs">Search across Dr. Sterling's publications index, preprints, and eBooks manuals database in real-time.</span>
+                    <span className="font-mono text-xs">Search across Tung's publications index, preprints, and eBooks manuals database in real-time.</span>
                   </div>
                 ) : matchedPublications.length === 0 && matchedBlogs.length === 0 ? (
                   <div className="text-center py-8">
