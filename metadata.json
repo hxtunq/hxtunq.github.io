@@ -1,8 +1,0 @@
-{
-  "name": "Simple Portfolio",
-  "description": "A minimalist, elegant academic research portfolio and publication hub showcasing papers, interactive books, research methodologies, and professional blog posts.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}
