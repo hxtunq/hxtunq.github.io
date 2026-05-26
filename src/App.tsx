@@ -55,9 +55,20 @@ export default function App() {
       document.title = "Blog — Xuan Tung Hoang";
     } else if (cleanPath === "bookdown" || cleanPath.startsWith("bookdown/")) {
       if (cleanPath.startsWith("bookdown/")) {
-        const bookId = cleanPath.substring("bookdown/".length).split("/")[0];
+        const parts = cleanPath.substring("bookdown/".length).split("/");
+        const bookId = parts[0];
+        const chapterId = parts[1];
         const book = bookMetadataList.find((b) => b.id === bookId);
-        document.title = book ? `${book.title} — Xuan Tung Hoang` : "Bookdown — Xuan Tung Hoang";
+        
+        let displayTitle = book ? book.title : "Bookdown";
+        if (chapterId) {
+          const formattedChapter = chapterId
+            .split("-")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+          displayTitle = `${formattedChapter} — ${displayTitle}`;
+        }
+        document.title = displayTitle;
       } else {
         document.title = "Bookdown — Xuan Tung Hoang";
       }
