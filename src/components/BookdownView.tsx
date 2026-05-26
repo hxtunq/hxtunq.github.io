@@ -46,7 +46,7 @@ interface BookdownViewProps {
 
 export default function BookdownView({ currentPath, navigate }: BookdownViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeLanguage, setActiveLanguage] = useState<string | null>(null);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [bookSearchQuery, setBookSearchQuery] = useState("");
   const [showSidebar, setShowSidebar] = useState(true);
@@ -129,11 +129,14 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
     return results;
   }, [selectedBook, bookSearchQuery]);
 
-  const languagesList = useMemo(() => {
+  const tagsList = useMemo(() => {
     const stats: Record<string, number> = {};
     bookItems.forEach((book) => {
-      const lang = book.language || "English";
-      stats[lang] = (stats[lang] || 0) + 1;
+      if (book.tags) {
+        book.tags.forEach((tag) => {
+          stats[tag] = (stats[tag] || 0) + 1;
+        });
+      }
     });
     return stats;
   }, []);
@@ -143,12 +146,12 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
       const matchesSearch =
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesLanguage = activeLanguage
-        ? (book.language || "English").toLowerCase() === activeLanguage.toLowerCase()
+      const matchesTag = activeTag
+        ? book.tags?.some((t) => t.toLowerCase() === activeTag.toLowerCase())
         : true;
-      return matchesSearch && matchesLanguage;
+      return matchesSearch && matchesTag;
     });
-  }, [searchQuery, activeLanguage]);
+  }, [searchQuery, activeTag]);
 
   const getBookIcon = (iconName: string) => {
     switch (iconName) {
@@ -213,7 +216,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                   Bookdown Gallery
                 </h1>
                 <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed">
-                  Interactive guidebooks, coding protocols, and statistical tutorials maintained as open-source Bookdown libraries. Optimized for molecular biology, reproducibility, and computational efficiency.
+                  Interactive guidebooks, coding protocols, and statistical tutorials maintained as open-source Bookdown libraries. Optimized for bioinformatics, reproducibility, and data analysis.
                 </p>
               </div>
 
@@ -232,29 +235,30 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
 
             <div className="w-full h-[1px] bg-brand-surface-highest"></div>
 
-            {/* Languages Pills */}
+            {/* Tags Filter */}
             <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[10px] text-brand-on-surface-variant/60 mr-2">Tags:</span>
               <button
-                onClick={() => setActiveLanguage(null)}
-                className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${activeLanguage === null
+                onClick={() => setActiveTag(null)}
+                className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${activeTag === null
                   ? "border-brand-primary bg-brand-primary text-white font-bold"
                   : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
                   }`}
               >
-                All Languages
+                All Tags
               </button>
-              {Object.entries(languagesList).map(([langName, count]) => {
-                const isActive = activeLanguage === langName;
+              {Object.entries(tagsList).map(([tagName, count]) => {
+                const isActive = activeTag === tagName;
                 return (
                   <button
-                    key={langName}
-                    onClick={() => setActiveLanguage(isActive ? null : langName)}
+                    key={tagName}
+                    onClick={() => setActiveTag(isActive ? null : tagName)}
                     className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
                       ? "border-brand-primary bg-brand-primary text-white font-bold"
                       : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
                       }`}
                   >
-                    {langName} ({count})
+                    {tagName} ({count})
                   </button>
                 );
               })}
@@ -294,6 +298,11 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                                 {book.language}
                               </span>
                             )}
+                            {book.tags && book.tags.map((tag) => (
+                              <span key={tag} className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70 uppercase">
+                                {tag}
+                              </span>
+                            ))}
                           </div>
                         </div>
                       </div>

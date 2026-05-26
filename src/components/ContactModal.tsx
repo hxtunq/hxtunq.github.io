@@ -20,23 +20,66 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !message) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitted(true);
+    const accessKey = import.meta.env.VITE_WEB3FORMS_KEY;
+
+    if (!accessKey) {
+      console.warn("VITE_WEB3FORMS_KEY is not defined. Simulating local submission...");
       setTimeout(() => {
-        // Reset states
-        setName("");
-        setEmail("");
-        setMessage("");
-        setSubmitted(false);
-        onClose();
-      }, 3000);
-    }, 1200);
+        setIsSubmitting(false);
+        setSubmitted(true);
+        setTimeout(() => {
+          setName("");
+          setEmail("");
+          setMessage("");
+          setSubmitted(false);
+          onClose();
+        }, 3000);
+      }, 1200);
+      return;
+    }
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json"
+        },
+        body: JSON.stringify({
+          access_key: accessKey,
+          name: name,
+          email: email,
+          subject: subject,
+          message: message,
+          from_name: "Academic Portfolio Inquiry"
+        })
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setIsSubmitting(false);
+        setSubmitted(true);
+        setTimeout(() => {
+          setName("");
+          setEmail("");
+          setMessage("");
+          setSubmitted(false);
+          onClose();
+        }, 3000);
+      } else {
+        alert("Submission failed: " + (result.message || "Unknown error"));
+        setIsSubmitting(false);
+      }
+    } catch (error) {
+      console.error("Error submitting contact form:", error);
+      alert("Network error: Could not submit inquiry. Please try again.");
+      setIsSubmitting(false);
+    }
   };
 
   return (

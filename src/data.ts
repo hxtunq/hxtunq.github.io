@@ -48,18 +48,20 @@ export const selectedPublications: SelectedPublication[] = [
 export const bookMetadataList: BookMetadata[] = [
   {
     id: "genomic-variant-analysis",
-    title: "Genomic Variant Analysis",
-    description: "Hướng dẫn thực hành phân tích dữ liệu giải trình tự thế hệ mới (NGS), tập trung vào quy trình WGS/WXS phát hiện và phân tích biến thể di truyền ở người.",
+    title: "Phân tích biến thể hệ gen",
+    description: "Hướng dẫn thực hành phân tích dữ liệu giải trình tự WGS/WES, tập trung vào quy trình phát hiện và phân tích biến thể dòng mầm nhỏ ở người.",
     iconName: "biotech",
     language: "Vietnamese",
     typeLabel: "Case Study & Hands-on Guide",
+    tags: ["genomics"],
   },
   {
     id: "bash-fundamentals-bioinformatics",
     title: "Bash cho Tin Sinh học",
-    description: "Hướng dẫn sử dụng và áp dụng các câu lệnh Bash/Shell script nền tảng trong phân tích tin sinh học.",
+    description: "Hướng dẫn sử dụng các câu lệnh Bash/Shell script nền tảng trong phân tích tin sinh học.",
     iconName: "terminal",
     language: "Vietnamese",
     typeLabel: "Introductory Book",
+    tags: ["code"],
   }
 ];

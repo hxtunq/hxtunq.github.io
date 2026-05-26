@@ -58,6 +58,7 @@ export interface BookMetadata {
   iconName: "biotech" | "insights" | "terminal" | "scatter_plot" | "account_tree" | "bug_report";
   language?: string;
   typeLabel?: string;
+  tags?: string[];
 }
 
 export interface BookItem extends BookMetadata {
