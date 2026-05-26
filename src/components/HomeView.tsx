@@ -383,8 +383,28 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                           className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
                         />
 
-                        {/* Safety Tether — from deck (5, 1.5) curving up to astronaut's oxygen tank */}
-                        <path d="M 5,1.5 Q 10,-3.5 17,-4" fill="none" stroke="#94a3b8" strokeWidth="0.5" strokeDasharray="1 1" />
+                        {/* Safety Tether — from deck (5, 1.5) curving up to the center of astronaut's body */}
+                        <motion.path
+                          animate={{
+                            d: [
+                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 14,-1.5 17,-2.8 20,-3.5",
+                              "M 5,1.5 C 7,1.0 8,-1.5 10.5,-1.5 C 13.5,-1.5 16.5,-2.0 20,-3.5",
+                              "M 5,1.5 C 5,-0.8 9,-1.2 11.5,-2.5 C 14,-3.8 17,-2.0 20,-3.5",
+                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 14,-1.5 17,-2.8 20,-3.5"
+                            ]
+                          }}
+                          transition={{
+                            duration: 8,
+                            ease: "easeInOut",
+                            repeat: Infinity,
+                          }}
+                          fill="none"
+                          stroke="#94a3b8"
+                          strokeWidth="0.5"
+                          strokeDasharray="1 1"
+                        />
+
+
 
                         {/* ======= ASTRONAUT (upper area, y=-7 to y=-2, clearly above ship) ======= */}
                         {/* Legs (trailing left, floating horizontal pose) */}
