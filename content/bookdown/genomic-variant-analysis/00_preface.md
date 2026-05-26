@@ -1,6 +1,6 @@
 ---
 id: "preface"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 title: "Lời nói đầu"
 order: 0
 ---

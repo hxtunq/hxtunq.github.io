@@ -1,6 +1,6 @@
 ---
 id: "annotation-humann"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "functional-annotation-pipelines"
 title: "4.1. Đường dẫn chú giải HUMAnN"
 order: "4.1"

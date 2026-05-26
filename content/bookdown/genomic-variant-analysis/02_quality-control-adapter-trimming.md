@@ -1,6 +1,6 @@
 ---
 id: "quality-control-adapter-trimming"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 title: "2. Kiểm soát chất lượng & Cắt lọc đoạn mồi"
 order: "2"
 ---

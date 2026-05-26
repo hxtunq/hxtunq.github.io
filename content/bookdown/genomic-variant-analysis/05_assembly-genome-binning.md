@@ -1,6 +1,6 @@
 ---
 id: "assembly-genome-binning"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 title: "5. Lắp ráp & Phân nhóm bộ gen"
 order: "5"
 ---

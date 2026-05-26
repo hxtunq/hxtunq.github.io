@@ -1,6 +1,6 @@
 ---
 id: "quality-assessment"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "quality-control-adapter-trimming"
 title: "2.1. Đánh giá chất lượng bằng FastQC"
 order: "2.1"

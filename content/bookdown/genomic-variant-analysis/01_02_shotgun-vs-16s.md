@@ -1,6 +1,6 @@
 ---
 id: "shotgun-vs-16s"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "introduction-shotgun-sequencing"
 title: "1.2. So sánh Shotgun và 16S"
 order: "1.2"

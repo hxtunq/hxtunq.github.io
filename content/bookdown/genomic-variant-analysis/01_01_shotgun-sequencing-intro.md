@@ -1,6 +1,6 @@
 ---
 id: "shotgun-sequencing-intro"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "introduction-shotgun-sequencing"
 title: "1.1. Giới thiệu Metagenomics"
 order: "1.1"

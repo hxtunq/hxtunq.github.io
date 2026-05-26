@@ -1,6 +1,6 @@
 ---
 id: "introduction-shotgun-sequencing"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 title: "1. Giới thiệu về Giải trình tự Shotgun"
 order: "1"
 ---

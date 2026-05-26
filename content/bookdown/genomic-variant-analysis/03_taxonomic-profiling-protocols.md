@@ -1,6 +1,6 @@
 ---
 id: "taxonomic-profiling-protocols"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 title: "3. Giao thức Định danh Phân loại học"
 order: "3"
 ---

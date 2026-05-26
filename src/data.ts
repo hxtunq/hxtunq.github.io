@@ -47,9 +47,9 @@ export const selectedPublications: SelectedPublication[] = [
 
 export const bookMetadataList: BookMetadata[] = [
   {
-    id: "whole-genome-sequencing",
-    title: "Whole Genome Sequencing",
-    description: "Hướng dẫn toàn diện về quy trình phân tích tin sinh học để xử lý dữ liệu giải trình tự thô và giải mã cấu trúc hệ vi sinh vật phức tạp bằng các công cụ R và Python hiện đại.",
+    id: "genomic-variant-analysis",
+    title: "Genomic Variant Analysis",
+    description: "Hướng dẫn thực hành phân tích dữ liệu giải trình tự thế hệ mới (NGS), tập trung vào quy trình WGS/WXS phát hiện và phân tích biến thể di truyền ở người.",
     iconName: "biotech",
     language: "Vietnamese",
     typeLabel: "Case Study & Hands-on Guide",
@@ -57,7 +57,7 @@ export const bookMetadataList: BookMetadata[] = [
   {
     id: "bash-fundamentals-bioinformatics",
     title: "Bash cho Tin Sinh học",
-    description: "Các công cụ dòng lệnh thiết yếu, kỹ thuật lập trình shell script và chiến lược quản lý gói dành riêng cho xử lý dữ liệu sinh học và đường dẫn phân tích tin sinh học.",
+    description: "Hướng dẫn sử dụng và áp dụng các câu lệnh Bash/Shell script nền tảng trong phân tích tin sinh học.",
     iconName: "terminal",
     language: "Vietnamese",
     typeLabel: "Introductory Book",

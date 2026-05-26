@@ -1,6 +1,6 @@
 ---
 id: "assembly-metaspades"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "assembly-genome-binning"
 title: "5.1. Lắp ráp metagenome với metaSPAdes"
 order: "5.1"

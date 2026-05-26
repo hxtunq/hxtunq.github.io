@@ -1,6 +1,6 @@
 ---
 id: "adapter-trimming"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "quality-control-adapter-trimming"
 title: "2.2. Cắt lọc adapter bằng Trimmomatic"
 order: "2.2"

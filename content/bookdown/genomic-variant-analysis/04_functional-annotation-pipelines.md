@@ -1,6 +1,6 @@
 ---
 id: "functional-annotation-pipelines"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 title: "4. Đường dẫn Chú giải Chức năng"
 order: "4"
 ---

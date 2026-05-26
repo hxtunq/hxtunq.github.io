@@ -1,6 +1,6 @@
 ---
 id: "classification-kraken2"
-bookId: "whole-genome-sequencing"
+bookId: "genomic-variant-analysis"
 parentId: "taxonomic-profiling-protocols"
 title: "3.1. Phân loại taxon bằng Kraken2"
 order: "3.1"
