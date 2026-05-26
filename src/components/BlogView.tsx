@@ -182,14 +182,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
             <div className="flex flex-col md:flex-row gap-12 relative">
               {/* Left Column: Sidebar Filters & Meta (Width: 280px) */}
               <aside className="w-full md:w-[280px] shrink-0 space-y-8 md:sticky md:top-24 h-fit">
-                {/* Visual Accent Title */}
-                <div>
-                  <h1 className="font-serif text-3.5xl font-bold tracking-tight text-brand-primary mb-3">
-                    Archive
-                  </h1>
-                  <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed">
-                  </p>
-                </div>
+
 
                 {/* Live Search Form */}
                 <div className="relative w-full">
@@ -336,12 +329,12 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
               {/* Right Column: Listing Items (Reading Width: 720px) */}
               <section className="flex-1 max-w-reading-width space-y-8">
                 {/* Highlighted info box */}
-                <div className="border border-emerald-100 bg-emerald-500/5 p-4 flex items-center md:items-start gap-3">
-                  <span className="font-mono text-xs font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 shrink-0 select-none">
-                    FEATURED
+                <div className="border border-amber-100 bg-amber-500/5 p-4 flex items-center md:items-start gap-3">
+                  <span className="font-mono text-xs font-bold text-amber-800 bg-amber-100 px-2 py-0.5 shrink-0 select-none">
+                    NOTICE
                   </span>
-                  <p className="font-sans text-xs text-emerald-950">
-                    The latest post <strong>"Generative AI in Academic Research Contexts"</strong> is out now. Take a look!
+                  <p className="font-sans text-xs text-amber-950">
+                    This website is currently under construction. Some details may be incomplete or inaccurate. Thank you for your patience!
                   </p>
                 </div>
 
@@ -373,7 +366,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                         </div>
 
                         {/* Title of Post */}
-                        <h2 className="font-serif text-xl sm:text-2xl text-brand-primary font-bold tracking-tight mb-3 group-hover:underline underline-offset-4 decoration-1 decoration-brand-secondary/40 transition-all">
+                        <h2 className="font-sans text-xl sm:text-2xl text-brand-primary font-bold tracking-tight mb-3 group-hover:underline underline-offset-4 decoration-1 decoration-brand-secondary/40 transition-all">
                           {post.title}
                         </h2>
 
@@ -438,7 +431,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
           >
             <div className="flex flex-col md:flex-row gap-12 relative">
               {/* BOOKDOWN-STYLE NAVIGATION DRAWER ON DESKTOP (Width: 280px) */}
-              <aside className="hidden md:flex flex-col bg-brand-surface-low/40 border border-brand-surface-highest w-full md:w-[280px] shrink-0 p-6 md:sticky md:top-24 h-[calc(100vh-120px)] rounded-[0.25rem] justify-between">
+              <aside className="hidden md:flex flex-col bg-brand-surface-low/40 border border-brand-surface-highest w-full md:w-[280px] shrink-0 p-6 md:sticky md:top-24 h-fit max-h-[70vh] rounded-[0.25rem] gap-6 overflow-y-auto scrollbar-subtle">
                 <div className="space-y-6">
                   {/* Table of Contents Header */}
                   <div className="mb-6 border-b border-brand-surface-highest pb-2">
@@ -494,7 +487,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                     className="flex items-center gap-1.5 font-sans font-bold text-xs tracking-wider uppercase text-brand-secondary hover:text-brand-primary"
                   >
                     <ArrowLeft className="w-3.5 h-3.5" />
-                    <span>Return to Archive</span>
+                    <span>Return to Blog</span>
                   </button>
                 </div>
 
@@ -505,7 +498,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                     <span>•</span>
                     <span>{selectedPost.date}</span>
                   </div>
-                  <h1 className="font-serif text-3xl sm:text-4.5xl leading-[1.1] text-brand-primary font-bold tracking-tight mb-6">
+                  <h1 className="font-sans text-3xl sm:text-4.5xl leading-[1.1] text-brand-primary font-bold tracking-tight mb-6">
                     {selectedPost.title}
                   </h1>
                   <p className="font-sans text-brand-on-surface-variant text-base sm:text-lg leading-relaxed font-light mb-6">

@@ -24,7 +24,7 @@ import BookdownView from "./components/BookdownView";
 import ContactModal from "./components/ContactModal";
 
 // Data & Types Imports
-import { selectedPublications } from "./data";
+import { selectedPublications, bookMetadataList } from "./data";
 import { blogPosts } from "./lib/blog-loader";
 import { SelectedPublication, BlogPost } from "./types";
 
@@ -43,6 +43,28 @@ export default function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  // Update document title based on currentPath
+  useEffect(() => {
+    const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
+    if (cleanPath.startsWith("post/")) {
+      const postId = cleanPath.substring("post/".length);
+      const post = blogPosts.find((p) => p.id === postId);
+      document.title = post ? `${post.title} — Xuan Tung Hoang` : "Xuan Tung Hoang";
+    } else if (cleanPath === "blog" || cleanPath.startsWith("blog/")) {
+      document.title = "Blog — Xuan Tung Hoang";
+    } else if (cleanPath === "bookdown" || cleanPath.startsWith("bookdown/")) {
+      if (cleanPath.startsWith("bookdown/")) {
+        const bookId = cleanPath.substring("bookdown/".length).split("/")[0];
+        const book = bookMetadataList.find((b) => b.id === bookId);
+        document.title = book ? `${book.title} — Xuan Tung Hoang` : "Bookdown — Xuan Tung Hoang";
+      } else {
+        document.title = "Bookdown — Xuan Tung Hoang";
+      }
+    } else {
+      document.title = "Xuan Tung Hoang";
+    }
+  }, [currentPath]);
 
   const navigate = (path: string) => {
     if (window.location.pathname !== path) {
@@ -123,7 +145,7 @@ export default function App() {
       )}
 
       {/* PRIMARY VIEWER PORTAL */}
-      <main className={`flex-1 ${isBookdownReader ? "pt-0" : "pt-20"}`}>
+      <main className="flex-1 pt-20">
         <AnimatePresence mode="wait">
           {activeTab === "home" && (
             <motion.div
@@ -291,7 +313,7 @@ export default function App() {
                             >
                               <div>
                                 <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{post.category}</span>
-                                <span className="font-serif text-sm font-bold text-brand-primary block">{post.title}</span>
+                                <span className="font-sans text-sm font-bold text-brand-primary block">{post.title}</span>
                               </div>
                               <button
                                 onClick={() => {

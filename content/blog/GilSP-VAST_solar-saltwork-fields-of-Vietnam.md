@@ -6,12 +6,14 @@ date: "2026-05-25"
 dateDisplay: "MAY 25, 2026" 
 author: "Xuan Tung Hoang"
 tags: ["Metagenomics", "Extremophiles", "Phylogeny", "R"]
-abstract: Ở bài viết này, mình sẽ tiến hành diễn giải các đoạn mã R mà nhóm tác giả của bài báo "Unique Features of Extremely Halophilic Microbiota Inhabiting Solar Saltworks Fields of Vietnam" đến từ VAST và ISP-CNR đã sử dụng để phân tích hệ vi sinh vật học từ cánh đồng muối tại Việt Nam vào năm 2024.
+abstract:
 status: "Published" 
 language: "Vietnamese"
 ---
 
 ## Giới thiệu
+
+Ở bài viết này, mình sẽ tiến hành diễn giải các đoạn mã R mà nhóm tác giả của bài báo "Unique Features of Extremely Halophilic Microbiota Inhabiting Solar Saltworks Fields of Vietnam" đến từ VAST và ISP-CNR đã sử dụng để phân tích hệ vi sinh vật học từ cánh đồng muối tại Việt Nam vào năm 2024.
 
 ```R
 library(dada2)
@@ -43,7 +45,9 @@ path <- "//your path/" # directory containing the fastq files after unzipping.
 list.files(path)
 ```
 
-## Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
+## Code
+
+Forward and reverse fastq filenames have format: SAMPLENAME_R1_001.fastq and SAMPLENAME_R2_001.fastq
 
 ```R
 fnFs <- sort(list.files(path, pattern="_R1_trimmed.fastq", full.names = TRUE))

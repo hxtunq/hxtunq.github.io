@@ -47,6 +47,7 @@ export interface BookChapter {
   order: number;
   contents: string;
   code?: string;
+  output?: string;
   subsections?: BookChapter[];
 }
 
@@ -56,6 +57,7 @@ export interface BookMetadata {
   description: string;
   iconName: "biotech" | "insights" | "terminal" | "scatter_plot" | "account_tree" | "bug_report";
   language?: string;
+  typeLabel?: string;
 }
 
 export interface BookItem extends BookMetadata {

@@ -10,6 +10,14 @@ code: |
   
   # Liệt kê nội dung thư mục chi tiết
   ls -la
+output: |
+  /home/tung/academic-portfolio
+  total 24
+  drwxr-xr-x  5 tung tung 4096 May 26 19:40 .
+  drwxr-xr-x 20 tung tung 4096 May 26 19:35 ..
+  -rw-r--r--  1 tung tung  845 May 26 19:40 package.json
+  drwxr-xr-x  3 tung tung 4096 May 26 19:35 src
+  drwxr-xr-x  4 tung tung 4096 May 26 19:35 content
 ---
 
 Giao diện dòng lệnh (CLI) là môi trường chính để thực thi các đường dẫn phân tích tin sinh học. Việc điều hướng hệ thống tệp tin nhanh chóng và hiểu rõ cấu trúc thư mục là rất cần thiết. Trong chương này, chúng ta sẽ tìm hiểu các lệnh cơ bản để xem thư mục hiện tại (`pwd`), liệt kê danh sách (`ls`), và thay đổi vị trí (`cd`).

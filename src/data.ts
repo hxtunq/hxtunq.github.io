@@ -52,6 +52,7 @@ export const bookMetadataList: BookMetadata[] = [
     description: "Hướng dẫn toàn diện về quy trình phân tích tin sinh học để xử lý dữ liệu giải trình tự thô và giải mã cấu trúc hệ vi sinh vật phức tạp bằng các công cụ R và Python hiện đại.",
     iconName: "biotech",
     language: "Vietnamese",
+    typeLabel: "Case Study & Hands-on Guide",
   },
   {
     id: "bash-fundamentals-bioinformatics",
@@ -59,5 +60,6 @@ export const bookMetadataList: BookMetadata[] = [
     description: "Các công cụ dòng lệnh thiết yếu, kỹ thuật lập trình shell script và chiến lược quản lý gói dành riêng cho xử lý dữ liệu sinh học và đường dẫn phân tích tin sinh học.",
     iconName: "terminal",
     language: "Vietnamese",
+    typeLabel: "Introductory Book",
   }
 ];

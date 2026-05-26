@@ -142,10 +142,21 @@ export function renderInlineStyles(text: string): React.JSX.Element {
     .replace(
       /`(.*?)`/g,
       "<code class='font-mono bg-brand-surface-low px-1.5 py-0.5 rounded text-xs text-brand-secondary'>$1</code>"
+    )
+    // Markdown links: [text](url)
+    .replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
+      "<a href='$2' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors'>$1</a>"
+    )
+    // Bare URLs: (https://...) or https://... standalone
+    .replace(
+      /\((https?:\/\/[^\s)]+)\)/g,
+      "(<a href='$1' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors'>$1</a>)"
     );
 
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
 }
+
 
 function highlightBashLine(line: string): string {
   const commentIndex = line.indexOf("#");
@@ -188,15 +199,60 @@ export function highlightBashCode(code: string): string {
   return lines.map(highlightBashLine).join("\n");
 }
 
-export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.Element {
-  const [copyCodeSuccess, setCopyCodeSuccess] = useState(false);
-  const blocks = parseMarkdown(markdown);
+interface CodeBlockProps {
+  language: string;
+  code: string;
+  key?: React.Key;
+}
 
-  const handleCopyCode = (code: string) => {
+function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopy = () => {
     navigator.clipboard.writeText(code);
-    setCopyCodeSuccess(true);
-    setTimeout(() => setCopyCodeSuccess(false), 2000);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
   };
+
+  const isBash = language === "bash" || language === "shell" || language === "sh";
+
+  return (
+    <div className="border border-brand-surface-highest bg-[#111827] text-[#f9fafb] rounded-[0.25rem] my-6 overflow-hidden font-mono">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-[#0b0f19] font-mono text-[10px]">
+        <span className="text-slate-400 font-mono uppercase">{language}</span>
+        <button
+          onClick={handleCopy}
+          className="text-slate-400 hover:text-white flex items-center gap-1 font-mono hover:bg-slate-800/60 px-2 py-1 outline-none transition-all cursor-pointer"
+        >
+          {copySuccess ? (
+            <>
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Copied!</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-3.5 h-3.5" />
+              <span>Copy Code</span>
+            </>
+          )}
+        </button>
+      </div>
+      <div className="p-4 overflow-x-auto text-xs leading-relaxed max-h-[400px]">
+        {isBash ? (
+          <pre
+            className="font-mono text-left whitespace-pre"
+            dangerouslySetInnerHTML={{ __html: highlightBashCode(code) }}
+          />
+        ) : (
+          <pre className="font-mono text-left whitespace-pre">{code}</pre>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.Element {
+  const blocks = parseMarkdown(markdown);
 
   return (
     <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
@@ -208,7 +264,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                 <h2
                   key={index}
                   id={slugify(block.text || "")}
-                  className="font-serif text-2xl font-bold text-brand-primary mb-4 mt-12 pb-2 border-b border-brand-surface-highest scroll-mt-24"
+                  className="font-sans text-2xl font-medium text-brand-primary mb-4 mt-12 scroll-mt-24"
                 >
                   {block.text}
                 </h2>
@@ -218,7 +274,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
               <h3
                 key={index}
                 id={slugify(block.text || "")}
-                className="font-serif text-xl font-bold text-brand-primary mb-3 mt-8 scroll-mt-24"
+                className="font-sans text-xl font-medium text-brand-primary mb-3 mt-8 scroll-mt-24"
               >
                 {block.text}
               </h3>
@@ -226,7 +282,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
           }
           case "paragraph":
             return (
-              <p key={index} className="font-sans text-[14px] leading-relaxed mb-6">
+              <p key={index} className="font-sans text-[15px] leading-relaxed mb-6">
                 {renderInlineStyles(block.text || "")}
               </p>
             );
@@ -248,42 +304,12 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
               );
             }
 
-            const isBash = block.language === "bash" || block.language === "shell" || block.language === "sh";
             return (
-              <div
+              <CodeBlock
                 key={index}
-                className="border border-brand-surface-highest bg-[#111827] text-[#f9fafb] rounded-[0.25rem] my-6 overflow-hidden font-mono"
-              >
-                <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-[#0b0f19] font-mono text-[10px]">
-                  <span className="text-slate-400 font-mono uppercase">{block.language}</span>
-                  <button
-                    onClick={() => handleCopyCode(block.code || "")}
-                    className="text-slate-400 hover:text-white flex items-center gap-1 font-mono hover:bg-slate-800/60 px-2 py-1 outline-none transition-all cursor-pointer"
-                  >
-                    {copyCodeSuccess ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy Code</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                <div className="p-4 overflow-x-auto text-xs leading-relaxed max-h-[400px]">
-                  {isBash ? (
-                    <pre
-                      className="font-mono text-left whitespace-pre"
-                      dangerouslySetInnerHTML={{ __html: highlightBashCode(block.code || "") }}
-                    />
-                  ) : (
-                    <pre className="font-mono text-left whitespace-pre">{block.code}</pre>
-                  )}
-                </div>
-              </div>
+                language={block.language || "text"}
+                code={block.code || ""}
+              />
             );
           }
           case "quote":

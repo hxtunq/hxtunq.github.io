@@ -109,6 +109,7 @@ for (const [, raw] of Object.entries(markdownModules)) {
     order: Number(meta.order) || 0,
     contents: body,
     code: (meta.code as string) || undefined,
+    output: (meta.output as string) || undefined,
   };
 
   chapters.push(chapter);
