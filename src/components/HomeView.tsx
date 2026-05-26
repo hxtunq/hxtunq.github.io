@@ -32,7 +32,6 @@ interface HomeViewProps {
 export default function HomeView({ onNavigate, onContactClick }: HomeViewProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showCV, setShowCV] = useState(false);
-  const [themeMode, setThemeMode] = useState<"abstract" | "custom">("abstract");
 
   const staticStars = React.useMemo(() => {
     return Array.from({ length: 30 }, (_, i) => ({
@@ -124,363 +123,325 @@ export default function HomeView({ onNavigate, onContactClick }: HomeViewProps) 
             transition={{ duration: 0.6 }}
             className="w-full max-w-[340px] aspect-square bg-brand-surface-low border border-brand-surface-highest rounded-[0.25rem] p-3 shadow-sm relative overflow-hidden"
           >
-            {/* Visual Type Selector */}
-            <div className="absolute top-4 right-4 z-10 flex gap-2">
-              <button
-                onClick={() => setThemeMode("abstract")}
-                className={`px-2 py-1 text-[9px] font-mono tracking-widest uppercase transition-colors select-none ${themeMode === "abstract"
-                  ? "bg-brand-primary text-white font-bold"
-                  : "bg-white/80 text-brand-secondary hover:bg-white"
-                  }`}
-              >
-                Simulation
-              </button>
-              <button
-                onClick={() => setThemeMode("custom")}
-                className={`px-2 py-1 text-[9px] font-mono tracking-widest uppercase transition-colors select-none ${themeMode === "custom"
-                  ? "bg-brand-primary text-white font-bold"
-                  : "bg-white/80 text-brand-secondary hover:bg-white"
-                  }`}
-              >
-                Photo
-              </button>
-            </div>
-
-            {themeMode === "abstract" ? (
-              /* A gorgeous CSS space scene with a pixel-art explorer spaceship and meteor shower rendering */
-              <div className="w-full h-full bg-[#030712] relative flex flex-col justify-between p-6 overflow-hidden rounded-[0.125rem] border border-slate-800">
-                <style>{`
-                  @keyframes starTwinkle {
-                    0%, 100% { opacity: 0.2; transform: scale(0.8); }
-                    50% { opacity: 1; transform: scale(1.2); }
+            {/* A gorgeous CSS space scene with a pixel-art explorer spaceship and meteor shower rendering */}
+            <div className="w-full h-full bg-[#030712] relative flex flex-col justify-between p-6 overflow-hidden rounded-[0.125rem] border border-slate-800">
+              <style>{`
+                @keyframes starTwinkle {
+                  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+                  50% { opacity: 1; transform: scale(1.2); }
+                }
+                @keyframes starFall {
+                  0% {
+                    transform: translateY(-20px) translateX(-50px);
+                    opacity: 0;
                   }
-                  @keyframes starFall {
-                    0% {
-                      transform: translateY(-20px) translateX(-50px);
-                      opacity: 0;
-                    }
-                    10% {
-                      opacity: 0.8;
-                    }
-                    90% {
-                      opacity: 0.8;
-                    }
-                    100% {
-                      transform: translateY(340px) translateX(120px);
-                      opacity: 0;
-                    }
+                  10% {
+                    opacity: 0.8;
                   }
-                  @keyframes spaceCruise {
-                    0% {
-                      transform: translateY(0px) translateX(-8px);
-                    }
-                    50% {
-                      transform: translateY(-6px) translateX(8px);
-                    }
-                    100% {
-                      transform: translateY(0px) translateX(-8px);
-                    }
+                  90% {
+                    opacity: 0.8;
                   }
-                  @keyframes scanBeam {
-                    0% {
-                      transform: rotate(-10deg);
-                      opacity: 0.25;
-                    }
-                    50% {
-                      opacity: 0.55;
-                    }
-                    100% {
-                      transform: rotate(10deg);
-                      opacity: 0.25;
-                    }
+                  100% {
+                    transform: translateY(340px) translateX(120px);
+                    opacity: 0;
                   }
-                  @keyframes microbeWiggle {
-                    0% {
-                      transform: translateY(0px) translateX(0px) rotate(0deg);
-                    }
-                    100% {
-                      transform: translateY(-1.5px) translateX(1px) rotate(6deg);
-                    }
+                }
+                @keyframes spaceCruise {
+                  0% {
+                    transform: translateY(0px) translateX(-8px);
                   }
-                  @keyframes laserBolt {
-                    0% {
-                      stroke-dashoffset: 48;
-                      opacity: 0;
-                    }
-                    3% {
-                      opacity: 1;
-                    }
-                    72% {
-                      stroke-dashoffset: -85;
-                      opacity: 1;
-                    }
-                    75%, 100% {
-                      stroke-dashoffset: -85;
-                      opacity: 0;
-                    }
+                  50% {
+                    transform: translateY(-6px) translateX(8px);
                   }
-                  .custom-static-star {
-                    position: absolute;
-                    background-color: #ffffff;
-                    border-radius: 50%;
-                    animation: starTwinkle ease-in-out infinite alternate;
+                  100% {
+                    transform: translateY(0px) translateX(-8px);
                   }
-                  .custom-falling-star {
-                    position: absolute;
-                    top: -20px;
-                    background-color: #ffffff;
-                    border-radius: 50%;
-                    box-shadow: 0 0 6px 1.5px rgba(255, 255, 255, 0.7);
-                    animation: starFall linear infinite;
+                }
+                @keyframes scanBeam {
+                  0% {
+                    transform: rotate(-10deg);
+                    opacity: 0.25;
                   }
-                `}</style>
+                  50% {
+                    opacity: 0.55;
+                  }
+                  100% {
+                    transform: rotate(10deg);
+                    opacity: 0.25;
+                  }
+                }
+                @keyframes microbeWiggle {
+                  0% {
+                    transform: translateY(0px) translateX(0px) rotate(0deg);
+                  }
+                  100% {
+                    transform: translateY(-1.5px) translateX(1px) rotate(6deg);
+                  }
+                }
+                @keyframes laserBolt {
+                  0% {
+                    stroke-dashoffset: 48;
+                    opacity: 0;
+                  }
+                  3% {
+                    opacity: 1;
+                  }
+                  72% {
+                    stroke-dashoffset: -85;
+                    opacity: 1;
+                  }
+                  75%, 100% {
+                    stroke-dashoffset: -85;
+                    opacity: 0;
+                  }
+                }
+                .custom-static-star {
+                  position: absolute;
+                  background-color: #ffffff;
+                  border-radius: 50%;
+                  animation: starTwinkle ease-in-out infinite alternate;
+                }
+                .custom-falling-star {
+                  position: absolute;
+                  top: -20px;
+                  background-color: #ffffff;
+                  border-radius: 50%;
+                  box-shadow: 0 0 6px 1.5px rgba(255, 255, 255, 0.7);
+                  animation: starFall linear infinite;
+                }
+              `}</style>
 
-                {/* Glowing cosmic nebula background */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-[#0b132b] via-[#1c2541] to-[#030712] opacity-90 z-0"></div>
-                <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-purple-600/10 rounded-full filter blur-[50px] pointer-events-none"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-cyan-600/10 rounded-full filter blur-[40px] pointer-events-none"></div>
+              {/* Glowing cosmic nebula background */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-[#0b132b] via-[#1c2541] to-[#030712] opacity-90 z-0"></div>
+              <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-purple-600/10 rounded-full filter blur-[50px] pointer-events-none"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-32 h-32 bg-cyan-600/10 rounded-full filter blur-[40px] pointer-events-none"></div>
 
-                {/* Static twinkling stars */}
-                {staticStars.map((star) => (
-                  <div
-                    key={`static-${star.id}`}
-                    className="custom-static-star"
-                    style={{
-                      left: star.left,
-                      top: star.top,
-                      width: star.size,
-                      height: star.size,
-                      animationDuration: star.duration,
-                    }}
-                  />
-                ))}
+              {/* Static twinkling stars */}
+              {staticStars.map((star) => (
+                <div
+                  key={`static-${star.id}`}
+                  className="custom-static-star"
+                  style={{
+                    left: star.left,
+                    top: star.top,
+                    width: star.size,
+                    height: star.size,
+                    animationDuration: star.duration,
+                  }}
+                />
+              ))}
 
-                {/* Falling stars */}
-                {fallingStars.map((star) => (
-                  <div
-                    key={`falling-${star.id}`}
-                    className="custom-falling-star"
-                    style={{
-                      left: star.left,
-                      width: star.size,
-                      height: star.size,
-                      animationDelay: star.delay,
-                      animationDuration: star.duration,
-                    }}
-                  />
-                ))}
+              {/* Falling stars */}
+              {fallingStars.map((star) => (
+                <div
+                  key={`falling-${star.id}`}
+                  className="custom-falling-star"
+                  style={{
+                    left: star.left,
+                    width: star.size,
+                    height: star.size,
+                    animationDelay: star.delay,
+                    animationDuration: star.duration,
+                  }}
+                />
+              ))}
 
-                {/* Centerpiece: Pixel Spacecraft cruising and scanning */}
-                <div className="flex-1 flex items-center justify-center relative z-10 py-4">
-                  <div
-                    className="relative flex items-center justify-center animate-[spaceCruise_6s_ease-in-out_infinite]"
-                    style={{ transformOrigin: "center" }}
-                  >
-                    {/* Spaceship and Crew */}
-                    <div className="relative z-10 drop-shadow-[0_4px_10px_rgba(56,189,248,0.3)]">
-                      <svg viewBox="0 -10 40 20" className="w-40 h-20 overflow-visible" shapeRendering="crispEdges">
-                        <defs>
-                          <linearGradient id="scanBeamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
-                          </linearGradient>
-                          <filter id="laserGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
-                            <feGaussianBlur stdDeviation="0.4" result="blur" />
-                          </filter>
-                        </defs>
+              {/* Centerpiece: Pixel Spacecraft cruising and scanning */}
+              <div className="flex-1 flex items-center justify-center relative z-10 py-4">
+                <div
+                  className="relative flex items-center justify-center animate-[spaceCruise_6s_ease-in-out_infinite]"
+                  style={{ transformOrigin: "center" }}
+                >
+                  {/* Spaceship and Crew */}
+                  <div className="relative z-10 drop-shadow-[0_4px_10px_rgba(56,189,248,0.3)]">
+                    <svg viewBox="0 -10 40 20" className="w-40 h-20 overflow-visible" shapeRendering="crispEdges">
+                      <defs>
+                        <linearGradient id="scanBeamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+                        </linearGradient>
+                        <filter id="laserGlowFilter" x="-30%" y="-30%" width="160%" height="160%">
+                          <feGaussianBlur stdDeviation="0.4" result="blur" />
+                        </filter>
+                      </defs>
 
-                        {/* Scanning Beam — symmetric fan from nose tip at (30.5, 5) */}
-                        <polygon
-                          points="30.5,5 40,-1 40,11"
-                          fill="url(#scanBeamGrad)"
-                          style={{ transformOrigin: "30.5px 5px" }}
-                          className="animate-[scanBeam_3s_ease-in-out_infinite_alternate] pointer-events-none"
-                        />
+                      {/* Scanning Beam — symmetric fan from nose tip at (30.5, 5) */}
+                      <polygon
+                        points="30.5,5 40,-1 40,11"
+                        fill="url(#scanBeamGrad)"
+                        style={{ transformOrigin: "30.5px 5px" }}
+                        className="animate-[scanBeam_3s_ease-in-out_infinite_alternate] pointer-events-none"
+                      />
 
-                        {/* Twin Ion Engine Plumes (symmetric: upper at y=4, lower at y=6) */}
-                        <g className="animate-pulse">
-                          <polygon points="-1,4 0,3 0,5" fill="rgba(6, 182, 212, 0.4)" />
-                          <line x1="-3" y1="4" x2="0" y2="4" stroke="#ffffff" strokeWidth="0.8" />
-                          <polygon points="-1,6 0,5 0,7" fill="rgba(6, 182, 212, 0.4)" />
-                          <line x1="-3" y1="6" x2="0" y2="6" stroke="#ffffff" strokeWidth="0.8" />
-                        </g>
+                      {/* Twin Ion Engine Plumes (symmetric: upper at y=4, lower at y=6) */}
+                      <g className="animate-pulse">
+                        <polygon points="-1,4 0,3 0,5" fill="rgba(6, 182, 212, 0.4)" />
+                        <line x1="-3" y1="4" x2="0" y2="4" stroke="#ffffff" strokeWidth="0.8" />
+                        <polygon points="-1,6 0,5 0,7" fill="rgba(6, 182, 212, 0.4)" />
+                        <line x1="-3" y1="6" x2="0" y2="6" stroke="#ffffff" strokeWidth="0.8" />
+                      </g>
 
-                        {/* Rear Engine Nozzles (symmetric: y=3-5 and y=5-7) */}
-                        <rect x="0" y="3" width="2" height="2" fill="#475569" />
-                        <rect x="0" y="3.5" width="1" height="1" fill="#1e293b" />
-                        <rect x="0" y="5" width="2" height="2" fill="#475569" />
-                        <rect x="0" y="5.5" width="1" height="1" fill="#1e293b" />
+                      {/* Rear Engine Nozzles (symmetric: y=3-5 and y=5-7) */}
+                      <rect x="0" y="3" width="2" height="2" fill="#475569" />
+                      <rect x="0" y="3.5" width="1" height="1" fill="#1e293b" />
+                      <rect x="0" y="5" width="2" height="2" fill="#475569" />
+                      <rect x="0" y="5.5" width="1" height="1" fill="#1e293b" />
 
-                        {/* ======= SHIP (bottom half, y=1.5 to y=8.5, slightly scaled up) ======= */}
-                        {/* Main chassis block */}
-                        <rect x="2" y="2.5" width="22" height="5" fill="#94a3b8" />
-                        {/* Top armored deck */}
-                        <rect x="4" y="1.5" width="16" height="1" fill="#cbd5e1" />
-                        {/* Bottom armor plate */}
-                        <rect x="4" y="7.5" width="14" height="1" fill="#475569" />
-                        {/* Blocky Nose Prow block */}
-                        <rect x="24" y="3" width="3.5" height="4" fill="#cbd5e1" />
-                        <polygon points="27.5,3.5 30.5,4.5 30.5,5.5 27.5,6.5" fill="#94a3b8" />
+                      {/* ======= SHIP (bottom half, y=1.5 to y=8.5, slightly scaled up) ======= */}
+                      {/* Main chassis block */}
+                      <rect x="2" y="2.5" width="22" height="5" fill="#94a3b8" />
+                      {/* Top armored deck */}
+                      <rect x="4" y="1.5" width="16" height="1" fill="#cbd5e1" />
+                      {/* Bottom armor plate */}
+                      <rect x="4" y="7.5" width="14" height="1" fill="#475569" />
+                      {/* Blocky Nose Prow block */}
+                      <rect x="24" y="3" width="3.5" height="4" fill="#cbd5e1" />
+                      <polygon points="27.5,3.5 30.5,4.5 30.5,5.5 27.5,6.5" fill="#94a3b8" />
 
-                        {/* Greebles & Windows */}
-                        <rect x="8" y="6" width="5" height="0.5" fill="#334155" />
-                        <rect x="15" y="6" width="4" height="0.5" fill="#334155" />
-                        <rect x="10" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
-                        <rect x="13.5" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
-                        <rect x="17" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
+                      {/* Greebles & Windows */}
+                      <rect x="8" y="6" width="5" height="0.5" fill="#334155" />
+                      <rect x="15" y="6" width="4" height="0.5" fill="#334155" />
+                      <rect x="10" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
+                      <rect x="13.5" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
+                      <rect x="17" y="3.5" width="1.5" height="0.6" fill="#38bdf8" />
 
-                        {/* Red Accent Stripe */}
-                        <rect x="6" y="4.5" width="12" height="1" fill="#ef4444" />
+                      {/* Red Accent Stripe */}
+                      <rect x="6" y="4.5" width="12" height="1" fill="#ef4444" />
 
-                        {/* Front Scanning Beam Emitter */}
-                        <rect x="30.5" y="4.7" width="2" height="0.6" fill="#38bdf8" />
+                      {/* Front Scanning Beam Emitter */}
+                      <rect x="30.5" y="4.7" width="2" height="0.6" fill="#38bdf8" />
 
-                        {/* Ventral Heavy Laser Cannon */}
-                        <g>
-                          {/* Cannon Base (Dark sloped armor) */}
-                          <path d="M 8.5,8.5 L 12.5,8.5 L 11.5,9.1 L 9.5,9.1 Z" fill="#334155" />
+                      {/* Ventral Heavy Laser Cannon */}
+                      <g>
+                        {/* Cannon Base (Dark sloped armor) */}
+                        <path d="M 8.5,8.5 L 12.5,8.5 L 11.5,9.1 L 9.5,9.1 Z" fill="#334155" />
 
-                          {/* Status LEDs on the turret base */}
-                          <rect x="9.8" y="8.7" width="0.5" height="0.3" fill="#06b6d4" />
-                          <rect x="11.2" y="8.7" width="0.5" height="0.3" fill="#ef4444" className="animate-pulse" />
+                        {/* Status LEDs on the turret base */}
+                        <rect x="9.8" y="8.7" width="0.5" height="0.3" fill="#06b6d4" />
+                        <rect x="11.2" y="8.7" width="0.5" height="0.3" fill="#ef4444" className="animate-pulse" />
 
-                          {/* Swivel Pivot */}
-                          <circle cx="10.5" cy="9.1" r="0.6" fill="#1e293b" />
+                        {/* Swivel Pivot */}
+                        <circle cx="10.5" cy="9.1" r="0.6" fill="#1e293b" />
 
-                          {/* Background Barrel (Shadow barrel) */}
-                          <line x1="11.0" y1="8.8" x2="14.5" y2="8.8" stroke="#1e293b" strokeWidth="0.8" strokeLinecap="round" />
-                          <circle cx="14.5" cy="8.8" r="0.35" fill="#ef4444" opacity="0.6" />
+                        {/* Background Barrel (Shadow barrel) */}
+                        <line x1="11.0" y1="8.8" x2="14.5" y2="8.8" stroke="#1e293b" strokeWidth="0.8" strokeLinecap="round" />
+                        <circle cx="14.5" cy="8.8" r="0.35" fill="#ef4444" opacity="0.6" />
 
-                          {/* Foreground Barrel */}
-                          <line x1="10.5" y1="9.2" x2="14.0" y2="9.2" stroke="#64748b" strokeWidth="0.8" strokeLinecap="round" />
-                          <circle cx="14.0" cy="9.2" r="0.4" fill="#ff4757" className="animate-pulse" />
-                        </g>
+                        {/* Foreground Barrel */}
+                        <line x1="10.5" y1="9.2" x2="14.0" y2="9.2" stroke="#64748b" strokeWidth="0.8" strokeLinecap="round" />
+                        <circle cx="14.0" cy="9.2" r="0.4" fill="#ff4757" className="animate-pulse" />
+                      </g>
 
-                        {/* Laser Bolt glow */}
-                        <line
-                          x1="14.0"
-                          y1="9.2"
-                          x2="48.0"
-                          y2="9.2"
-                          stroke="#ff0000"
-                          strokeWidth="1.2"
-                          strokeLinecap="round"
-                          strokeDasharray="8 40"
-                          filter="url(#laserGlowFilter)"
-                          className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
-                          style={{ opacity: 0.9 }}
-                        />
-                        {/* Laser Bolt core */}
-                        <line
-                          x1="14.0"
-                          y1="9.2"
-                          x2="48.0"
-                          y2="9.2"
-                          stroke="#ffffff"
-                          strokeWidth="0.4"
-                          strokeLinecap="round"
-                          strokeDasharray="8 40"
-                          className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
-                        />
+                      {/* Laser Bolt glow */}
+                      <line
+                        x1="14.0"
+                        y1="9.2"
+                        x2="48.0"
+                        y2="9.2"
+                        stroke="#ff0000"
+                        strokeWidth="1.2"
+                        strokeLinecap="round"
+                        strokeDasharray="8 40"
+                        filter="url(#laserGlowFilter)"
+                        className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
+                        style={{ opacity: 0.9 }}
+                      />
+                      {/* Laser Bolt core */}
+                      <line
+                        x1="14.0"
+                        y1="9.2"
+                        x2="48.0"
+                        y2="9.2"
+                        stroke="#ffffff"
+                        strokeWidth="0.4"
+                        strokeLinecap="round"
+                        strokeDasharray="8 40"
+                        className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
+                      />
 
-                        {/* ======= ASTRONAUT (upper area, y=-7 to y=-2, clearly above ship) ======= */}
-                        {/* Legs (trailing left, floating horizontal pose) */}
-                        <rect x="16" y="-4" width="2" height="1" fill="#1e293b" />
-                        <rect x="17" y="-3" width="2" height="1" fill="#1e293b" />
+                      {/* ======= ASTRONAUT (upper area, y=-7 to y=-2, clearly above ship) ======= */}
+                      {/* Legs (trailing left, floating horizontal pose) */}
+                      <rect x="16" y="-4" width="2" height="1" fill="#1e293b" />
+                      <rect x="17" y="-3" width="2" height="1" fill="#1e293b" />
 
-                        {/* Torso */}
-                        <rect x="18" y="-5" width="4" height="3" fill="#ea580c" />
-                        <rect x="19" y="-5" width="2" height="3" fill="#ff7849" />
+                      {/* Torso */}
+                      <rect x="18" y="-5" width="4" height="3" fill="#ea580c" />
+                      <rect x="19" y="-5" width="2" height="3" fill="#ff7849" />
 
-                        {/* Oxygen Tank (on back) */}
-                        <rect x="17" y="-5" width="1" height="2" fill="#475569" />
+                      {/* Oxygen Tank (on back) */}
+                      <rect x="17" y="-5" width="1" height="2" fill="#475569" />
 
-                        {/* Helmet & Visor (facing right toward Astrophage) */}
-                        <rect x="21" y="-7" width="3" height="3" fill="#ffffff" />
-                        <rect x="23" y="-7" width="1" height="3" fill="#fbbf24" />
+                      {/* Helmet & Visor (facing right toward Astrophage) */}
+                      <rect x="21" y="-7" width="3" height="3" fill="#ffffff" />
+                      <rect x="23" y="-7" width="1" height="3" fill="#fbbf24" />
 
-                        {/* Arm reaching right */}
-                        <rect x="22" y="-4" width="2" height="1" fill="#ea580c" />
-                        <rect x="24" y="-5" width="1" height="1" fill="#475569" />
+                      {/* Arm reaching right */}
+                      <rect x="22" y="-4" width="2" height="1" fill="#ea580c" />
+                      <rect x="24" y="-5" width="1" height="1" fill="#475569" />
 
-                        {/* Robotic Claw / Gripper (reaching toward Astrophage) */}
-                        <rect x="25" y="-6" width="1" height="1" fill="#475569" />
-                        <rect x="26" y="-7" width="1" height="1" fill="#475569" />
-                        <rect x="27" y="-7" width="1" height="1" fill="#94a3b8" />
-                        <rect x="28" y="-8" width="1" height="1" fill="#cbd5e1" />  {/* Upper pincer */}
-                        <rect x="29" y="-8" width="1" height="1" fill="#cbd5e1" />
-                        <rect x="28" y="-6" width="1" height="1" fill="#cbd5e1" />  {/* Lower pincer */}
-                        <rect x="29" y="-6" width="1" height="1" fill="#cbd5e1" />
+                      {/* Robotic Claw / Gripper (reaching toward Astrophage) */}
+                      <rect x="25" y="-6" width="1" height="1" fill="#475569" />
+                      <rect x="26" y="-7" width="1" height="1" fill="#475569" />
+                      <rect x="27" y="-7" width="1" height="1" fill="#94a3b8" />
+                      <rect x="28" y="-8" width="1" height="1" fill="#cbd5e1" />  {/* Upper pincer */}
+                      <rect x="29" y="-8" width="1" height="1" fill="#cbd5e1" />
+                      <rect x="28" y="-6" width="1" height="1" fill="#cbd5e1" />  {/* Lower pincer */}
+                      <rect x="29" y="-6" width="1" height="1" fill="#cbd5e1" />
 
-                        {/* Safety Tether — from deck (5, 1.5) curving up to the back of astronaut's body (attached to oxygen tank at 17.5, -4) */}
-                        <motion.path
-                          animate={{
-                            d: [
-                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 13,-1.5 15.5,-3.0 17.5,-4",
-                              "M 5,1.5 C 7,1.0 8,-1.5 10.5,-1.5 C 12.5,-1.5 15.0,-2.5 17.5,-4",
-                              "M 5,1.5 C 5,-0.8 9,-1.2 11.5,-2.5 C 13.5,-3.2 15.5,-2.8 17.5,-4",
-                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 13,-1.5 15.5,-3.0 17.5,-4"
-                            ]
-                          }}
-                          transition={{
-                            duration: 8,
-                            ease: "easeInOut",
-                            repeat: Infinity,
-                          }}
-                          fill="none"
-                          stroke="#94a3b8"
-                          strokeWidth="0.5"
-                          strokeDasharray="1 1"
-                        />
+                      {/* Safety Tether — from deck (5, 1.5) curving up to the back of astronaut's body (attached to oxygen tank at 17.5, -4) */}
+                      <motion.path
+                        animate={{
+                          d: [
+                            "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 13,-1.5 15.5,-3.0 17.5,-4",
+                            "M 5,1.5 C 7,1.0 8,-1.5 10.5,-1.5 C 12.5,-1.5 15.0,-2.5 17.5,-4",
+                            "M 5,1.5 C 5,-0.8 9,-1.2 11.5,-2.5 C 13.5,-3.2 15.5,-2.8 17.5,-4",
+                            "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 13,-1.5 15.5,-3.0 17.5,-4"
+                          ]
+                        }}
+                        transition={{
+                          duration: 8,
+                          ease: "easeInOut",
+                          repeat: Infinity,
+                        }}
+                        fill="none"
+                        stroke="#94a3b8"
+                        strokeWidth="0.5"
+                        strokeDasharray="1 1"
+                      />
 
-                        {/* ======= ASTROPHAGE (far right, shifted by +2x, +2y) ======= */}
-                        <g className="animate-[microbeWiggle_0.8s_ease-in-out_infinite_alternate]" style={{ transformOrigin: "37.5px -5px" }}>
-                          {/* Glowing Gold Aura */}
-                          <circle cx="37.5" cy="-5" r="3.5" fill="rgba(245, 158, 11, 0.25)" />
+                      {/* ======= ASTROPHAGE (far right, shifted by +2x, +2y) ======= */}
+                      <g className="animate-[microbeWiggle_0.8s_ease-in-out_infinite_alternate]" style={{ transformOrigin: "37.5px -5px" }}>
+                        {/* Glowing Gold Aura */}
+                        <circle cx="37.5" cy="-5" r="3.5" fill="rgba(245, 158, 11, 0.25)" />
 
-                          {/* Main Astrophage Body */}
-                          <rect x="36" y="-6" width="3" height="3" fill="#fbbf24" rx="0.5" />
-                          <rect x="37" y="-6" width="1" height="1" fill="#ffffff" />
-                          <rect x="37" y="-5" width="1" height="1" fill="#ea580c" />
+                        {/* Main Astrophage Body */}
+                        <rect x="36" y="-6" width="3" height="3" fill="#fbbf24" rx="0.5" />
+                        <rect x="37" y="-6" width="1" height="1" fill="#ffffff" />
+                        <rect x="37" y="-5" width="1" height="1" fill="#ea580c" />
 
-                          {/* Cilia */}
-                          <rect x="35" y="-5" width="1" height="1" fill="#f59e0b" />
-                          <rect x="39" y="-5" width="1" height="1" fill="#f59e0b" />
-                          <rect x="37" y="-7" width="1" height="1" fill="#f59e0b" />
-                          <rect x="37" y="-3" width="1" height="1" fill="#f59e0b" />
+                        {/* Cilia */}
+                        <rect x="35" y="-5" width="1" height="1" fill="#f59e0b" />
+                        <rect x="39" y="-5" width="1" height="1" fill="#f59e0b" />
+                        <rect x="37" y="-7" width="1" height="1" fill="#f59e0b" />
+                        <rect x="37" y="-3" width="1" height="1" fill="#f59e0b" />
 
-                          {/* Eyes */}
-                          <rect x="37" y="-6" width="1" height="1" fill="#ffffff" />
-                          <rect x="38" y="-6" width="1" height="1" fill="#ffffff" />
-                          <rect x="37" y="-5" width="1" height="1" fill="#000000" />
-                          <rect x="38" y="-5" width="1" height="1" fill="#000000" />
-                        </g>
-                      </svg>
-                    </div>
+                        {/* Eyes */}
+                        <rect x="37" y="-6" width="1" height="1" fill="#ffffff" />
+                        <rect x="38" y="-6" width="1" height="1" fill="#ffffff" />
+                        <rect x="37" y="-5" width="1" height="1" fill="#000000" />
+                        <rect x="38" y="-5" width="1" height="1" fill="#000000" />
+                      </g>
+                    </svg>
                   </div>
                 </div>
-
-                {/* Visual Label */}
-                <div className="relative z-10">
-                  <div className="font-serif text-white font-bold text-lg leading-tight">Xuan Tung Hoang</div>
-                  <div className="font-mono text-cyan-200 text-[10px] uppercase tracking-widest mt-1">Undergraduate, Bioengineering</div>
-                </div>
               </div>
-            ) : (
-              /* High-fidelity Photo fallback interface */
-              <div className="w-full h-full bg-slate-200 relative flex flex-col justify-end p-4 rounded-[0.125rem] overflow-hidden group">
-                <img
-                  src="/assets/images/profile_pic.png"
-                  alt="Xuan Tung Hoang"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
 
-                <div className="relative z-10 bg-slate-900/85 backdrop-blur-sm p-3 border border-slate-700">
-                  <div className="font-serif text-white font-bold text-sm">Xuan Tung Hoang</div>
-                  <div className="font-mono text-slate-300 text-[9px] uppercase tracking-wider">Undergraduate, Bioengineering</div>
-                </div>
+              {/* Visual Label */}
+              <div className="relative z-10">
+                <div className="font-serif text-white font-bold text-lg leading-tight">Xuan Tung Hoang</div>
+                <div className="font-mono text-cyan-200 text-[10px] uppercase tracking-widest mt-1">Undergraduate, Bioengineering</div>
               </div>
-            )}
+            </div>
           </motion.div>
         </div>
       </div>

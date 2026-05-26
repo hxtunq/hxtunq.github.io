@@ -11,7 +11,7 @@ interface FooterProps {
 
 export default function Footer({ onLinkHighlight }: FooterProps) {
   return (
-    <footer className="w-full bg-brand-surface-highest/60 border-t border-brand-surface-highest mt-6">
+    <footer className="w-full bg-brand-surface-highest/60 border-t border-brand-surface-highest">
       <div className="max-w-container-max mx-auto px-4 md:px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-6">
         {/* Left Side: Serif Wordmark */}
         <div className="font-serif font-bold text-xl text-brand-primary tracking-tight">
