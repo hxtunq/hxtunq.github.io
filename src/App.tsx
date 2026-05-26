@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Search,
@@ -29,11 +29,51 @@ import { blogPosts } from "./lib/blog-loader";
 import { SelectedPublication, BlogPost } from "./types";
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"home" | "blog" | "bookdown">("home");
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [contactOpen, setContactOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Sync state with browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const navigate = (path: string) => {
+    if (window.location.pathname !== path) {
+      window.history.pushState(null, "", path);
+      setCurrentPath(path);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Derive activeTab from currentPath
+  const getActiveTab = (path: string): "home" | "blog" | "bookdown" => {
+    const cleanPath = path.replace(/^\/+|\/+$/g, "");
+    if (cleanPath.startsWith("blog") || cleanPath.startsWith("post/")) {
+      return "blog";
+    }
+    if (cleanPath.startsWith("bookdown")) {
+      return "bookdown";
+    }
+    return "home";
+  };
+
+  const activeTab = getActiveTab(currentPath);
+
+  const isBookdownReader = useMemo(() => {
+    const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
+    if (cleanPath.startsWith("bookdown/")) {
+      const parts = cleanPath.substring("bookdown/".length).split("/");
+      return !!parts[0];
+    }
+    return false;
+  }, [currentPath]);
 
   // Trigger quick interactive notification
   const triggerToast = (message: string) => {
@@ -73,15 +113,17 @@ export default function App() {
       </AnimatePresence>
 
       {/* FIXED NAVIGATION HEADER */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        onContactClick={() => setContactOpen(true)}
-        onSearchToggle={() => setSearchOpen(true)}
-      />
+      {!isBookdownReader && (
+        <Navbar
+          activeTab={activeTab}
+          onNavigate={navigate}
+          onContactClick={() => setContactOpen(true)}
+          onSearchToggle={() => setSearchOpen(true)}
+        />
+      )}
 
       {/* PRIMARY VIEWER PORTAL */}
-      <main className="flex-1 pt-20">
+      <main className={`flex-1 ${isBookdownReader ? "pt-0" : "pt-20"}`}>
         <AnimatePresence mode="wait">
           {activeTab === "home" && (
             <motion.div
@@ -92,10 +134,7 @@ export default function App() {
               transition={{ duration: 0.3 }}
             >
               <HomeView
-                setActiveTab={(tab) => {
-                  setActiveTab(tab);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                onNavigate={navigate}
                 onContactClick={() => setContactOpen(true)}
               />
             </motion.div>
@@ -110,6 +149,8 @@ export default function App() {
               transition={{ duration: 0.3 }}
             >
               <BlogView
+                currentPath={currentPath}
+                navigate={navigate}
                 onContactClick={() => setContactOpen(true)}
                 onLinkHighlight={() => triggerToast("NAVIGATING OUTSIDE SANDBOX")}
               />
@@ -124,14 +165,19 @@ export default function App() {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
             >
-              <BookdownView />
+              <BookdownView
+                currentPath={currentPath}
+                navigate={navigate}
+              />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
       {/* FOOTER Wordmark & Profiles links */}
-      <Footer onLinkHighlight={() => triggerToast("OPENING ACCAL REPO LINK")} />
+      {!isBookdownReader && (
+        <Footer onLinkHighlight={() => triggerToast("OPENING ACCAL REPO LINK")} />
+      )}
 
       {/* COLLABORATIVE CONTACT DIALOGUE FORM */}
       <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
@@ -249,11 +295,9 @@ export default function App() {
                               </div>
                               <button
                                 onClick={() => {
-                                  setActiveTab("blog");
+                                  navigate(`/post/${post.id}`);
                                   setSearchOpen(false);
                                   setGlobalSearchQuery("");
-                                  // This immediately displays active blog inside list
-                                  window.scrollTo({ top: 0, behavior: "smooth" });
                                 }}
                                 className="font-sans text-[9px] font-bold tracking-widest uppercase text-brand-primary border border-brand-primary bg-white hover:bg-brand-primary hover:text-white px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
                               >

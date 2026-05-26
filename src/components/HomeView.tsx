@@ -25,11 +25,11 @@ import { focusItems, selectedPublications } from "../data";
 import { SelectedPublication } from "../types";
 
 interface HomeViewProps {
-  setActiveTab: (tab: "home" | "blog" | "bookdown") => void;
+  onNavigate: (path: string) => void;
   onContactClick: () => void;
 }
 
-export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps) {
+export default function HomeView({ onNavigate, onContactClick }: HomeViewProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showCV, setShowCV] = useState(false);
   const [themeMode, setThemeMode] = useState<"abstract" | "custom">("abstract");
@@ -383,29 +383,6 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                           className="animate-[laserBolt_4s_linear_infinite] pointer-events-none"
                         />
 
-                        {/* Safety Tether — from deck (5, 1.5) curving up to the center of astronaut's body */}
-                        <motion.path
-                          animate={{
-                            d: [
-                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 14,-1.5 17,-2.8 20,-3.5",
-                              "M 5,1.5 C 7,1.0 8,-1.5 10.5,-1.5 C 13.5,-1.5 16.5,-2.0 20,-3.5",
-                              "M 5,1.5 C 5,-0.8 9,-1.2 11.5,-2.5 C 14,-3.8 17,-2.0 20,-3.5",
-                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 14,-1.5 17,-2.8 20,-3.5"
-                            ]
-                          }}
-                          transition={{
-                            duration: 8,
-                            ease: "easeInOut",
-                            repeat: Infinity,
-                          }}
-                          fill="none"
-                          stroke="#94a3b8"
-                          strokeWidth="0.5"
-                          strokeDasharray="1 1"
-                        />
-
-
-
                         {/* ======= ASTRONAUT (upper area, y=-7 to y=-2, clearly above ship) ======= */}
                         {/* Legs (trailing left, floating horizontal pose) */}
                         <rect x="16" y="-4" width="2" height="1" fill="#1e293b" />
@@ -434,6 +411,27 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
                         <rect x="29" y="-8" width="1" height="1" fill="#cbd5e1" />
                         <rect x="28" y="-6" width="1" height="1" fill="#cbd5e1" />  {/* Lower pincer */}
                         <rect x="29" y="-6" width="1" height="1" fill="#cbd5e1" />
+
+                        {/* Safety Tether — from deck (5, 1.5) curving up to the back of astronaut's body (attached to oxygen tank at 17.5, -4) */}
+                        <motion.path
+                          animate={{
+                            d: [
+                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 13,-1.5 15.5,-3.0 17.5,-4",
+                              "M 5,1.5 C 7,1.0 8,-1.5 10.5,-1.5 C 12.5,-1.5 15.0,-2.5 17.5,-4",
+                              "M 5,1.5 C 5,-0.8 9,-1.2 11.5,-2.5 C 13.5,-3.2 15.5,-2.8 17.5,-4",
+                              "M 5,1.5 C 6,0.2 9,-2.5 11,-2 C 13,-1.5 15.5,-3.0 17.5,-4"
+                            ]
+                          }}
+                          transition={{
+                            duration: 8,
+                            ease: "easeInOut",
+                            repeat: Infinity,
+                          }}
+                          fill="none"
+                          stroke="#94a3b8"
+                          strokeWidth="0.5"
+                          strokeDasharray="1 1"
+                        />
 
                         {/* ======= ASTROPHAGE (far right, shifted by +2x, +2y) ======= */}
                         <g className="animate-[microbeWiggle_0.8s_ease-in-out_infinite_alternate]" style={{ transformOrigin: "37.5px -5px" }}>
@@ -622,7 +620,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
             Selected Publications
           </h2>
           <button
-            onClick={() => setActiveTab("blog")}
+            onClick={() => onNavigate("/blog")}
             className="group flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-secondary hover:text-brand-primary transition-colors cursor-pointer"
           >
             <span>All Articles</span>
@@ -698,7 +696,7 @@ export default function HomeView({ setActiveTab, onContactClick }: HomeViewProps
 
         <div className="mt-10 text-center">
           <button
-            onClick={() => setActiveTab("blog")}
+            onClick={() => onNavigate("/blog")}
             className="group inline-flex items-center gap-2 font-sans font-bold text-xs tracking-wider uppercase text-brand-primary border-b border-brand-primary pb-1 outline-none cursor-pointer hover:border-transparent transition-all"
           >
             <span>View Full Publication List</span>

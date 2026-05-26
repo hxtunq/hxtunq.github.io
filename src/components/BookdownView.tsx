@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Search,
   Book,
-  ArrowLeft,
   ChevronRight,
   GitBranch,
   Dna,
@@ -16,28 +15,123 @@ import {
   Terminal,
   Bug,
   LayoutGrid,
-  Copy,
-  CheckCircle2,
   BookOpenText,
-  Bookmark
+  Home,
+  Github,
+  Linkedin
 } from "lucide-react";
-import { bookItems } from "../data";
-import { BookItem } from "../types";
+import { bookItems } from "../lib/book-loader";
+import { RenderMarkdown, parseMarkdown, slugify, highlightBashCode } from "../lib/markdown";
 
-export default function BookdownView() {
+interface BookdownViewProps {
+  currentPath: string;
+  navigate: (path: string) => void;
+}
+
+export default function BookdownView({ currentPath, navigate }: BookdownViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBook, setSelectedBook] = useState<BookItem | null>(null);
-  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
-  const [copiedCitation, setCopiedCitation] = useState(false);
+  const [activeLanguage, setActiveLanguage] = useState<string | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [bookSearchQuery, setBookSearchQuery] = useState("");
+
+  // Derive bookId and chapterId from currentPath
+  const pathParts = useMemo(() => {
+    const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
+    if (cleanPath.startsWith("bookdown/")) {
+      const parts = cleanPath.substring("bookdown/".length).split("/");
+      return {
+        bookId: parts[0] || null,
+        chapterId: parts[1] || null
+      };
+    }
+    return { bookId: null, chapterId: null };
+  }, [currentPath]);
+
+  const selectedBook = useMemo(() => {
+    if (!pathParts.bookId) return null;
+    return bookItems.find((b) => b.id === pathParts.bookId) || null;
+  }, [pathParts.bookId]);
+
+  const activePage = useMemo(() => {
+    if (!selectedBook) return null;
+    if (!pathParts.chapterId) return selectedBook.chapters[0] || null;
+
+    for (const chap of selectedBook.chapters) {
+      if (chap.id === pathParts.chapterId) return chap;
+      if (chap.subsections) {
+        const found = chap.subsections.find((s) => s.id === pathParts.chapterId);
+        if (found) return found;
+      }
+    }
+    return selectedBook.chapters[0] || null;
+  }, [selectedBook, pathParts.chapterId]);
+
+  const expandedRootId = useMemo(() => {
+    if (!activePage) return null;
+    return activePage.parentId || activePage.id;
+  }, [activePage]);
+
+  const flatPages = useMemo(() => {
+    if (!selectedBook) return [];
+    const list: any[] = [];
+    selectedBook.chapters.forEach((chap) => {
+      list.push(chap);
+      if (chap.subsections) {
+        list.push(...chap.subsections);
+      }
+    });
+    return list;
+  }, [selectedBook]);
+
+  const activePageIndex = useMemo(() => {
+    if (!activePage || flatPages.length === 0) return 0;
+    return flatPages.findIndex((p) => p.id === activePage.id);
+  }, [activePage, flatPages]);
+
+  // Filter chapters list based on local book search query
+  const filteredChapters = useMemo(() => {
+    if (!bookSearchQuery) return selectedBook?.chapters || [];
+
+    const results: any[] = [];
+    selectedBook?.chapters.forEach((chap) => {
+      const matchRoot = chap.title.toLowerCase().includes(bookSearchQuery.toLowerCase()) ||
+                        chap.contents.toLowerCase().includes(bookSearchQuery.toLowerCase());
+
+      const matchedSubs = chap.subsections?.filter((sub) =>
+        sub.title.toLowerCase().includes(bookSearchQuery.toLowerCase()) ||
+        sub.contents.toLowerCase().includes(bookSearchQuery.toLowerCase())
+      ) || [];
+
+      if (matchRoot || matchedSubs.length > 0) {
+        results.push({
+          ...chap,
+          subsections: matchedSubs
+        });
+      }
+    });
+    return results;
+  }, [selectedBook, bookSearchQuery]);
+
+  const languagesList = useMemo(() => {
+    const stats: Record<string, number> = {};
+    bookItems.forEach((book) => {
+      const lang = book.language || "English";
+      stats[lang] = (stats[lang] || 0) + 1;
+    });
+    return stats;
+  }, []);
 
   const filteredBooks = useMemo(() => {
     return bookItems.filter((book) => {
-      return (
+      const matchesSearch =
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.description.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+        book.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesLanguage = activeLanguage
+        ? (book.language || "English").toLowerCase() === activeLanguage.toLowerCase()
+        : true;
+      return matchesSearch && matchesLanguage;
     });
-  }, [searchQuery]);
+  }, [searchQuery, activeLanguage]);
 
   const getBookIcon = (iconName: string) => {
     switch (iconName) {
@@ -77,70 +171,12 @@ export default function BookdownView() {
     }
   };
 
-  // Pre-compiled chapter contents simulating a high-end educational tool
-  const getSimulatedChapterContent = (bookId: string, chapterIndex: number) => {
-    const defaultText = {
-      title: "Module Overview & Setup",
-      contents: "This section configures local pipelines. Ensure your system meets the minimum hardware spec (16GB RAM recommended for large indices). We will load required modules, import environment configuration files, and initialize test data streams to verify compilation paths.",
-      code: "# Setup terminal parameters\nexport METAGENOMICS_PATH=/opt/bioinformatics/bin\nexport PATH=$PATH:$METAGENOMICS_PATH\n\n# Test compilation path\nbio_tool --version"
-    };
 
-    const datasets: Record<string, typeof defaultText[]> = {
-      "book-1": [
-        {
-          title: "Introduction to Shotgun Sequencing",
-          contents: "Shotgun metagenomics provides an untargeted window into the entire genomic content of a microbial community. Unlike 16S amplicon profiling, shotgun datasets capture partial sequences representing viral, bacterial, and eukaryotic kingdoms alike. Users must handle massive volume, requiring optimized fastaq/bam pipelines.",
-          code: "# Download raw FASTQ test assets\nwget https://data.microbiome-hub.org/samples/mock_community_R1.fastq.gz\nwget https://data.microbiome-hub.org/samples/mock_community_R2.fastq.gz"
-        },
-        {
-          title: "Quality Control & Adapter Trimming",
-          contents: "Raw reads contain PCR adapters, priming artifacts, and low-quality bases. We leverage FastQC for visual analysis, and configure Trimmomatic layers to drop low score bases under Q20 from the ends, with a sliding-window cut size.",
-          code: "# Run quality-control pipeline\nfastqc mock_community_R1.fastq.gz\n\n# Execute Trimmomatic base cleanup\njava -jar trimmomatic.jar PE mock_community_R1.fastq.gz mock_community_R2.fastq.gz \\\n  paired_R1_clean.fq unpaired_R1.fq paired_R2_clean.fq unpaired_R2.fq \\\n  ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 LEADING:3 TRAILING:3 SLIDINGWINDOW:4:20 MINLEN:36"
-        },
-        {
-          title: "Taxonomic Profiling Protocols",
-          contents: "Identifying 'who' is in the sample. We run Kraken2 against a compressed Standard database, mapping reads directly to taxonomic clades. Results will be saved into classified and unclassified text tables.",
-          code: "# Run classification using Kraken2 databases\nkraken2 --db /databases/standard_kraken2 \\\n  --paired paired_R1_clean.fq paired_R2_clean.fq \\\n  --output sample_kraken.out \\\n  --report sample_report.txt"
-        }
-      ],
-      "book-2": [
-        {
-          title: "Probability Theory Foundations",
-          contents: "Statistical inference transitions us from observing sample dynamics to identifying core latent populations. This chapter establishes the axioms of probability, cumulative distribution functions, and discrete distributions (Poisson, Binomial) critical in digital counting systems.",
-          code: "# R Script distribution generation\nx <- seq(0, 50, by = 1)\ny_poisson <- dpois(x, lambda = 12)\n\n# Quick visual validation plot\nplot(x, y_poisson, type='h', col='navy', lwd=2,\n     main='Poisson Count Probability Curve')"
-        },
-        {
-          title: "Hypothesis Testing Paradigms",
-          contents: "We evaluate empirical samples against Null distributions. In this chapter we break down Type I and Type II testing errors, define statistical power curves, and configure manual ANOVA computations on social questionnaires.",
-          code: "# Run student t-test on biological vectors\ntreatment <- c(10.2, 11.4, 12.1, 9.8, 11.0)\ncontrol   <- c(8.5, 9.2, 9.0, 10.1, 8.8)\n\nt.test(treatment, control, var.equal=TRUE)"
-        }
-      ]
-    };
 
-    const bookData = datasets[bookId];
-    if (bookData && bookData[chapterIndex]) {
-      return bookData[chapterIndex];
-    }
-    
-    // Fallback automatic generator
-    const chapterName = selectedBook?.chapters[chapterIndex] || "Module Content";
-    return {
-      title: chapterName,
-      contents: `In this section of "${selectedBook?.title}", we dive deeply into theoretical frameworks, architectural rules, and operational strategies. By defining structural conditions, we compile reproducible methodologies that withstand peer scrutiny. Standard setups involve referencing our helper classes before configuring the core analytical block.`,
-      code: `# Standard automated pipeline execution\npython -m ${bookId.replace("-", "_")}_pipeline \\\n  --chapter_idx ${chapterIndex} \\\n  --mode production \\\n  --export_pdf`
-    };
-  };
-
-  const handleCopyCitation = (bookTitle: string) => {
-    navigator.clipboard.writeText(`Sterling, E. (2025). ${bookTitle}: An Open-Source Interactive Tutorial. Academic Lab Bookdowns. https://bookdown.sterling-lab.org/`);
-    setCopiedCitation(true);
-    setTimeout(() => setCopiedCitation(false), 2000);
-  };
-
-  const currentChapter = selectedBook ? getSimulatedChapterContent(selectedBook.id, activeChapterIndex) : null;
+  const currentChapter = activePage;
 
   return (
-    <div className="max-w-container-max mx-auto px-4 md:px-6 py-12">
+    <div className={selectedBook ? "w-full bg-brand-surface-lowest" : "max-w-container-max mx-auto px-4 md:px-6 py-12"}>
       <AnimatePresence mode="wait">
         {!selectedBook ? (
           /* =========================================================
@@ -172,12 +208,42 @@ export default function BookdownView() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter online manuals..."
-                  className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none py-3 pl-10 pr-4 text-xs font-sans tracking-wide text-brand-on-surface transition-all placeholder:text-brand-on-surface-variant/40"
+                  className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none py-3.5 pl-10 pr-4 text-xs font-sans tracking-wide text-brand-on-surface transition-all placeholder:text-brand-on-surface-variant/40"
                 />
               </div>
             </div>
 
             <div className="w-full h-[1px] bg-brand-surface-highest"></div>
+
+            {/* Languages Pills */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setActiveLanguage(null)}
+                className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${
+                  activeLanguage === null
+                    ? "border-brand-primary bg-brand-primary text-white font-bold"
+                    : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
+                }`}
+              >
+                All Languages
+              </button>
+              {Object.entries(languagesList).map(([langName, count]) => {
+                const isActive = activeLanguage === langName;
+                return (
+                  <button
+                    key={langName}
+                    onClick={() => setActiveLanguage(isActive ? null : langName)}
+                    className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${
+                      isActive
+                        ? "border-brand-primary bg-brand-primary text-white font-bold"
+                        : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
+                    }`}
+                  >
+                    {langName} ({count})
+                  </button>
+                );
+              })}
+            </div>
 
             {/* Grid structure of books */}
             {filteredBooks.length === 0 ? (
@@ -204,9 +270,16 @@ export default function BookdownView() {
                           <div className="font-mono text-[9px] tracking-widest text-brand-secondary uppercase">
                             BOOKDOWN MANUAL
                           </div>
-                          <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70">
-                            {book.chapters.length} CHAPTERS
-                          </span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70">
+                              {book.chapters.length} CHAPTERS
+                            </span>
+                            {book.language && (
+                              <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-secondary/80 font-bold uppercase">
+                                {book.language}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -224,8 +297,8 @@ export default function BookdownView() {
                     {/* Bookdown Link */}
                     <button
                       onClick={() => {
-                        setSelectedBook(book);
-                        setActiveChapterIndex(0);
+                        const firstChapter = book.chapters[0];
+                        navigate(`/bookdown/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
                       }}
                       className="group flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-primary outline-none cursor-pointer border-b border-transparent hover:border-brand-primary pb-0.5 w-fit mt-2 transition-all"
                     >
@@ -243,152 +316,218 @@ export default function BookdownView() {
              ========================================================= */
           <motion.div
             key="ebook-reader"
-            initial={{ opacity: 0, scale: 0.99 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="border border-brand-surface-highest bg-brand-surface-lowest grid grid-cols-1 md:grid-cols-12 min-h-[600px]"
+            className="bg-brand-surface-lowest flex flex-col h-screen overflow-hidden"
           >
-            {/* Left Hand: Book chapters index listing hierarchy (Cols 4) */}
-            <div className="md:col-span-4 bg-brand-surface-low border-b md:border-b-0 md:border-r border-brand-surface-highest p-6 flex flex-col justify-between">
-              <div>
-                {/* Back link to books catalog */}
+            {/* Top Header Bar */}
+            <div className="h-12 border-b border-brand-surface-highest flex items-center justify-between w-full bg-brand-surface-lowest shrink-0 select-none">
+              {/* Left Header segment (above sidebar) */}
+              <div className="hidden md:flex w-[300px] shrink-0 border-r border-brand-surface-highest h-full items-center px-6 bg-brand-surface-low">
                 <button
-                  onClick={() => setSelectedBook(null)}
-                  className="flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-secondary hover:text-brand-primary transition-colors mb-8 cursor-pointer"
+                  onClick={() => navigate(`/bookdown/${selectedBook.id}/${selectedBook.chapters[0]?.id}`)}
+                  className="font-serif font-bold text-[16px] tracking-tight text-black truncate cursor-pointer w-full text-left outline-none hover:text-sky-600 transition-colors"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
-                  <span>Books Catalog</span>
+                  {selectedBook.title}
                 </button>
-
-                {/* Book specifications header */}
-                <div className="mb-8">
-                  <div className="font-mono text-[9px] text-brand-secondary tracking-widest uppercase mb-1">
-                    ACTIVE LIBRARY
-                  </div>
-                  <h2 className="font-serif font-bold text-xl text-brand-primary leading-snug">
-                    {selectedBook.title}
-                  </h2>
-                </div>
-
-                {/* Table of Chapters list */}
-                <div className="space-y-1.5">
-                  <div className="font-sans text-[10px] font-bold text-brand-on-surface-variant/45 tracking-widest uppercase mb-2">
-                    Chapters List
-                  </div>
-                  <div className="space-y-1">
-                    {selectedBook.chapters.map((chap, idx) => (
-                      <button
-                        key={chap}
-                        onClick={() => setActiveChapterIndex(idx)}
-                        className={`w-full text-left font-sans text-xs px-3 py-2.5 transition-colors border-l-2 flex items-center gap-2 cursor-pointer ${
-                          activeChapterIndex === idx
-                            ? "bg-brand-surface-lowest text-brand-primary font-bold border-brand-primary"
-                            : "text-brand-on-surface-variant border-transparent hover:bg-brand-surface-lowest/40"
-                        }`}
-                      >
-                        <Bookmark className={`w-3.5 h-3.5 shrink-0 ${activeChapterIndex === idx ? "text-brand-primary" : "text-brand-on-surface-variant/30"}`} />
-                        <span className="truncate">{chap}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
 
-              {/* Bottom quick citation copy action */}
-              <div className="pt-6 border-t border-brand-surface-highest mt-8 space-y-3">
-                <button
-                  onClick={() => handleCopyCitation(selectedBook.title)}
-                  className="w-full flex items-center justify-center gap-2 font-mono text-[10px] tracking-wider text-brand-on-surface border border-brand-surface-highest hover:bg-white hover:border-brand-primary py-2.5 px-3 transition-all cursor-pointer"
-                >
-                  {copiedCitation ? (
-                    <>
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Citation Copied!</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-3.5 h-3.5 text-brand-secondary" />
-                      <span>Copy Cite Vector</span>
-                    </>
+              {/* Right Header segment (above content canvas) */}
+              <div className="flex-1 flex items-center justify-between px-6 h-full">
+                {/* Left Group: Navigation & Search */}
+                <div className="flex items-center gap-4">
+                  {/* Catalog / Home link */}
+                  <button
+                    onClick={() => navigate("/bookdown")}
+                    title="Books Catalog"
+                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
+                  >
+                    <Home className="w-[18px] h-[18px]" />
+                  </button>
+
+                  {/* Local search within Bookdown */}
+                  <button
+                    onClick={() => setShowSearch(!showSearch)}
+                    title="Search book..."
+                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
+                  >
+                    <Search className="w-[18px] h-[18px]" />
+                  </button>
+
+                  {/* Inline search input */}
+                  {showSearch && (
+                    <input
+                      type="text"
+                      value={bookSearchQuery}
+                      onChange={(e) => setBookSearchQuery(e.target.value)}
+                      placeholder="Tìm kiếm trong sách..."
+                      autoFocus
+                      className="bg-brand-surface-low border border-brand-surface-highest focus:border-sky-500 outline-none text-xs px-2.5 py-1 rounded w-[180px] text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-all font-sans"
+                    />
                   )}
-                </button>
-                <div className="text-center">
-                  <span className="font-sans text-[10px] text-brand-on-surface-variant/40">
-                    Open-Source Bookdown Academic License
+                </div>
+
+                {/* Right Group: Social Media */}
+                <div className="flex items-center gap-4">
+                  <a
+                    href="https://linkedin.com/in/hxtunq"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="LinkedIn Profile"
+                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors"
+                  >
+                    <Linkedin className="w-[18px] h-[18px]" />
+                  </a>
+                  <a
+                    href="https://github.com/hxtunq"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="GitHub Profile"
+                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors"
+                  >
+                    <Github className="w-[18px] h-[18px]" />
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Main content grid split */}
+            <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+              {/* Left Hand: Book chapters index listing hierarchy */}
+              <div className="w-full md:w-[300px] shrink-0 bg-brand-surface-low border-b md:border-b-0 md:border-r border-brand-surface-highest flex flex-col h-[350px] md:h-full overflow-hidden">
+                {/* Scrollable list */}
+                <div className="flex-1 p-6 overflow-y-auto scrollbar-subtle">
+                  {/* Table of Chapters list */}
+                  <div className="space-y-1">
+                    <div className="space-y-1.5">
+                      {filteredChapters.map((chap) => {
+                        const isRootActive = activePage?.id === chap.id;
+
+                        return (
+                          <div key={chap.id} className="space-y-0.5">
+                            <button
+                              onClick={() => navigate(`/bookdown/${selectedBook.id}/${chap.id}`)}
+                              className={`w-full text-left font-sans text-[13px] px-2 py-1 transition-colors block cursor-pointer truncate ${
+                                isRootActive
+                                  ? "text-sky-600 font-semibold"
+                                  : "text-brand-on-surface font-normal hover:text-sky-600"
+                              }`}
+                            >
+                              {chap.title}
+                            </button>
+
+                            {/* Subsections list (always visible, fully expanded) */}
+                            {chap.subsections && chap.subsections.length > 0 && (
+                              <div className="space-y-0.5">
+                                {chap.subsections.map((sub) => {
+                                  const isSubActive = activePage?.id === sub.id;
+
+                                  return (
+                                    <button
+                                      key={sub.id}
+                                      onClick={() => navigate(`/bookdown/${selectedBook.id}/${sub.id}`)}
+                                      className={`w-full text-left font-sans text-[13px] pl-6 pr-2 py-0.5 transition-colors block cursor-pointer truncate ${
+                                        isSubActive
+                                          ? "text-sky-600 font-semibold"
+                                          : "text-brand-on-surface font-normal hover:text-sky-600"
+                                      }`}
+                                    >
+                                      {sub.title}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom sidebar footer */}
+                <div className="border-t border-brand-surface-highest flex items-center bg-brand-surface-low/30 p-4 shrink-0 w-full">
+                  <span className="font-sans text-[10px] text-brand-on-surface-variant/40 uppercase tracking-wider font-medium">
+                    © 2026 Xuan Tung Hoang
                   </span>
                 </div>
               </div>
-            </div>
 
-            {/* Right Hand: Sub-document scrolling reader canvas (Cols 8) */}
-            <div className="md:col-span-8 p-6 md:p-10 flex flex-col justify-between">
-              {currentChapter ? (
-                <div className="space-y-6">
-                  {/* Heading header title */}
-                  <div className="border-b border-brand-surface-highest pb-4 flex items-center justify-between">
-                    <span className="font-mono text-[10px] text-brand-secondary">
-                      Section {activeChapterIndex + 1}
-                    </span>
-                    <span className="font-sans text-[10px] bg-brand-surface-low border border-brand-surface-highest text-brand-on-surface-variant px-2.5 py-0.5">
-                      COMPUTATION_READY
-                    </span>
-                  </div>
+            {/* Right Hand: Sub-document scrolling reader canvas */}
+            <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+              {/* Scrollable content container */}
+              <div className="flex-1 p-6 md:p-10 overflow-y-auto">
+                {currentChapter ? (
+                  <div className="space-y-6 max-w-3xl w-full mx-auto">
 
-                  <h3 className="font-serif font-bold text-2xl text-brand-primary tracking-tight">
-                    {currentChapter.title}
-                  </h3>
 
-                  {/* Body text content */}
-                  <p className="font-sans text-sm text-brand-on-surface-variant leading-relaxed">
-                    {currentChapter.contents}
-                  </p>
+                    <h3 className="font-serif font-bold text-2xl text-brand-primary tracking-tight">
+                      {currentChapter.title}
+                    </h3>
 
-                  {/* Dynamic coding exercises window */}
-                  <div className="border border-brand-surface-highest bg-[#0d1522] rounded-[0.25rem] overflow-hidden my-6">
-                    <div className="bg-[#080d16] border-b border-brand-primary/10 px-4 py-2 font-mono text-[9px] text-slate-400 select-none flex items-center gap-1.5">
-                      <Terminal className="w-3 h-3 text-cyan-400" />
-                      <span>Interactive Bookdown Code Console</span>
+                    {/* Body text content (Rendered via Markdown helper) */}
+                    <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
+                      <RenderMarkdown markdown={currentChapter.contents} />
                     </div>
-                    <div className="p-4 overflow-x-auto">
-                      <pre className="font-mono text-xs text-lime-400 text-left">
-                        {currentChapter.code}
-                      </pre>
-                    </div>
-                  </div>
 
-                  <p className="font-sans text-xs text-brand-on-surface-variant/70 italic mt-4">
-                    Modify parameters directly or port this workflow snippet directly into RStudio / Posit environments to execute calculations. All supporting files are accessible under GNU research repositories.
-                  </p>
-                </div>
-              ) : (
-                <div className="text-center py-20 text-brand-on-surface-variant">
-                  <BookOpenText className="w-8 h-8 mx-auto opacity-30 mb-2" />
-                  <span>Chapter not synchronized.</span>
-                </div>
-              )}
+                    {/* Dynamic coding exercises window */}
+                    {currentChapter.code && (
+                      <div className="border border-brand-surface-highest bg-[#111827] rounded-[0.25rem] overflow-hidden my-6">
+                        <div className="bg-[#0b0f19] border-b border-slate-800 px-4 py-2 font-mono text-[9px] text-slate-400 select-none flex items-center gap-1.5">
+                          <Terminal className="w-3 h-3 text-cyan-400" />
+                          <span>Interactive Bookdown Code Console</span>
+                        </div>
+                        <div className="p-4 overflow-x-auto">
+                          <pre 
+                            className="font-mono text-xs text-[#f9fafb] text-left whitespace-pre"
+                            dangerouslySetInnerHTML={{ __html: highlightBashCode(currentChapter.code) }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-20 text-brand-on-surface-variant">
+                    <BookOpenText className="w-8 h-8 mx-auto opacity-30 mb-2" />
+                    <span>Chapter not synchronized.</span>
+                  </div>
+                )}
+              </div>
 
               {/* Prev / Next controls for chapter index inside ebook reader */}
-              <div className="mt-12 pt-6 border-t border-brand-surface-highest flex justify-between items-center bg-brand-surface-low/30 p-4">
+              <div className="border-t border-brand-surface-highest flex justify-between items-center bg-brand-surface-low/30 p-4 shrink-0 w-full">
                 <button
-                  disabled={activeChapterIndex === 0}
-                  onClick={() => setActiveChapterIndex(activeChapterIndex - 1)}
-                  className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase"
+                  disabled={activePageIndex === 0}
+                  onClick={() => {
+                    const prevPage = flatPages[activePageIndex - 1];
+                    if (prevPage) {
+                      navigate(`/bookdown/${selectedBook.id}/${prevPage.id}`);
+                    }
+                  }}
+                  className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase text-left"
                 >
-                  &larr; Prev Chapter
+                  &larr; Prev Page
                 </button>
                 <span className="font-mono text-[10px] text-brand-secondary font-semibold">
-                  {activeChapterIndex + 1} of {selectedBook.chapters.length}
+                  {activePageIndex + 1} of {flatPages.length}
                 </span>
                 <button
-                  disabled={activeChapterIndex === selectedBook.chapters.length - 1}
-                  onClick={() => setActiveChapterIndex(activeChapterIndex + 1)}
-                  className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase"
+                  disabled={activePageIndex === flatPages.length - 1}
+                  onClick={() => {
+                    const nextPage = flatPages[activePageIndex + 1];
+                    if (nextPage) {
+                      navigate(`/bookdown/${selectedBook.id}/${nextPage.id}`);
+                    }
+                  }}
+                  className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase text-right"
                 >
-                  Next Chapter &rarr;
+                  Next Page &rarr;
                 </button>
               </div>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
         )}
       </AnimatePresence>
     </div>

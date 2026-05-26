@@ -39,10 +39,25 @@ export interface BlogPost {
   author?: string;
 }
 
-export interface BookItem {
+export interface BookChapter {
+  id: string;
+  bookId: string;
+  parentId?: string;
+  title: string;
+  order: number;
+  contents: string;
+  code?: string;
+  subsections?: BookChapter[];
+}
+
+export interface BookMetadata {
   id: string;
   title: string;
   description: string;
   iconName: "biotech" | "insights" | "terminal" | "scatter_plot" | "account_tree" | "bug_report";
-  chapters: string[];
+  language?: string;
+}
+
+export interface BookItem extends BookMetadata {
+  chapters: BookChapter[];
 }

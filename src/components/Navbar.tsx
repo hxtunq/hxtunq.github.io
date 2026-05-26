@@ -8,14 +8,14 @@ import { Search, Menu, X } from "lucide-react";
 
 interface NavbarProps {
   activeTab: "home" | "blog" | "bookdown";
-  setActiveTab: (tab: "home" | "blog" | "bookdown") => void;
+  onNavigate: (path: string) => void;
   onContactClick: () => void;
   onSearchToggle?: () => void;
 }
 
 export default function Navbar({
   activeTab,
-  setActiveTab,
+  onNavigate,
   onContactClick,
   onSearchToggle
 }: NavbarProps) {
@@ -27,7 +27,7 @@ export default function Navbar({
         {/* Brand Logo */}
         <button
           onClick={() => {
-            setActiveTab("home");
+            onNavigate("/");
             setMobileMenuOpen(false);
           }}
           className="font-serif font-bold text-xl md:text-2xl text-brand-primary hover:opacity-80 transition-opacity text-left outline-none cursor-pointer"
@@ -38,7 +38,7 @@ export default function Navbar({
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
           <button
-            onClick={() => setActiveTab("home")}
+            onClick={() => onNavigate("/")}
             className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${activeTab === "home"
               ? "border-brand-primary text-brand-primary font-bold"
               : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
@@ -47,7 +47,7 @@ export default function Navbar({
             Home
           </button>
           <button
-            onClick={() => setActiveTab("blog")}
+            onClick={() => onNavigate("/blog")}
             className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${activeTab === "blog"
               ? "border-brand-primary text-brand-primary font-bold"
               : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
@@ -56,7 +56,7 @@ export default function Navbar({
             Blog
           </button>
           <button
-            onClick={() => setActiveTab("bookdown")}
+            onClick={() => onNavigate("/bookdown")}
             className={`font-sans text-sm tracking-wide transition-all uppercase font-medium border-b-2 py-1 outline-none cursor-pointer ${activeTab === "bookdown"
               ? "border-brand-primary text-brand-primary font-bold"
               : "border-transparent text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-surface-highest"
@@ -102,7 +102,7 @@ export default function Navbar({
         <div className="md:hidden bg-brand-surface-lowest border-b border-brand-surface-highest py-4 px-6 flex flex-col gap-4 shadow-sm animate-fade-in">
           <button
             onClick={() => {
-              setActiveTab("home");
+              onNavigate("/");
               setMobileMenuOpen(false);
             }}
             className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${activeTab === "home" ? "text-brand-primary" : "text-brand-on-surface-variant"
@@ -112,7 +112,7 @@ export default function Navbar({
           </button>
           <button
             onClick={() => {
-              setActiveTab("blog");
+              onNavigate("/blog");
               setMobileMenuOpen(false);
             }}
             className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${activeTab === "blog" ? "text-brand-primary" : "text-brand-on-surface-variant"
@@ -122,7 +122,7 @@ export default function Navbar({
           </button>
           <button
             onClick={() => {
-              setActiveTab("bookdown");
+              onNavigate("/bookdown");
               setMobileMenuOpen(false);
             }}
             className={`text-left font-sans text-sm tracking-widest uppercase font-semibold py-2 ${activeTab === "bookdown" ? "text-brand-primary" : "text-brand-on-surface-variant"

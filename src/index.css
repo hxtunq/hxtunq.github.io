@@ -51,3 +51,18 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-brand-primary);
 }
+
+/* Subtle scrollbar for sidebar */
+.scrollbar-subtle::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-subtle::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb {
+  background: var(--color-brand-surface-high);
+  border-radius: 2px;
+}
+.scrollbar-subtle::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-secondary);
+}
