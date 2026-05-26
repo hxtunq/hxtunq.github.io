@@ -26,6 +26,7 @@ import ContactModal from "./components/ContactModal";
 // Data & Types Imports
 import { selectedPublications, bookMetadataList } from "./data";
 import { blogPosts } from "./lib/blog-loader";
+import { bookItems } from "./lib/book-loader";
 import { SelectedPublication, BlogPost } from "./types";
 
 export default function App() {
@@ -58,15 +59,34 @@ export default function App() {
         const parts = cleanPath.substring("bookdown/".length).split("/");
         const bookId = parts[0];
         const chapterId = parts[1];
-        const book = bookMetadataList.find((b) => b.id === bookId);
+        const book = bookItems.find((b) => b.id === bookId);
         
         let displayTitle = book ? book.title : "Bookdown";
-        if (chapterId) {
-          const formattedChapter = chapterId
-            .split("-")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-          displayTitle = `${formattedChapter} — ${displayTitle}`;
+        if (chapterId && book) {
+          let chapterTitle = "";
+          for (const chap of book.chapters) {
+            if (chap.id === chapterId) {
+              chapterTitle = chap.title;
+              break;
+            }
+            if (chap.subsections) {
+              const sub = chap.subsections.find((s) => s.id === chapterId);
+              if (sub) {
+                chapterTitle = sub.title;
+                break;
+              }
+            }
+          }
+          if (chapterTitle) {
+            const cleanChapterTitle = chapterTitle.replace(/^[\d.]+\.\s+/, "");
+            displayTitle = `${cleanChapterTitle} — ${displayTitle}`;
+          } else {
+            const formattedChapter = chapterId
+              .split("-")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ");
+            displayTitle = `${formattedChapter} — ${displayTitle}`;
+          }
         }
         document.title = displayTitle;
       } else {
