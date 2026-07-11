@@ -271,7 +271,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                             setCurrentPage(1);
                           }}
                           className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
-                            ? "border-brand-primary bg-brand-primary text-white font-bold"
+                            ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
                             : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
                             }`}
                         >
@@ -298,7 +298,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                             setCurrentPage(1);
                           }}
                           className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
-                            ? "border-brand-primary bg-brand-primary text-white font-bold"
+                            ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
                             : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
                             }`}
                         >
@@ -319,7 +319,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                       setSearchQuery("");
                       setCurrentPage(1);
                     }}
-                    className="font-mono text-[10px] font-bold tracking-widest uppercase text-brand-primary border border-brand-primary hover:bg-brand-primary hover:text-white transition-all py-2.5 w-full text-center block"
+                    className="font-mono text-[10px] font-bold tracking-widest uppercase text-brand-accent border border-brand-accent hover:bg-brand-accent hover:text-brand-accent-ink transition-all py-2.5 w-full text-center block"
                   >
                     Reset Active Filters
                   </button>
@@ -352,7 +352,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                       className="group border border-brand-surface-highest p-6 md:p-8 bg-brand-surface-lowest hover:bg-brand-surface-low/30 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between"
                     >
                       {/* Interactive slide-in Accent */}
-                      <div className="absolute top-0 left-0 h-full w-1.25 bg-brand-primary transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200"></div>
+                      <div className="absolute top-0 left-0 h-full w-1.25 bg-brand-accent transform -translate-x-full group-hover:translate-x-0 transition-transform duration-200"></div>
 
                       <div>
                         {/* Post Header Row */}
@@ -463,7 +463,7 @@ export default function BlogView({ currentPath, navigate, onContactClick, onLink
                 <div className="space-y-3 pt-6 border-t border-brand-surface-highest">
                   <button
                     onClick={onContactClick}
-                    className="w-full font-sans font-bold text-[9px] tracking-widest uppercase border border-brand-primary py-2 px-3 hover:bg-brand-primary hover:text-white transition-colors"
+                    className="w-full font-sans font-bold text-[9px] tracking-widest uppercase border border-brand-accent text-brand-accent py-2 px-3 hover:bg-brand-accent hover:text-brand-accent-ink transition-colors"
                   >
                     Download PDF
                   </button>

@@ -207,7 +207,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex-1 bg-brand-primary hover:bg-brand-secondary text-white py-3 text-xs uppercase font-bold tracking-widest flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+                      className="flex-1 bg-brand-accent hover:bg-cyan-800 text-brand-accent-ink py-3 text-xs uppercase font-bold tracking-widest flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>

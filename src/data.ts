@@ -45,23 +45,6 @@ export const selectedPublications: SelectedPublication[] = [
   },
 ];
 
-export const bookMetadataList: BookMetadata[] = [
-  {
-    id: "genomic-variant-analysis",
-    title: "Phân tích biến thể hệ gen",
-    description: "Hướng dẫn thực hành phân tích dữ liệu giải trình tự WGS/WES, tập trung vào quy trình phát hiện và phân tích biến thể dòng mầm nhỏ ở người.",
-    iconName: "biotech",
-    language: "Vietnamese",
-    typeLabel: "Case Study & Hands-on Guide",
-    tags: ["genomics"],
-  },
-  {
-    id: "bash-fundamentals-bioinformatics",
-    title: "Bash cho Tin Sinh học",
-    description: "Hướng dẫn sử dụng các câu lệnh Bash/Shell script nền tảng trong phân tích tin sinh học.",
-    iconName: "terminal",
-    language: "Vietnamese",
-    typeLabel: "Introductory Book",
-    tags: ["code"],
-  }
-];
+// Temporarily empty — project write-ups are still being finished.
+// Restore entries here (see git history) once ready to publish.
+export const bookMetadataList: BookMetadata[] = [];

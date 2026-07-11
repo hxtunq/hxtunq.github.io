@@ -49,13 +49,17 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
   const [bookSearchQuery, setBookSearchQuery] = useState("");
-  const [showSidebar, setShowSidebar] = useState(true);
+  // Start with the table of contents collapsed on phones so readers land on the
+  // chapter content first; keep it open by default on tablets/desktops.
+  const [showSidebar, setShowSidebar] = useState(
+    () => (typeof window !== "undefined" ? window.innerWidth >= 768 : true)
+  );
 
   // Derive bookId and chapterId from currentPath
   const pathParts = useMemo(() => {
     const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
-    if (cleanPath.startsWith("bookdown/")) {
-      const parts = cleanPath.substring("bookdown/".length).split("/");
+    if (cleanPath.startsWith("project/")) {
+      const parts = cleanPath.substring("project/".length).split("/");
       return {
         bookId: parts[0] || null,
         chapterId: parts[1] || null
@@ -195,6 +199,17 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
 
   const currentChapter = activePage;
 
+  // Navigate to a chapter and, on phones, auto-collapse the TOC so the reader
+  // immediately sees the content instead of the (still-open) chapter list.
+  const goToChapter = (chapterId: string) => {
+    if (selectedBook) {
+      navigate(`/project/${selectedBook.id}/${chapterId}`);
+    }
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setShowSidebar(false);
+    }
+  };
+
   return (
     <div className="w-full bg-brand-surface-lowest">
       <AnimatePresence mode="wait">
@@ -207,16 +222,16 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="max-w-container-max mx-auto px-4 md:px-6 py-12 space-y-12"
+            className="max-w-container-max mx-auto px-4 md:px-6 py-12 space-y-10"
           >
             {/* Header Content Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-2xl">
                 <h1 className="font-sans text-3.5xl font-bold tracking-tight text-brand-primary mb-3">
-                  Bookdown Gallery
+                  Projects
                 </h1>
                 <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed">
-                  Interactive guidebooks, coding protocols, and statistical tutorials maintained as open-source Bookdown libraries. Optimized for bioinformatics, reproducibility, and data analysis.
+                  Long-form projects, reproducible notebooks and hands-on guides I build and maintain — mostly around bioinformatics, computational biology, and data analysis.
                 </p>
               </div>
 
@@ -241,7 +256,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
               <button
                 onClick={() => setActiveTag(null)}
                 className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${activeTag === null
-                  ? "border-brand-primary bg-brand-primary text-white font-bold"
+                  ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
                   : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
                   }`}
               >
@@ -254,7 +269,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     key={tagName}
                     onClick={() => setActiveTag(isActive ? null : tagName)}
                     className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
-                      ? "border-brand-primary bg-brand-primary text-white font-bold"
+                      ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
                       : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
                       }`}
                   >
@@ -271,7 +286,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                 <p className="font-sans text-xs text-brand-on-surface-variant mt-1">Try resetting the spelling of your query to browse full lists of computational manuals.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {filteredBooks.map((book) => (
                   <motion.div
                     key={book.id}
@@ -322,7 +337,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     <button
                       onClick={() => {
                         const firstChapter = book.chapters[0];
-                        navigate(`/bookdown/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
+                        navigate(`/project/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
                       }}
                       className="group flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-primary outline-none cursor-pointer border-b border-transparent hover:border-brand-primary pb-0.5 w-fit mt-2 transition-all"
                     >
@@ -351,7 +366,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
               {showSidebar && (
                 <div className="hidden md:flex w-[300px] shrink-0 border-r border-brand-surface-highest h-full items-center px-6 bg-brand-surface-low">
                   <button
-                    onClick={() => navigate(`/bookdown/${selectedBook.id}/${selectedBook.chapters[0]?.id}`)}
+                    onClick={() => navigate(`/project/${selectedBook.id}/${selectedBook.chapters[0]?.id}`)}
                     style={{ textAlign: "left" }}
                     className="font-sans font-normal text-[14.5px] text-brand-on-surface truncate cursor-pointer w-full outline-none hover:text-sky-600 transition-colors"
                   >
@@ -375,8 +390,8 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
 
                   {/* Catalog / Home link */}
                   <button
-                    onClick={() => navigate("/bookdown")}
-                    title="Books Catalog"
+                    onClick={() => navigate("/project")}
+                    title="Project Catalog"
                     className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
                   >
                     <Home className="w-[18px] h-[18px]" />
@@ -437,16 +452,16 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                   <div className="flex-1 px-4 py-5 overflow-y-auto scrollbar-subtle">
                     {/* Table of Chapters list */}
                     <div className="space-y-1">
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {filteredChapters.map((chap) => {
                           const isRootActive = activePage?.id === chap.id;
 
                           return (
                             <div key={chap.id} className="space-y-0.5">
                               <button
-                                onClick={() => navigate(`/bookdown/${selectedBook.id}/${chap.id}`)}
+                                onClick={() => goToChapter(chap.id)}
                                 style={{ textAlign: "left" }}
-                                className={`w-full font-sans text-[13.5px] px-2 py-1.5 transition-colors block cursor-pointer truncate ${isRootActive
+                                className={`w-full font-sans text-[13.5px] px-2 py-1 transition-colors block cursor-pointer truncate ${isRootActive
                                   ? "text-sky-600 font-normal"
                                   : "text-brand-on-surface font-normal hover:text-sky-600"
                                   }`}
@@ -463,9 +478,9 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                                     return (
                                       <button
                                         key={sub.id}
-                                        onClick={() => navigate(`/bookdown/${selectedBook.id}/${sub.id}`)}
+                                        onClick={() => goToChapter(sub.id)}
                                         style={{ textAlign: "left" }}
-                                        className={`w-full font-sans text-[13px] pl-5 pr-2 py-1 transition-colors block cursor-pointer truncate ${isSubActive
+                                        className={`w-full font-sans text-[13px] pl-5 pr-2 py-0.5 transition-colors block cursor-pointer truncate ${isSubActive
                                           ? "text-sky-600 font-normal"
                                           : "text-brand-on-surface font-normal hover:text-sky-600"
                                           }`}
@@ -495,9 +510,9 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
               {/* Right Hand: Sub-document scrolling reader canvas */}
               <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
                 {/* Scrollable content container */}
-                <div className="flex-1 p-6 md:p-10 overflow-y-auto">
+                <div className="flex-1 p-6 md:p-10 lg:px-16 xl:pl-36 xl:pr-8 overflow-y-auto">
                   {currentChapter ? (
-                    <div className="space-y-6 max-w-3xl w-full mx-auto">
+                    <div className="space-y-6 max-w-2xl xl:max-w-[984px] w-full mx-auto">
 
 
                       <h3 className="font-sans font-medium text-2xl text-brand-primary tracking-tight">
@@ -526,7 +541,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     onClick={() => {
                       const prevPage = flatPages[activePageIndex - 1];
                       if (prevPage) {
-                        navigate(`/bookdown/${selectedBook.id}/${prevPage.id}`);
+                        navigate(`/project/${selectedBook.id}/${prevPage.id}`);
                       }
                     }}
                     className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase text-left"
@@ -541,7 +556,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     onClick={() => {
                       const nextPage = flatPages[activePageIndex + 1];
                       if (nextPage) {
-                        navigate(`/bookdown/${selectedBook.id}/${nextPage.id}`);
+                        navigate(`/project/${selectedBook.id}/${nextPage.id}`);
                       }
                     }}
                     className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase text-right"

@@ -6,16 +6,19 @@
   --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Custom palette matching the brand style guide */
-  --color-brand-primary: #091426;
-  --color-brand-secondary: #515f74;
-  --color-brand-bg: #f7f9fb;
-  --color-brand-surface-low: #f2f4f6;
-  --color-brand-surface-lowest: #ffffff;
-  --color-brand-surface-high: #e6e8ea;
-  --color-brand-surface-highest: #e0e3e5;
-  --color-brand-on-surface: #191c1e;
-  --color-brand-on-surface-variant: #45474c;
+  /* Clean light "academic white" palette.
+     Surfaces get lighter as they are raised: bg < surface-low < surface-lowest. */
+  --color-brand-primary: #091426;        /* near-black ink: headings, emphasis, active nav */
+  --color-brand-secondary: #515f74;      /* muted slate: mono labels, meta */
+  --color-brand-accent: #0e7490;         /* deep teal: interactive fills & links */
+  --color-brand-accent-ink: #ffffff;     /* text placed on top of accent fills */
+  --color-brand-bg: #f7f9fb;             /* near-white page base */
+  --color-brand-surface-low: #f2f4f6;    /* recessed panels & inputs */
+  --color-brand-surface-lowest: #ffffff; /* elevated cards */
+  --color-brand-surface-high: #e6e8ea;   /* hover / raised */
+  --color-brand-surface-highest: #e0e3e5;/* hairline borders */
+  --color-brand-on-surface: #191c1e;     /* body text */
+  --color-brand-on-surface-variant: #45474c; /* muted body text */
 }
 
 body {
@@ -65,4 +68,15 @@ body {
 }
 .scrollbar-subtle::-webkit-scrollbar-thumb:hover {
   background: var(--color-brand-secondary);
+}
+
+/* Disable font ligatures in code blocks to keep characters like !=, <- exactly as typed */
+pre, code {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* Justify all text elements inside the Bookdown reader to override prose specificity */
+.prose p, .prose li, .prose blockquote p {
+  text-align: justify;
 }

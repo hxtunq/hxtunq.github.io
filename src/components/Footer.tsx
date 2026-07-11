@@ -14,8 +14,8 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
     <footer className="w-full bg-brand-surface-highest/60 border-t border-brand-surface-highest">
       <div className="max-w-container-max mx-auto px-4 md:px-6 py-10 flex flex-col md:flex-row justify-between items-center gap-6">
         {/* Left Side: Serif Wordmark */}
-        <div className="font-serif font-bold text-xl text-brand-primary tracking-tight">
-          Xuan Tung Hoang
+        <div className="font-serif font-semibold text-base md:text-lg text-brand-primary tracking-tight">
+          Tung Hoang
         </div>
 
         {/* Center: Social links with consistent layout spacing */}
@@ -51,7 +51,7 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
 
         {/* Right Side: Copyright */}
         <div className="font-sans text-[11px] font-medium text-brand-on-surface-variant tracking-wider uppercase text-center md:text-right">
-          © 2026 Xuan Tung Hoang. All rights reserved.
+          © 2026 Tung Hoang.
         </div>
       </div>
     </footer>

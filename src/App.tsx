@@ -54,14 +54,14 @@ export default function App() {
       document.title = post ? `${post.title} — Xuan Tung Hoang` : "Xuan Tung Hoang";
     } else if (cleanPath === "blog" || cleanPath.startsWith("blog/")) {
       document.title = "Blog — Xuan Tung Hoang";
-    } else if (cleanPath === "bookdown" || cleanPath.startsWith("bookdown/")) {
-      if (cleanPath.startsWith("bookdown/")) {
-        const parts = cleanPath.substring("bookdown/".length).split("/");
+    } else if (cleanPath === "project" || cleanPath.startsWith("project/")) {
+      if (cleanPath.startsWith("project/")) {
+        const parts = cleanPath.substring("project/".length).split("/");
         const bookId = parts[0];
         const chapterId = parts[1];
         const book = bookItems.find((b) => b.id === bookId);
-        
-        let displayTitle = book ? book.title : "Bookdown";
+
+        let displayTitle = book ? book.title : "Projects";
         if (chapterId && book) {
           let chapterTitle = "";
           for (const chap of book.chapters) {
@@ -90,7 +90,7 @@ export default function App() {
         }
         document.title = displayTitle;
       } else {
-        document.title = "Bookdown — Xuan Tung Hoang";
+        document.title = "Projects — Xuan Tung Hoang";
       }
     } else {
       document.title = "Xuan Tung Hoang";
@@ -105,14 +105,14 @@ export default function App() {
     }
   };
 
-  // Derive activeTab from currentPath
-  const getActiveTab = (path: string): "home" | "blog" | "bookdown" => {
+  // Derive activeTab from currentPath.
+  const getActiveTab = (path: string): "home" | "blog" | "project" => {
     const cleanPath = path.replace(/^\/+|\/+$/g, "");
     if (cleanPath.startsWith("blog") || cleanPath.startsWith("post/")) {
       return "blog";
     }
-    if (cleanPath.startsWith("bookdown")) {
-      return "bookdown";
+    if (cleanPath.startsWith("project")) {
+      return "project";
     }
     return "home";
   };
@@ -121,8 +121,8 @@ export default function App() {
 
   const isBookdownReader = useMemo(() => {
     const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
-    if (cleanPath.startsWith("bookdown/")) {
-      const parts = cleanPath.substring("bookdown/".length).split("/");
+    if (cleanPath.startsWith("project/")) {
+      const parts = cleanPath.substring("project/".length).split("/");
       return !!parts[0];
     }
     return false;
@@ -150,7 +150,7 @@ export default function App() {
   );
 
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-on-surface flex flex-col justify-between selection:bg-brand-primary selection:text-white">
+    <div className="min-h-screen bg-brand-bg text-brand-on-surface flex flex-col justify-between selection:bg-brand-accent selection:text-brand-accent-ink">
       {/* Dynamic Toast feedback */}
       <AnimatePresence>
         {toastMessage && (
@@ -158,7 +158,7 @@ export default function App() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-brand-primary text-white text-xs font-mono tracking-widest px-6 py-3 border border-brand-surface-high shadow-lg"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-brand-accent text-brand-accent-ink text-xs font-mono tracking-widest px-6 py-3 border border-cyan-300/40 shadow-lg"
           >
             {toastMessage}
           </motion.div>
@@ -176,7 +176,7 @@ export default function App() {
       )}
 
       {/* PRIMARY VIEWER PORTAL */}
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-16">
         <AnimatePresence mode="wait">
           {activeTab === "home" && (
             <motion.div
@@ -210,9 +210,9 @@ export default function App() {
             </motion.div>
           )}
 
-          {activeTab === "bookdown" && (
+          {activeTab === "project" && (
             <motion.div
-              key="bookdown-tab"
+              key="project-tab"
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -320,7 +320,7 @@ export default function App() {
                                   setSearchOpen(false);
                                   setGlobalSearchQuery("");
                                 }}
-                                className="font-mono text-[9px] font-bold tracking-widest uppercase text-brand-secondary border border-brand-surface-highest bg-white hover:border-brand-primary px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
+                                className="font-mono text-[9px] font-bold tracking-widest uppercase text-brand-secondary border border-brand-surface-highest bg-brand-surface-low hover:border-brand-accent hover:text-brand-accent px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
                               >
                                 Copy DOI
                               </button>
@@ -352,7 +352,7 @@ export default function App() {
                                   setSearchOpen(false);
                                   setGlobalSearchQuery("");
                                 }}
-                                className="font-sans text-[9px] font-bold tracking-widest uppercase text-brand-primary border border-brand-primary bg-white hover:bg-brand-primary hover:text-white px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
+                                className="font-sans text-[9px] font-bold tracking-widest uppercase text-brand-accent-ink border border-brand-accent bg-brand-accent hover:bg-cyan-800 px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
                               >
                                 Read
                               </button>

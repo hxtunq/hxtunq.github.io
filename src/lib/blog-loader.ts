@@ -132,6 +132,11 @@ const posts: BlogPost[] = [];
 for (const [, raw] of Object.entries(markdownModules)) {
   const { meta, body } = parseFrontmatter(raw as string);
 
+  // Skip draft or unpublished posts
+  if (meta.status !== undefined && meta.status !== "Published") {
+    continue;
+  }
+
   const post: BlogPost = {
     id: (meta.id as string) || `post-${Date.now()}`,
     category: (meta.category as BlogPost["category"]) || "METHODOLOGY",

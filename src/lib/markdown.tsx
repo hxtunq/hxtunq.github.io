@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
 export interface MarkdownBlock {
-  type: "heading" | "paragraph" | "code" | "quote" | "image" | "list";
+  type: "heading" | "paragraph" | "code" | "quote" | "image" | "list" | "details";
   level?: number;
   text?: string;
   items?: string[];
@@ -16,6 +16,8 @@ export interface MarkdownBlock {
   src?: string;
   alt?: string;
   caption?: string;
+  note?: string;
+  noteOffset?: number;
 }
 
 export function slugify(text: string): string {
@@ -28,6 +30,74 @@ export function slugify(text: string): string {
     .trim();
 }
 
+function extractNote(text: string): { cleanText: string; note?: string; offset?: number } {
+  const noteMarker = "[^note:";
+  const startIndex = text.indexOf(noteMarker);
+  if (startIndex === -1) {
+    return { cleanText: text };
+  }
+
+  // Find the matching closing bracket for the note by counting nested brackets
+  let bracketCount = 1;
+  let i = startIndex + noteMarker.length;
+  while (i < text.length && bracketCount > 0) {
+    if (text[i] === "[") {
+      bracketCount++;
+    } else if (text[i] === "]") {
+      bracketCount--;
+    }
+    i++;
+  }
+
+  if (bracketCount === 0) {
+    const noteFullText = text.substring(startIndex + noteMarker.length, i - 1);
+    
+    // Parse offset if present, e.g. "note content | 10"
+    // We look for the last "|" that is NOT inside nested brackets
+    let pipeIndex = -1;
+    let nestedLevel = 0;
+    for (let j = noteFullText.length - 1; j >= 0; j--) {
+      if (noteFullText[j] === "]") nestedLevel++;
+      else if (noteFullText[j] === "[") nestedLevel--;
+      else if (noteFullText[j] === "|" && nestedLevel === 0) {
+        pipeIndex = j;
+        break;
+      }
+    }
+
+    let note = noteFullText.trim();
+    let offset = 0;
+    if (pipeIndex !== -1) {
+      const offsetStr = noteFullText.substring(pipeIndex + 1).trim();
+      if (/^-?\d+$/.test(offsetStr)) {
+        note = noteFullText.substring(0, pipeIndex).trim();
+        offset = parseInt(offsetStr, 10);
+      }
+    }
+
+    const cleanText = (text.substring(0, startIndex) + text.substring(i)).trim();
+    return { cleanText, note, offset };
+  }
+
+  return { cleanText: text };
+}
+
+function extractNoteFromCode(code: string): { cleanCode: string; note?: string; offset?: number } {
+  const lines = code.split("\n");
+  let note: string | undefined;
+  let offset: number | undefined;
+  const cleanLines = lines.filter(line => {
+    const res = extractNote(line);
+    if (res.note !== undefined) {
+      note = res.note;
+      offset = res.offset;
+      return false; // exclude this line from code block display
+    }
+    return true;
+  });
+  return { cleanCode: cleanLines.join("\n"), note, offset };
+}
+
 export function parseMarkdown(md: string): MarkdownBlock[] {
   const blocks: MarkdownBlock[] = [];
   const lines = md.split("\n");
@@ -38,6 +108,36 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
 
     if (!line.trim()) {
       i++;
+      continue;
+    }
+
+    // Details block
+    if (line.trim().startsWith("<details>")) {
+      let summaryText = "";
+      const summaryMatch = line.match(/<summary>(.*?)<\/summary>/);
+      if (summaryMatch) {
+        summaryText = summaryMatch[1];
+      }
+      
+      let detailsContent = "";
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith("</details>")) {
+        const currentLine = lines[i];
+        const innerSummary = currentLine.match(/<summary>(.*?)<\/summary>/);
+        if (innerSummary) {
+          summaryText = innerSummary[1];
+        } else {
+          detailsContent += currentLine + "\n";
+        }
+        i++;
+      }
+      
+      blocks.push({
+        type: "details",
+        text: summaryText,
+        code: detailsContent,
+      });
+      i++; // skip </details>
       continue;
     }
 
@@ -75,9 +175,16 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
           level: match[1].length,
           text: match[2].trim(),
         });
-        i++;
-        continue;
+      } else {
+        const hashes = line.trim().match(/^(#{1,6})/);
+        blocks.push({
+          type: "heading",
+          level: hashes ? hashes[1].length : 1,
+          text: "",
+        });
       }
+      i++;
+      continue;
     }
 
     // Bullet lists
@@ -129,7 +236,58 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
     }
   }
 
-  return blocks;
+  // Post-process to extract notes from blocks
+  return blocks.map(block => {
+    if (block.type === "paragraph" || block.type === "heading" || block.type === "quote") {
+      if (block.text) {
+        const { cleanText, note, offset } = extractNote(block.text);
+        return {
+          ...block,
+          text: cleanText,
+          note,
+          noteOffset: offset
+        };
+      }
+    } else if (block.type === "code") {
+      if (block.code) {
+        const { cleanCode, note, offset } = extractNoteFromCode(block.code);
+        return {
+          ...block,
+          code: cleanCode,
+          note,
+          noteOffset: offset
+        };
+      }
+    } else if (block.type === "image") {
+      if (block.caption) {
+        const { cleanText, note, offset } = extractNote(block.caption);
+        return {
+          ...block,
+          caption: cleanText,
+          note,
+          noteOffset: offset
+        };
+      }
+    } else if (block.type === "list" && block.items) {
+      let listNote: string | undefined;
+      let listOffset: number | undefined;
+      const cleanItems = block.items.map(item => {
+        const { cleanText, note, offset } = extractNote(item);
+        if (note) {
+          listNote = note;
+          listOffset = offset;
+        }
+        return cleanText;
+      });
+      return {
+        ...block,
+        items: cleanItems,
+        note: listNote,
+        noteOffset: listOffset
+      };
+    }
+    return block;
+  });
 }
 
 export function renderInlineStyles(text: string): React.JSX.Element {
@@ -152,6 +310,31 @@ export function renderInlineStyles(text: string): React.JSX.Element {
     .replace(
       /\((https?:\/\/[^\s)]+)\)/g,
       "(<a href='$1' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors'>$1</a>)"
+    )
+    // Custom inline coloring: [text]{style}
+    .replace(
+      /\[([^\]]+)\]\{([^}]+)\}/g,
+      (match, content, style) => {
+        const trimmedStyle = style.trim();
+        const isColor = /^(#[0-9a-fA-F]{3,8}|[a-zA-Z]+)$/.test(trimmedStyle);
+        const hasColon = trimmedStyle.includes(":");
+        if (isColor) {
+          const colorMap: Record<string, string> = {
+            red: "#e11d48",      // Soft, professional rose-red (rose-600)
+            green: "#10b981",    // Soft emerald-500
+            blue: "#2563eb",     // Soft blue-600
+            yellow: "#d97706",   // Soft amber-600
+            orange: "#ea580c",   // Soft orange-600
+            purple: "#7c3aed",   // Soft violet-600
+            gray: "#4b5563",     // Soft gray-600
+          };
+          const colorValue = colorMap[trimmedStyle.toLowerCase()] || trimmedStyle;
+          return `<span style="color: ${colorValue}">${content}</span>`;
+        } else if (hasColon) {
+          return `<span style="${trimmedStyle}">${content}</span>`;
+        }
+        return match;
+      }
     );
 
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
@@ -174,8 +357,13 @@ function highlightBashLine(line: string): string {
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 
-  escapedCode = escapedCode.replace(/(&quot;)(.*?)(&quot;)/g, '<span class="text-emerald-400">$1$2$3</span>');
-  escapedCode = escapedCode.replace(/(')(.*?)(')/g, '<span class="text-emerald-400">$1$2$3</span>');
+  const strings: string[] = [];
+  const stringRegex = /"([^"\\]|\\.)*"|'([^'\\]|\\.)*'/g;
+  escapedCode = escapedCode.replace(stringRegex, (match) => {
+    const placeholder = `___STR_PLACEHOLDER_${strings.length}___`;
+    strings.push(`<span class="text-emerald-400">${match}</span>`);
+    return placeholder;
+  });
 
   const keywords = [
     "echo", "cd", "ls", "pwd", "mkdir", "rm", "cp", "mv", "grep", "cat", "conda", 
@@ -191,12 +379,81 @@ function highlightBashLine(line: string): string {
   escapedCode = escapedCode.replace(/(\$\{[\w]+\})/g, '<span class="text-amber-400 font-mono">$1</span>');
   escapedCode = escapedCode.replace(/(\s)(-\w+|\-\-[\w\-]+)/g, '$1<span class="text-fuchsia-400">$2</span>');
 
+  strings.forEach((strHtml, index) => {
+    escapedCode = escapedCode.replace(`___STR_PLACEHOLDER_${index}___`, strHtml);
+  });
+
   return escapedCode + commentPart;
 }
 
 export function highlightBashCode(code: string): string {
-  const lines = code.split("\n");
+  const cleanCode = code.replace(/\r/g, "");
+  const lines = cleanCode.split("\n");
   return lines.map(highlightBashLine).join("\n");
+}
+
+function highlightRLine(line: string): string {
+  const commentIndex = line.indexOf("#");
+  let codePart = line;
+  let commentPart = "";
+  if (commentIndex !== -1) {
+    codePart = line.slice(0, commentIndex);
+    commentPart = `<span class="text-[#75715e] font-mono italic">${line.slice(commentIndex)}</span>`;
+  }
+
+  let escapedCode = codePart
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  const strings: string[] = [];
+  const stringRegex = /"([^"\\]|\\.)*"|'([^'\\]|\\.)*'/g;
+  escapedCode = escapedCode.replace(stringRegex, (match) => {
+    const placeholder = `___STR_PLACEHOLDER_${strings.length}___`;
+    strings.push(`<span class="text-[#e6db74]">${match}</span>`);
+    return placeholder;
+  });
+
+  // Highlight Named Arguments (e.g. pattern =, full.names =)
+  escapedCode = escapedCode.replace(/\b([a-zA-Z0-9_\.]+)\s*=(?!=)/g, '<span class="text-[#fd971f] italic">$1</span> =');
+
+  // Highlight Functions: word followed by optional space and '('
+  escapedCode = escapedCode.replace(/\b([a-zA-Z0-9_\.]+)(?=\s*\()/g, '<span class="text-[#66d9ef]">$1</span>');
+
+  // Highlight R Constants
+  const rConstants = ["TRUE", "FALSE", "NULL", "NA", "NaN", "Inf"];
+  rConstants.forEach((constant) => {
+    const regex = new RegExp(`\\b(${constant})\\b`, "g");
+    escapedCode = escapedCode.replace(regex, '<span class="text-[#ae81ff]">$1</span>');
+  });
+
+  // Highlight R Keywords
+  const rKeywords = [
+    "if", "else", "repeat", "while", "function", "for", "in", "next", "break"
+  ];
+  rKeywords.forEach((keyword) => {
+    const regex = new RegExp(`\\b(${keyword})\\b`, "g");
+    escapedCode = escapedCode.replace(regex, '<span class="text-[#f92672] font-semibold">$1</span>');
+  });
+
+  // Highlight Assignment Operator and other common operators
+  escapedCode = escapedCode.replace(/(&lt;-|&lt;&lt;-|-&gt;)/g, '<span class="text-[#f92672]">$1</span>');
+  escapedCode = escapedCode.replace(/(\s)(==|!=|&gt;=|&lt;=)(\s)/g, '$1<span class="text-[#f92672]">$2</span>$3');
+  
+  // Highlight Numbers
+  escapedCode = escapedCode.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="text-[#ae81ff]">$1</span>');
+
+  strings.forEach((strHtml, index) => {
+    escapedCode = escapedCode.replace(`___STR_PLACEHOLDER_${index}___`, strHtml);
+  });
+
+  return escapedCode + commentPart;
+}
+
+export function highlightRCode(code: string): string {
+  const cleanCode = code.replace(/\r/g, "");
+  const lines = cleanCode.split("\n");
+  return lines.map(highlightRLine).join("\n");
 }
 
 interface CodeBlockProps {
@@ -215,9 +472,10 @@ function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
   };
 
   const isBash = language === "bash" || language === "shell" || language === "sh";
+  const isR = language.toLowerCase() === "r";
 
   return (
-    <div className="border border-brand-surface-highest bg-[#111827] text-[#f9fafb] rounded-[0.25rem] my-6 overflow-hidden font-mono">
+    <div className="border border-brand-surface-highest bg-[#111827] text-[#f9fafb] rounded-[0.25rem] overflow-hidden font-mono">
       <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-[#0b0f19] font-mono text-[10px]">
         <span className="text-slate-400 font-mono uppercase">{language}</span>
         <button
@@ -237,11 +495,16 @@ function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
           )}
         </button>
       </div>
-      <div className="p-4 overflow-x-auto text-xs leading-relaxed max-h-[400px]">
+      <div className="p-4 overflow-auto text-xs leading-relaxed max-h-[400px]">
         {isBash ? (
           <pre
             className="font-mono text-left whitespace-pre"
             dangerouslySetInnerHTML={{ __html: highlightBashCode(code) }}
+          />
+        ) : isR ? (
+          <pre
+            className="font-mono text-left whitespace-pre"
+            dangerouslySetInnerHTML={{ __html: highlightRCode(code) }}
           />
         ) : (
           <pre className="font-mono text-left whitespace-pre">{code}</pre>
@@ -251,110 +514,232 @@ function CodeBlock({ language, code }: CodeBlockProps): React.JSX.Element {
   );
 }
 
+function highlightOutputLine(line: string): string {
+  let escaped = line
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  if (escaped.includes("ERROR:")) {
+    escaped = escaped.replace(
+      /(ERROR:)/g,
+      '<span class="bg-[#b91c1c] text-white px-1.5 py-0.5 rounded-sm font-bold mr-1.5">$1</span>'
+    );
+    return `<span class="text-[#f87171]">${escaped}</span>`;
+  }
+  return escaped;
+}
+
+export function highlightOutputCode(code: string): string {
+  const cleanCode = code.replace(/\r/g, "");
+  const lines = cleanCode.split("\n");
+  return lines.map(highlightOutputLine).join("\n");
+}
+
 export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.Element {
   const blocks = parseMarkdown(markdown);
 
   return (
-    <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
+    <div className="w-full">
       {blocks.map((block, index) => {
-        switch (block.type) {
-          case "heading": {
-            if (block.level === 2) {
+        const blockElement = (() => {
+          switch (block.type) {
+            case "heading": {
+              if (block.level === 2) {
+                return (
+                  <h2
+                    id={slugify(block.text || "")}
+                    className="font-sans text-2xl font-medium text-brand-primary scroll-mt-24"
+                  >
+                    {block.text}
+                  </h2>
+                );
+              }
               return (
-                <h2
-                  key={index}
+                <h3
                   id={slugify(block.text || "")}
-                  className="font-sans text-2xl font-medium text-brand-primary mb-4 mt-12 scroll-mt-24"
+                  className="font-sans text-xl font-medium text-brand-primary scroll-mt-24"
                 >
                   {block.text}
-                </h2>
+                </h3>
               );
             }
-            return (
-              <h3
-                key={index}
-                id={slugify(block.text || "")}
-                className="font-sans text-xl font-medium text-brand-primary mb-3 mt-8 scroll-mt-24"
-              >
-                {block.text}
-              </h3>
-            );
-          }
-          case "paragraph":
-            return (
-              <p key={index} className="font-sans text-[15px] leading-relaxed mb-6">
-                {renderInlineStyles(block.text || "")}
-              </p>
-            );
-          case "code": {
-            const isOutput = block.language === "output" || block.language === "stdout" || block.language === "bash-output";
-            if (isOutput) {
+            case "paragraph":
               return (
-                <div
-                  key={index}
-                  className="border border-brand-surface-highest bg-brand-surface-low text-brand-on-surface rounded-[0.25rem] my-6 overflow-hidden font-mono"
-                >
-                  <div className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary select-none">
-                    OUTPUT
+                <p className="font-sans text-[14px] leading-relaxed">
+                  {renderInlineStyles(block.text || "")}
+                </p>
+              );
+            case "code": {
+              const lang = (block.language || "").toLowerCase().trim();
+              const isOutput = lang === "output" || lang === "stdout" || lang === "bash-output";
+              const isSimpleOutput = lang === "console" || lang === "terminal" || lang === "raw" || lang === "plain";
+              const isCollapsibleOutput = lang === "hidden-output" || lang === "collapsible-output" || lang === "toggle-output";
+
+              if (isCollapsibleOutput) {
+                return (
+                  <details
+                    className="border border-brand-surface-highest bg-brand-surface-low text-brand-on-surface rounded-[0.25rem] overflow-hidden font-mono group"
+                  >
+                    <summary className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary select-none cursor-pointer outline-none hover:bg-brand-surface-high transition-colors flex items-center gap-1.5 list-none [&::-webkit-details-marker]:hidden">
+                      <span className="text-[8px] transform group-open:rotate-90 transition-transform duration-200">▶</span>
+                      <span>OUTPUT (CLICK TO EXPAND)</span>
+                    </summary>
+                    <div className="p-4 overflow-auto text-xs leading-relaxed max-h-[300px] bg-brand-surface-lowest/50 border-t border-brand-surface-highest">
+                      <pre
+                        className="font-mono text-left whitespace-pre text-brand-on-surface-variant"
+                        dangerouslySetInnerHTML={{ __html: highlightOutputCode(block.code || "") }}
+                      />
+                    </div>
+                  </details>
+                );
+              }
+              
+              if (isOutput) {
+                return (
+                  <div
+                    className="border border-brand-surface-highest bg-brand-surface-low text-brand-on-surface rounded-[0.25rem] overflow-hidden font-mono"
+                  >
+                    <div className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary select-none">
+                      OUTPUT
+                    </div>
+                    <div className="p-4 overflow-auto text-xs leading-relaxed max-h-[300px]">
+                      <pre
+                        className="font-mono text-left whitespace-pre text-brand-on-surface-variant"
+                        dangerouslySetInnerHTML={{ __html: highlightOutputCode(block.code || "") }}
+                      />
+                    </div>
                   </div>
-                  <div className="p-4 overflow-x-auto text-xs leading-relaxed max-h-[300px]">
-                    <pre className="font-mono text-left whitespace-pre text-brand-on-surface-variant">{block.code}</pre>
+                );
+              }
+
+              if (isSimpleOutput) {
+                return (
+                  <div
+                    className="border border-brand-surface-highest bg-brand-surface-low text-brand-on-surface rounded-[0.25rem] overflow-hidden font-mono"
+                  >
+                    <div className="p-4 overflow-auto text-xs leading-relaxed max-h-[300px]">
+                      <pre
+                        className="font-mono text-left whitespace-pre text-brand-on-surface-variant"
+                        dangerouslySetInnerHTML={{ __html: highlightOutputCode(block.code || "") }}
+                      />
+                    </div>
                   </div>
-                </div>
+                );
+              }
+
+              return (
+                <CodeBlock
+                  language={block.language || "text"}
+                  code={block.code || ""}
+                />
               );
             }
-
-            return (
-              <CodeBlock
-                key={index}
-                language={block.language || "text"}
-                code={block.code || ""}
-              />
-            );
+            case "quote":
+              return (
+                <blockquote
+                  className="pl-4 border-l-4 border-brand-surface-highest text-brand-on-surface-variant"
+                >
+                  <p className="font-sans text-[13px] leading-relaxed">
+                    {renderInlineStyles(block.text || "")}
+                  </p>
+                </blockquote>
+              );
+            case "image":
+              return (
+                <figure className="w-full">
+                  <div className="w-full bg-brand-surface-low rounded-lg overflow-hidden border border-brand-surface-highest">
+                    <img
+                      alt={block.alt || ""}
+                      className="w-full h-auto object-cover max-h-[500px]"
+                      src={block.src}
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  {block.caption && (
+                    <figcaption className="mt-2 font-mono text-[10px] text-brand-on-surface-variant tracking-wider uppercase text-center">
+                      {block.caption}
+                    </figcaption>
+                  )}
+                </figure>
+              );
+            case "list":
+              return (
+                <ul className="list-disc pl-5 space-y-2">
+                  {block.items?.map((item, idx) => (
+                    <li key={idx} className="font-sans text-[13px] leading-relaxed">
+                      {renderInlineStyles(item)}
+                    </li>
+                  ))}
+                </ul>
+              );
+            case "details":
+              return (
+                <details
+                  className="border border-brand-surface-highest rounded-[0.25rem] bg-brand-surface-low/20 overflow-hidden"
+                >
+                  <summary className="font-sans text-sm font-bold text-brand-primary px-4 py-3 cursor-pointer select-none hover:bg-brand-surface-low/50 outline-none transition-colors">
+                    {block.text || "Xem câu trả lời"}
+                  </summary>
+                  <div className="px-4 pb-4 pt-2 border-t border-brand-surface-highest bg-brand-surface-lowest/50">
+                    <RenderMarkdown markdown={block.code || ""} />
+                  </div>
+                </details>
+              );
+            default:
+              return null;
           }
-          case "quote":
-            return (
-              <blockquote
-                key={index}
-                className="my-8 pl-6 pr-6 py-4 border-l-4 border-brand-secondary bg-brand-surface-low/60 rounded-r-md"
-              >
-                <p className="font-serif italic text-base sm:text-lg text-brand-on-surface leading-relaxed font-medium">
-                  {block.text}
-                </p>
-              </blockquote>
-            );
-          case "image":
-            return (
-              <figure key={index} className="my-8">
-                <div className="w-full bg-brand-surface-low rounded-lg overflow-hidden border border-brand-surface-highest">
-                  <img
-                    alt={block.alt || ""}
-                    className="w-full h-auto object-cover max-h-[500px]"
-                    src={block.src}
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                {block.caption && (
-                  <figcaption className="mt-2 font-mono text-[10px] text-brand-on-surface-variant tracking-wider uppercase text-center">
-                    {block.caption}
-                  </figcaption>
-                )}
-              </figure>
-            );
-          case "list":
-            return (
-              <ul key={index} className="list-disc pl-5 my-4 space-y-2 mb-6">
-                {block.items?.map((item, idx) => (
-                  <li key={idx} className="font-sans text-[14px] leading-relaxed">
-                    {renderInlineStyles(item)}
-                  </li>
-                ))}
-              </ul>
-            );
-          default:
-            return null;
+        })();
+
+        if (!blockElement) return null;
+
+        const hasNote = !!block.note;
+
+        let wrapperMargin = "my-3";
+        if (block.type === "paragraph") {
+          wrapperMargin = "mb-4";
+        } else if (block.type === "heading") {
+          wrapperMargin = block.level === 2 ? "mt-8 mb-3" : "mt-6 mb-2";
+        } else if (block.type === "code") {
+          wrapperMargin = "my-4";
+        } else if (block.type === "quote") {
+          wrapperMargin = "my-4";
+        } else if (block.type === "image") {
+          wrapperMargin = "my-5";
+        } else if (block.type === "list") {
+          wrapperMargin = "my-3";
+        } else if (block.type === "details") {
+          wrapperMargin = "my-4";
         }
+
+        return (
+          <div key={index} className={`relative group/block w-full ${wrapperMargin}`}>
+            {/* Content & Note Wrapper */}
+            <div className="relative w-full xl:max-w-[720px]">
+              {blockElement}
+ 
+              {/* Note Column (Positioned absolutely on the right on xl screens, static below content on mobile/tablet) */}
+              {hasNote && (
+                <div
+                  style={{
+                    transform: block.noteOffset ? `translateY(${block.noteOffset}px)` : undefined
+                  }}
+                  className="w-full xl:w-56 mt-4 xl:mt-0 bg-sky-50/50 dark:bg-sky-950/20 border-l-2 border-sky-400/70 p-3.5 rounded-r-md text-xs text-brand-on-surface-variant font-sans transition-all xl:absolute xl:left-[calc(100%+40px)] xl:top-0"
+                >
+                  <div className="font-mono text-[9px] uppercase tracking-wider text-sky-600 dark:text-sky-400 mb-1 font-bold">
+                    Note
+                  </div>
+                  <div className="leading-relaxed text-justify">{renderInlineStyles(block.note || "")}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
       })}
     </div>
   );
 }
+
+
+
+
