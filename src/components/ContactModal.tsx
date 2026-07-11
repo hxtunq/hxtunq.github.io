@@ -105,7 +105,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             {/* Header */}
             <div className="flex items-center justify-between border-b border-brand-surface-highest px-6 py-4 bg-brand-surface-low">
               <h3 className="font-serif font-bold text-lg text-brand-primary">
-                Academic Inquiry
+                Get in Touch
               </h3>
               <button
                 onClick={onClose}
@@ -129,14 +129,10 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="bg-brand-surface-low/50 border border-brand-surface-highest p-3 text-xs font-mono text-brand-on-surface-variant mb-2">
-                    <span className="font-bold text-brand-primary">INFO //</span> All inbounds are filtered by institutional domain and archived securely for compliance audits.
-                  </div>
-
                   {/* Name field */}
                   <div>
                     <label className="block text-[11px] font-bold tracking-wider text-brand-secondary uppercase mb-1">
-                      Academic Name / Affiliation
+                      Name / Affiliation
                     </label>
                     <input
                       type="text"
@@ -151,7 +147,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                   {/* Email field */}
                   <div>
                     <label className="block text-[11px] font-bold tracking-wider text-brand-secondary uppercase mb-1">
-                      Institutional Email Address
+                      Email Address
                     </label>
                     <input
                       type="email"
@@ -183,14 +179,13 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                   {/* Message body */}
                   <div>
                     <label className="block text-[11px] font-bold tracking-wider text-brand-secondary uppercase mb-1">
-                      Brief Proposal / Inquiry Abstract
+                      Description
                     </label>
                     <textarea
                       required
                       rows={4}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Provide a concise description of your request or biological research hypothesis..."
                       className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40 resize-none"
                     />
                   </div>
@@ -217,7 +212,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       ) : (
                         <>
                           <Send className="w-3 h-3" />
-                          Transmit Inquiry
+                          Transmit
                         </>
                       )}
                     </button>

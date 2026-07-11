@@ -51,7 +51,7 @@ export default function Footer({ onLinkHighlight }: FooterProps) {
 
         {/* Right Side: Copyright */}
         <div className="font-sans text-[11px] font-medium text-brand-on-surface-variant tracking-wider uppercase text-center md:text-right">
-          © 2026 Tung Hoang.
+          © 2026 Tung Hoang
         </div>
       </div>
     </footer>
