@@ -101,6 +101,17 @@ const chapters: BookChapter[] = [];
 for (const [, raw] of Object.entries(markdownModules)) {
   const { meta, body } = parseFrontmatter(raw as string);
 
+  // Skip draft or unpublished chapters
+  if (
+    meta.published === false ||
+    meta.published === "false" ||
+    meta.draft === true ||
+    meta.draft === "true" ||
+    (meta.status !== undefined && meta.status !== "Published")
+  ) {
+    continue;
+  }
+
   const chapter: BookChapter = {
     id: (meta.id as string) || `chapter-${Date.now()}`,
     bookId: (meta.bookId as string) || "",
@@ -110,43 +121,49 @@ for (const [, raw] of Object.entries(markdownModules)) {
     contents: body,
     code: (meta.code as string) || undefined,
     output: (meta.output as string) || undefined,
+    section: (meta.section as string) || undefined,
+    published: meta.published !== false,
   };
 
   chapters.push(chapter);
 }
 
-export const bookItems: BookItem[] = bookMetadataList.map((metadata) => {
-  const bookFlat = chapters.filter((c) => c.bookId === metadata.id);
+// Only export books that are published (published !== false)
+export const bookItems: BookItem[] = bookMetadataList
+  .filter((metadata) => metadata.published !== false)
+  .map((metadata) => {
+    const bookFlat = chapters.filter((c) => c.bookId === metadata.id);
 
-  // Find roots (no parentId)
-  const rootChapters: BookChapter[] = bookFlat
-    .filter((c) => !c.parentId)
-    .map((c) => ({
-      ...c,
-      subsections: []
-    }));
+    // Find roots (no parentId)
+    const rootChapters: BookChapter[] = bookFlat
+      .filter((c) => !c.parentId)
+      .map((c) => ({
+        ...c,
+        subsections: []
+      }));
 
-  // Associate children (subsections)
-  bookFlat.forEach((c) => {
-    if (c.parentId) {
-      const parent = rootChapters.find((r) => r.id === c.parentId);
-      if (parent) {
-        parent.subsections!.push({
-          ...c,
-          subsections: []
-        });
+    // Associate children (subsections)
+    bookFlat.forEach((c) => {
+      if (c.parentId) {
+        const parent = rootChapters.find((r) => r.id === c.parentId);
+        if (parent) {
+          parent.subsections!.push({
+            ...c,
+            subsections: []
+          });
+        }
       }
-    }
+    });
+
+    // Sort roots and their subsections by order
+    rootChapters.sort((a, b) => a.order - b.order);
+    rootChapters.forEach((r) => {
+      r.subsections!.sort((a, b) => a.order - b.order);
+    });
+
+    return {
+      ...metadata,
+      chapters: rootChapters,
+    };
   });
 
-  // Sort roots and their subsections by order
-  rootChapters.sort((a, b) => a.order - b.order);
-  rootChapters.forEach((r) => {
-    r.subsections!.sort((a, b) => a.order - b.order);
-  });
-
-  return {
-    ...metadata,
-    chapters: rootChapters,
-  };
-});

@@ -3,6 +3,7 @@ id: "preface"
 bookId: "genomic-variant-analysis"
 title: "Lời nói đầu"
 order: 0
+section: "Getting started"
 ---
 
 Chào mừng bạn đến với tài liệu hướng dẫn **Whole Genome Sequencing**. Cuốn sách này được biên soạn nhằm cung cấp một lộ trình thực hành thực tế, trực quan, giúp các nhà nghiên cứu chuyển đổi từ dữ liệu thô sang các phân tích sinh học có ý nghĩa sâu sắc. Whole Genome Sequencing (WGS) là công nghệ cốt lõi trong nghiên cứu di truyền học và tin sinh học hiện đại.

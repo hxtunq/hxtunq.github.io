@@ -679,7 +679,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                   className="border border-brand-surface-highest rounded-[0.25rem] bg-brand-surface-low/20 overflow-hidden"
                 >
                   <summary className="font-sans text-sm font-bold text-brand-primary px-4 py-3 cursor-pointer select-none hover:bg-brand-surface-low/50 outline-none transition-colors">
-                    {block.text || "Xem câu trả lời"}
+                    {block.text || "View Answer"}
                   </summary>
                   <div className="px-4 pb-4 pt-2 border-t border-brand-surface-highest bg-brand-surface-lowest/50">
                     <RenderMarkdown markdown={block.code || ""} />

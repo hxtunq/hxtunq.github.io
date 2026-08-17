@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  --font-serif: "Newsreader", Georgia, Cambria, "Times New Roman", serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* Clean light "academic white" palette.
@@ -12,13 +12,15 @@
   --color-brand-secondary: #515f74;      /* muted slate: mono labels, meta */
   --color-brand-accent: #0e7490;         /* deep teal: interactive fills & links */
   --color-brand-accent-ink: #ffffff;     /* text placed on top of accent fills */
-  --color-brand-bg: #f7f9fb;             /* near-white page base */
+  --color-brand-bg: #ffffff;             /* pure white page base */
   --color-brand-surface-low: #f2f4f6;    /* recessed panels & inputs */
   --color-brand-surface-lowest: #ffffff; /* elevated cards */
   --color-brand-surface-high: #e6e8ea;   /* hover / raised */
   --color-brand-surface-highest: #e0e3e5;/* hairline borders */
   --color-brand-on-surface: #191c1e;     /* body text */
   --color-brand-on-surface-variant: #45474c; /* muted body text */
+  --color-brand-nav: #f2f4f6;            /* floating nav pill, tinted against the white page */
+  --color-brand-nav-border: #e2e6ea;     /* outline around the pill */
 }
 
 body {
@@ -34,6 +36,52 @@ body {
 
 .max-w-reading-width {
   max-width: 720px;
+}
+
+/* Navbar sky. Each element animates exactly once and holds at opacity 0 either
+   side of its run; NavSky.tsx remounts the whole set once per cycle with fresh
+   positions, which is what starts them again. The phases are kept apart by the
+   animation-delay it hands out, not by these keyframes. */
+.nav-sky-meteor {
+  animation: nav-sky-streak 1.2s linear both;
+}
+
+/* Each meteor carries its own --nav-sky-travel; the vertical leg is half of it
+   so every streak keeps the 2:1 slope the sprite is drawn at. */
+@keyframes nav-sky-streak {
+  0%   { transform: translate(0, 0); opacity: 0; }
+  25%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% {
+    transform: translate(var(--nav-sky-travel), calc(var(--nav-sky-travel) / 2));
+    opacity: 0;
+  }
+}
+
+/* Stars swell as they light up, which reads as a twinkle rather than a fade. */
+.nav-sky-star {
+  transform-origin: center;
+  animation: nav-sky-twinkle 2.6s ease-in-out both;
+}
+
+@keyframes nav-sky-twinkle {
+  0%   { opacity: 0; transform: scale(0.3) rotate(-20deg); }
+  28%  { opacity: 1; transform: scale(1) rotate(0deg); }
+  62%  { opacity: 1; transform: scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0.3) rotate(20deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-sky-meteor,
+  .nav-sky-star {
+    animation: none;
+  }
+  .nav-sky-meteor {
+    opacity: 0;
+  }
+  .nav-sky-star {
+    opacity: 0.5;
+  }
 }
 
 /* Custom scrollbar for an academic feel */

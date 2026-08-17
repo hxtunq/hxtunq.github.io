@@ -21,12 +21,15 @@ import Footer from "./components/Footer";
 import HomeView from "./components/HomeView";
 import BlogView from "./components/BlogView";
 import BookdownView from "./components/BookdownView";
+import AboutView from "./components/AboutView";
+import NotesView from "./components/NotesView";
 import ContactModal from "./components/ContactModal";
 
 // Data & Types Imports
 import { selectedPublications, bookMetadataList } from "./data";
 import { blogPosts } from "./lib/blog-loader";
 import { bookItems } from "./lib/book-loader";
+import { notesPosts } from "./lib/notes-loader";
 import { SelectedPublication, BlogPost } from "./types";
 
 export default function App() {
@@ -54,14 +57,14 @@ export default function App() {
       document.title = post ? `${post.title} — Xuan Tung Hoang` : "Xuan Tung Hoang";
     } else if (cleanPath === "blog" || cleanPath.startsWith("blog/")) {
       document.title = "Blog — Xuan Tung Hoang";
-    } else if (cleanPath === "project" || cleanPath.startsWith("project/")) {
-      if (cleanPath.startsWith("project/")) {
-        const parts = cleanPath.substring("project/".length).split("/");
+    } else if (cleanPath === "docs" || cleanPath.startsWith("docs/")) {
+      if (cleanPath.startsWith("docs/")) {
+        const parts = cleanPath.substring("docs/".length).split("/");
         const bookId = parts[0];
         const chapterId = parts[1];
         const book = bookItems.find((b) => b.id === bookId);
 
-        let displayTitle = book ? book.title : "Projects";
+        let displayTitle = book ? book.title : "Docs";
         if (chapterId && book) {
           let chapterTitle = "";
           for (const chap of book.chapters) {
@@ -90,8 +93,12 @@ export default function App() {
         }
         document.title = displayTitle;
       } else {
-        document.title = "Projects — Xuan Tung Hoang";
+        document.title = "Docs — Xuan Tung Hoang";
       }
+    } else if (cleanPath === "about" || cleanPath.startsWith("about/")) {
+      document.title = "About — Xuan Tung Hoang";
+    } else if (cleanPath === "notes" || cleanPath.startsWith("notes/")) {
+      document.title = "Notes — Xuan Tung Hoang";
     } else {
       document.title = "Xuan Tung Hoang";
     }
@@ -106,13 +113,19 @@ export default function App() {
   };
 
   // Derive activeTab from currentPath.
-  const getActiveTab = (path: string): "home" | "blog" | "project" => {
+  const getActiveTab = (path: string): "home" | "blog" | "notes" | "docs" | "about" => {
     const cleanPath = path.replace(/^\/+|\/+$/g, "");
     if (cleanPath.startsWith("blog") || cleanPath.startsWith("post/")) {
       return "blog";
     }
-    if (cleanPath.startsWith("project")) {
-      return "project";
+    if (cleanPath.startsWith("notes")) {
+      return "notes";
+    }
+    if (cleanPath.startsWith("docs")) {
+      return "docs";
+    }
+    if (cleanPath.startsWith("about")) {
+      return "about";
     }
     return "home";
   };
@@ -121,8 +134,8 @@ export default function App() {
 
   const isBookdownReader = useMemo(() => {
     const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
-    if (cleanPath.startsWith("project/")) {
-      const parts = cleanPath.substring("project/".length).split("/");
+    if (cleanPath.startsWith("docs/")) {
+      const parts = cleanPath.substring("docs/".length).split("/");
       return !!parts[0];
     }
     return false;
@@ -134,19 +147,37 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  // Compute search results across all publications & blogs
+  // Compute search results across all content
+  const q = globalSearchQuery.toLowerCase();
+
   const matchedPublications = selectedPublications.filter(
     (pub) =>
-      pub.title.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
-      pub.abstract.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
-      pub.journal.toLowerCase().includes(globalSearchQuery.toLowerCase())
+      pub.title.toLowerCase().includes(q) ||
+      pub.abstract.toLowerCase().includes(q) ||
+      pub.journal.toLowerCase().includes(q)
   );
 
   const matchedBlogs = blogPosts.filter(
     (post) =>
-      post.title.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
-      post.abstract.toLowerCase().includes(globalSearchQuery.toLowerCase()) ||
-      post.category.toLowerCase().includes(globalSearchQuery.toLowerCase())
+      post.title.toLowerCase().includes(q) ||
+      post.abstract.toLowerCase().includes(q) ||
+      post.category.toLowerCase().includes(q)
+  );
+
+  const matchedNotes = notesPosts.filter(
+    (post) =>
+      post.content.toLowerCase().includes(q) ||
+      post.authorName.toLowerCase().includes(q)
+  );
+
+  const matchedDocs = bookItems.flatMap((book) =>
+    book.chapters
+      .filter(
+        (ch) =>
+          ch.title.toLowerCase().includes(q) ||
+          ch.contents.toLowerCase().includes(q)
+      )
+      .map((ch) => ({ ...ch, bookTitle: book.title, bookId: book.id }))
   );
 
   return (
@@ -181,10 +212,10 @@ export default function App() {
           {activeTab === "home" && (
             <motion.div
               key="home-tab"
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <HomeView
                 onNavigate={navigate}
@@ -196,10 +227,10 @@ export default function App() {
           {activeTab === "blog" && (
             <motion.div
               key="blog-tab"
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <BlogView
                 currentPath={currentPath}
@@ -210,18 +241,42 @@ export default function App() {
             </motion.div>
           )}
 
-          {activeTab === "project" && (
+          {activeTab === "docs" && (
             <motion.div
-              key="project-tab"
-              initial={{ opacity: 0, y: 8 }}
+              key="docs-tab"
+              initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.3 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
               <BookdownView
                 currentPath={currentPath}
                 navigate={navigate}
               />
+            </motion.div>
+          )}
+
+          {activeTab === "notes" && (
+            <motion.div
+              key="notes-tab"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <NotesView />
+            </motion.div>
+          )}
+
+          {activeTab === "about" && (
+            <motion.div
+              key="about-tab"
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              <AboutView onContactClick={() => setContactOpen(true)} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -244,18 +299,20 @@ export default function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               onClick={() => {
                 setSearchOpen(false);
                 setGlobalSearchQuery("");
               }}
-              className="absolute inset-0 bg-brand-primary/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-brand-primary/60"
             />
 
             {/* Popup Box */}
             <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.98 }}
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
               className="relative w-full max-w-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-2xl p-6 z-10 rounded-none overflow-hidden"
             >
               <div className="flex justify-between items-center border-b border-brand-surface-highest pb-4 mb-4">
@@ -288,73 +345,128 @@ export default function App() {
               <div className="mt-6 max-h-[360px] overflow-y-auto space-y-6 pr-1 whitespace-normal">
                 {globalSearchQuery === "" ? (
                   <div className="text-center py-8 text-brand-on-surface-variant/60">
-                    <span className="font-mono text-xs">Search across Tung's website in real-time.</span>
+                    <span className="font-mono text-xs">Search across all posts, notes, docs & publications.</span>
                   </div>
-                ) : matchedPublications.length === 0 && matchedBlogs.length === 0 ? (
+                ) : matchedPublications.length === 0 && matchedBlogs.length === 0 && matchedNotes.length === 0 && matchedDocs.length === 0 ? (
                   <div className="text-center py-8">
-                    <span className="font-mono text-xs text-rose-700 font-bold">ZERO RECORDS MATCHED</span>
-                    <p className="font-sans text-xs text-brand-on-surface-variant mt-1">Try searching broader tags or parameters.</p>
+                    <span className="font-mono text-xs text-rose-700 font-bold">No results found</span>
+                    <p className="font-sans text-xs text-brand-on-surface-variant mt-1">Try different keywords.</p>
                   </div>
                 ) : (
                   <>
-                    {/* Publication entries matches */}
-                    {matchedPublications.length > 0 && (
+                    {/* Notes matches */}
+                    {matchedNotes.length > 0 && (
                       <div className="space-y-3">
                         <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                          Peer-Reviewed Publications ({matchedPublications.length})
+                          Notes ({matchedNotes.length})
                         </h4>
                         <div className="space-y-2">
-                          {matchedPublications.map((pub) => (
+                          {matchedNotes.map((post) => (
                             <div
-                              key={pub.id}
-                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-default flex justify-between items-center"
+                              key={post.id}
+                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-pointer flex justify-between items-center rounded-md"
+                              onClick={() => {
+                                navigate("/notes");
+                                setSearchOpen(false);
+                                setGlobalSearchQuery("");
+                                setTimeout(() => {
+                                  document.getElementById(post.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                                }, 300);
+                              }}
                             >
-                              <div>
-                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{pub.journal} • {pub.year}</span>
-                                <span className="font-serif text-sm font-bold text-brand-primary block">{pub.title}</span>
+                              <div className="min-w-0">
+                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{new Date(post.createdAt).toLocaleDateString()}</span>
+                                <span className="font-sans text-sm text-brand-primary block line-clamp-1">{post.content.slice(0, 100)}</span>
                               </div>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(pub.doi);
-                                  triggerToast("COPIED DOI TO SYSTEM CLIPBOARD");
-                                  setSearchOpen(false);
-                                  setGlobalSearchQuery("");
-                                }}
-                                className="font-mono text-[9px] font-bold tracking-widest uppercase text-brand-secondary border border-brand-surface-highest bg-brand-surface-low hover:border-brand-accent hover:text-brand-accent px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
-                              >
-                                Copy DOI
-                              </button>
+                              <ArrowRight className="w-3.5 h-3.5 text-brand-secondary shrink-0 ml-3" />
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    {/* Blog & chapters matches */}
+                    {/* Blog matches */}
                     {matchedBlogs.length > 0 && (
                       <div className="space-y-3">
                         <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                          Preprints & Research Articles ({matchedBlogs.length})
+                          Blog Posts ({matchedBlogs.length})
                         </h4>
                         <div className="space-y-2">
                           {matchedBlogs.map((post) => (
                             <div
                               key={post.id}
-                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-default flex justify-between items-center"
+                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-pointer flex justify-between items-center rounded-md"
+                              onClick={() => {
+                                navigate(`/post/${post.id}`);
+                                setSearchOpen(false);
+                                setGlobalSearchQuery("");
+                              }}
                             >
-                              <div>
+                              <div className="min-w-0">
                                 <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{post.category}</span>
-                                <span className="font-sans text-sm font-bold text-brand-primary block">{post.title}</span>
+                                <span className="font-sans text-sm font-bold text-brand-primary block line-clamp-1">{post.title}</span>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-brand-secondary shrink-0 ml-3" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Docs matches */}
+                    {matchedDocs.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
+                          Docs ({matchedDocs.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {matchedDocs.map((ch) => (
+                            <div
+                              key={`${ch.bookId}-${ch.id}`}
+                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-pointer flex justify-between items-center rounded-md"
+                              onClick={() => {
+                                navigate(`/docs/${ch.bookId}/${ch.id}`);
+                                setSearchOpen(false);
+                                setGlobalSearchQuery("");
+                              }}
+                            >
+                              <div className="min-w-0">
+                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{ch.bookTitle}</span>
+                                <span className="font-sans text-sm font-bold text-brand-primary block line-clamp-1">{ch.title}</span>
+                              </div>
+                              <ArrowRight className="w-3.5 h-3.5 text-brand-secondary shrink-0 ml-3" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Publication matches */}
+                    {matchedPublications.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
+                          Publications ({matchedPublications.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {matchedPublications.map((pub) => (
+                            <div
+                              key={pub.id}
+                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-default flex justify-between items-center rounded-md"
+                            >
+                              <div className="min-w-0">
+                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{pub.journal} • {pub.year}</span>
+                                <span className="font-serif text-sm font-bold text-brand-primary block line-clamp-1">{pub.title}</span>
                               </div>
                               <button
                                 onClick={() => {
-                                  navigate(`/post/${post.id}`);
+                                  navigator.clipboard.writeText(pub.doi);
+                                  triggerToast("Copied DOI");
                                   setSearchOpen(false);
                                   setGlobalSearchQuery("");
                                 }}
-                                className="font-sans text-[9px] font-bold tracking-widest uppercase text-brand-accent-ink border border-brand-accent bg-brand-accent hover:bg-cyan-800 px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer"
+                                className="font-mono text-[9px] font-bold tracking-widest uppercase text-brand-secondary border border-brand-surface-highest bg-brand-surface-low hover:border-brand-accent hover:text-brand-accent px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer rounded"
                               >
-                                Read
+                                DOI
                               </button>
                             </div>
                           ))}

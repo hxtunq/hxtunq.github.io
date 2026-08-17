@@ -3,6 +3,7 @@ id: "quality-control-adapter-trimming"
 bookId: "genomic-variant-analysis"
 title: "2. Kiểm soát chất lượng & Cắt lọc đoạn mồi"
 order: "2"
+section: "QC & Preprocessing"
 ---
 
 Chương này trình bày các bước thiết yếu để đánh giá chất lượng dữ liệu trình tự thô nhận được từ máy giải trình tự, nhận diện các vấn đề về chất lượng đọc và áp dụng thuật toán cắt lọc mồi thích hợp.

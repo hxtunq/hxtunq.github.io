@@ -45,6 +45,35 @@ export const selectedPublications: SelectedPublication[] = [
   },
 ];
 
-// Temporarily empty — project write-ups are still being finished.
-// Restore entries here (see git history) once ready to publish.
-export const bookMetadataList: BookMetadata[] = [];
+export const bookMetadataList: BookMetadata[] = [
+  {
+    id: "genomic-variant-analysis",
+    title: "Genomic Variant Analysis",
+    description: "Hands-on guide for WGS/WES sequencing data analysis, focusing on short germline variant discovery and annotation in humans.",
+    iconName: "biotech",
+    language: "Vietnamese",
+    typeLabel: "Case Study & Hands-on Guide",
+    tags: ["genomics"],
+    published: false,
+  },
+  {
+    id: "bash-fundamentals-bioinformatics",
+    title: "Bash for Bioinformatics",
+    description: "Essential Bash and Shell scripting guide for bioinformatics workflows and large-scale data processing.",
+    iconName: "terminal",
+    language: "Vietnamese",
+    typeLabel: "Introductory Book",
+    tags: ["code"],
+    published: false,
+  },
+  {
+    id: "halophilic-microbiota-vietnam",
+    title: "Halophilic Microbiota of Vietnam",
+    description: "A case study on multi-sample metagenomics data analysis from extreme solar saltworks in Vietnam.",
+    iconName: "scatter_plot",
+    language: "Vietnamese",
+    typeLabel: "Case Study & Hands-on Guide",
+    tags: ["metagenomics", "r", "bioinformatics"],
+    published: false,
+  }
+];

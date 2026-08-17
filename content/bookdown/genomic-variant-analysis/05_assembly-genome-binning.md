@@ -3,6 +3,7 @@ id: "assembly-genome-binning"
 bookId: "genomic-variant-analysis"
 title: "5. Lắp ráp & Phân nhóm bộ gen"
 order: "5"
+section: "Assembly & Binning"
 ---
 
 Chương này hướng dẫn các kỹ thuật lắp ráp các đoạn đọc ngắn thành các đoạn dài (contigs/scaffolds) và phân nhóm chúng thành các bộ gen riêng biệt từ metagenome (Metagenome-Assembled Genomes - MAGs).

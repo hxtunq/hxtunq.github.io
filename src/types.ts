@@ -49,6 +49,8 @@ export interface BookChapter {
   code?: string;
   output?: string;
   subsections?: BookChapter[];
+  section?: string;
+  published?: boolean;
 }
 
 export interface BookMetadata {
@@ -59,8 +61,35 @@ export interface BookMetadata {
   language?: string;
   typeLabel?: string;
   tags?: string[];
+  published?: boolean;
 }
 
 export interface BookItem extends BookMetadata {
   chapters: BookChapter[];
+}
+
+export interface NewsItem {
+  id: string;
+  date: string;
+  content: string;
+}
+
+export interface NotesPost {
+  id: string;
+  authorName: string;
+  createdAt: string; // ISO format: e.g. "2026-07-29T10:00:00Z"
+  content: string;
+  tags?: string[];
+  imageUrl?: string;
+  paperPreview?: string; // URL to an academic paper (for paper counting & preview)
+  linkPreview?: {
+    url: string;
+    title: string;
+    description: string;
+    siteName?: string;
+    imageUrl?: string;
+  };
+  likes?: number;
+  commentsCount?: number;
+  repostsCount?: number;
 }

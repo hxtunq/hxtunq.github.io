@@ -58,8 +58,8 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
   // Derive bookId and chapterId from currentPath
   const pathParts = useMemo(() => {
     const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
-    if (cleanPath.startsWith("project/")) {
-      const parts = cleanPath.substring("project/".length).split("/");
+    if (cleanPath.startsWith("docs/")) {
+      const parts = cleanPath.substring("docs/".length).split("/");
       return {
         bookId: parts[0] || null,
         chapterId: parts[1] || null
@@ -203,7 +203,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
   // immediately sees the content instead of the (still-open) chapter list.
   const goToChapter = (chapterId: string) => {
     if (selectedBook) {
-      navigate(`/project/${selectedBook.id}/${chapterId}`);
+      navigate(`/docs/${selectedBook.id}/${chapterId}`);
     }
     if (typeof window !== "undefined" && window.innerWidth < 768) {
       setShowSidebar(false);
@@ -228,7 +228,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-2xl">
                 <h1 className="font-sans text-3.5xl font-bold tracking-tight text-brand-primary mb-3">
-                  Projects
+                  Docs
                 </h1>
                 <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed">
                   Long-form projects, reproducible notebooks and hands-on guides I build and maintain — mostly around bioinformatics, computational biology, and data analysis.
@@ -337,11 +337,11 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     <button
                       onClick={() => {
                         const firstChapter = book.chapters[0];
-                        navigate(`/project/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
+                        navigate(`/docs/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
                       }}
                       className="group flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-primary outline-none cursor-pointer border-b border-transparent hover:border-brand-primary pb-0.5 w-fit mt-2 transition-all"
                     >
-                      <span>Read eBook</span>
+                      <span>Read</span>
                       <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </motion.div>
@@ -366,7 +366,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
               {showSidebar && (
                 <div className="hidden md:flex w-[300px] shrink-0 border-r border-brand-surface-highest h-full items-center px-6 bg-brand-surface-low">
                   <button
-                    onClick={() => navigate(`/project/${selectedBook.id}/${selectedBook.chapters[0]?.id}`)}
+                    onClick={() => navigate(`/docs/${selectedBook.id}/${selectedBook.chapters[0]?.id}`)}
                     style={{ textAlign: "left" }}
                     className="font-sans font-normal text-[14.5px] text-brand-on-surface truncate cursor-pointer w-full outline-none hover:text-sky-600 transition-colors"
                   >
@@ -390,8 +390,8 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
 
                   {/* Catalog / Home link */}
                   <button
-                    onClick={() => navigate("/project")}
-                    title="Project Catalog"
+                    onClick={() => navigate("/notebooks")}
+                    title="Notebook Catalog"
                     className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
                   >
                     <Home className="w-[18px] h-[18px]" />
@@ -412,7 +412,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                       type="text"
                       value={bookSearchQuery}
                       onChange={(e) => setBookSearchQuery(e.target.value)}
-                      placeholder="Tìm kiếm trong sách..."
+                      placeholder="Search within book..."
                       autoFocus
                       className="bg-brand-surface-low border border-brand-surface-highest focus:border-sky-500 outline-none text-xs px-2.5 py-1 rounded w-[180px] text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-all font-sans"
                     />
@@ -453,11 +453,16 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     {/* Table of Chapters list */}
                     <div className="space-y-1">
                       <div className="space-y-1">
-                        {filteredChapters.map((chap) => {
+                        {filteredChapters.map((chap, idx) => {
                           const isRootActive = activePage?.id === chap.id;
 
                           return (
                             <div key={chap.id} className="space-y-0.5">
+                              {chap.section && (
+                                <div className={`font-sans text-[10.5px] font-bold text-brand-secondary/80 tracking-wider uppercase px-2 select-none ${idx === 0 ? "pt-1 pb-0.5" : "pt-3 pb-0.5"}`}>
+                                  {chap.section}
+                                </div>
+                              )}
                               <button
                                 onClick={() => goToChapter(chap.id)}
                                 style={{ textAlign: "left" }}
@@ -541,7 +546,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     onClick={() => {
                       const prevPage = flatPages[activePageIndex - 1];
                       if (prevPage) {
-                        navigate(`/project/${selectedBook.id}/${prevPage.id}`);
+                        navigate(`/notebooks/${selectedBook.id}/${prevPage.id}`);
                       }
                     }}
                     className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase text-left"
@@ -556,7 +561,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     onClick={() => {
                       const nextPage = flatPages[activePageIndex + 1];
                       if (nextPage) {
-                        navigate(`/project/${selectedBook.id}/${nextPage.id}`);
+                        navigate(`/notebooks/${selectedBook.id}/${nextPage.id}`);
                       }
                     }}
                     className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase text-right"

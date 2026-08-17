@@ -15,7 +15,7 @@ interface ContactModalProps {
 export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("Collaborative Research Inquiry");
+  const [subject, setSubject] = useState("Research Discussion & Questions");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -91,20 +91,22 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
             onClick={onClose}
-            className="absolute inset-0 bg-brand-primary/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-brand-primary/60"
           />
 
           {/* Modal content body */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            initial={{ opacity: 0, scale: 0.98, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
             className="relative w-full max-w-lg bg-brand-surface-lowest border border-brand-surface-highest rounded-none shadow-xl overflow-hidden z-10"
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-brand-surface-highest px-6 py-4 bg-brand-surface-low">
-              <h3 className="font-serif font-bold text-lg text-brand-primary">
+              <h3 className="font-sans font-bold text-lg text-brand-primary">
                 Get in Touch
               </h3>
               <button
@@ -169,10 +171,10 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       onChange={(e) => setSubject(e.target.value)}
                       className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all"
                     >
-                      <option value="Collaborative Research Inquiry">Collaborative Research Inquiry</option>
-                      <option value="Peer Review / Editorial Request">Peer Review / Editorial Request</option>
-                      <option value="Graduate/Advising Opportunity">Graduate/Advising Opportunity</option>
-                      <option value="General Academic Question">General Academic Question</option>
+                      <option value="Research Discussion & Questions">Research Discussion & Questions</option>
+                      <option value="Academic Feedback & Suggestions">Academic Feedback & Suggestions</option>
+                      <option value="Graduate & Internship Opportunities">Graduate & Internship Opportunities</option>
+                      <option value="General Inquiry / Saying Hello">General Inquiry / Saying Hello</option>
                     </select>
                   </div>
 
