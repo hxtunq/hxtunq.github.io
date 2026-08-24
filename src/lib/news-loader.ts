@@ -6,71 +6,96 @@
 import { NewsItem } from "../types";
 
 /**
- * Parses YAML frontmatter from a raw markdown string.
+ * Parses markdown news lines from a single unified news.md file.
+ * Supports:
+ * - **2026-08-25**: Updated website interface.
+ * - [2026-08-25]: Updated website interface.
+ * - 2026-08-25: Updated website interface.
  */
-function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: string } {
-  const trimmed = raw.trim();
-  if (!trimmed.startsWith("---")) {
-    return { meta: {}, body: trimmed };
-  }
+function parseNewsMarkdownLines(raw: string): NewsItem[] {
+  const list: NewsItem[] = [];
+  const lines = raw.split("\n");
 
-  const endIndex = trimmed.indexOf("---", 3);
-  if (endIndex === -1) {
-    return { meta: {}, body: trimmed };
-  }
+  let currentItem: Partial<NewsItem> | null = null;
 
-  const yamlBlock = trimmed.slice(3, endIndex).trim();
-  const body = trimmed.slice(endIndex + 3).trim();
-  const meta: Record<string, unknown> = {};
-
-  const lines = yamlBlock.split("\n");
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const match = line.match(/^([a-zA-Z_][\w]*)\s*:\s*(.*)/);
-    if (!match) continue;
+    const line = lines[i].trim();
+    if (!line || line.startsWith("#")) continue;
 
-    const key = match[1];
-    let value = match[2].trim();
+    // Pattern: - **2026-08-25**: Content OR - [2026-08-25] Content OR - 2026-08-25: Content
+    const bulletMatch = line.match(/^[-*]\s*(?:\*\*(.*?)\*\*|\[(.*?)\]|(\d{4}[-/.]\d{2}[-/.]\d{2}))\s*[:|-]?\s*(.*)$/);
+    if (bulletMatch) {
+      if (currentItem && currentItem.id && currentItem.content) {
+        list.push(currentItem as NewsItem);
+      }
 
-    // Strip surrounding quotes
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
+      const rawDate = bulletMatch[1] || bulletMatch[2] || bulletMatch[3];
+      const content = bulletMatch[4]?.trim() || "";
+
+      // Extract ISO date
+      const isoMatch = rawDate.match(/(\d{4})[-/.](\d{2})[-/.](\d{2})/);
+      const isoDate = isoMatch ? `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}` : rawDate;
+
+      // Format display date (e.g. Aug 2026 or Aug 25, 2026)
+      const d = new Date(isoDate);
+      const displayDate = !isNaN(d.getTime())
+        ? d.toLocaleString("en-US", { month: "short", year: "numeric" })
+        : rawDate;
+
+      currentItem = {
+        id: `news-${isoDate}-${list.length + 1}`,
+        date: displayDate,
+        createdAt: isoDate,
+        content: content,
+      };
+    } else if (currentItem) {
+      // Append multi-line content
+      currentItem.content = (currentItem.content ? `${currentItem.content} ` : "") + line;
     }
-
-    meta[key] = value;
   }
 
-  return { meta, body };
+  if (currentItem && currentItem.id && currentItem.content) {
+    list.push(currentItem as NewsItem);
+  }
+
+  return list;
 }
 
-// Auto-discover all markdown files in /content/news/ at build/compile time
-const markdownModules = import.meta.glob("/content/news/*.md", {
+// Auto-discover single content/news.md or any files in /content/news/*.md
+const unifiedNewsModules = import.meta.glob("/content/news.md", {
   eager: true,
   query: "?raw",
   import: "default",
 });
 
-const items: (NewsItem & { createdAt: string })[] = [];
+const legacyNewsModules = import.meta.glob("/content/news/*.md", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
 
-for (const [path, raw] of Object.entries(markdownModules)) {
-  const { meta, body } = parseFrontmatter(raw as string);
+const items: NewsItem[] = [];
 
-  // Extract ID from filename
-  const filename = path.split("/").pop() || "";
-  const id = filename.replace(/\.md$/, "");
+// 1. Process unified content/news.md
+for (const [, raw] of Object.entries(unifiedNewsModules)) {
+  const parsed = parseNewsMarkdownLines(raw as string);
+  items.push(...parsed);
+}
 
-  items.push({
-    id: id,
-    date: (meta.date as string) || "Recent",
-    content: body,
-    createdAt: (meta.createdAt as string) || new Date().toISOString(),
-  });
+// 2. Process legacy separate files if any exist
+for (const [, raw] of Object.entries(legacyNewsModules)) {
+  const parsed = parseNewsMarkdownLines(raw as string);
+  if (parsed.length > 0) {
+    items.push(...parsed);
+  }
 }
 
 // Sort by createdAt descending (newest first)
 items.sort((a, b) => {
-  return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+  const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+  return timeB - timeA;
 });
 
-// Set to display maximum of 5 of the newest items
-export const newsItems: NewsItem[] = items.slice(0, 5);
+// Export newsItems
+export const newsItems: NewsItem[] = items;

@@ -86,7 +86,7 @@ export default function App() {
     if (path === currentPath) return;
     window.history.pushState({}, "", path);
     setCurrentPath(path);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   // Toast notification trigger
@@ -123,7 +123,7 @@ export default function App() {
   }, [currentPath]);
 
   return (
-    <div className="min-h-screen flex flex-col justify-between bg-brand-bg text-brand-on-surface antialiased selection:bg-brand-accent selection:text-brand-accent-ink transition-colors duration-200">
+    <div className="min-h-screen flex flex-col justify-between bg-brand-bg text-brand-on-surface antialiased selection:bg-brand-accent selection:text-brand-accent-ink">
       {/* TOAST SYSTEM NOTIFICATION */}
       <AnimatePresence>
         {toastMessage && (
@@ -132,14 +132,14 @@ export default function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-brand-primary text-brand-surface-lowest font-mono text-[11px] font-bold px-4 py-2 rounded-full shadow-lg border border-brand-surface-highest tracking-wider uppercase select-none pointer-events-none"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-brand-primary text-brand-surface-lowest font-mono text-[11px] font-bold px-4 py-2 rounded-full shadow-lg border border-brand-surface-highest tracking-wider uppercase select-none pointer-events-auto"
           >
             {toastMessage}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* FIXED NAVIGATION HEADER */}
+      {/* FLOATING ACRYLIC NAVBAR */}
       {!isBookdownReader && (
         <Navbar
           activeTab={activeTab}
@@ -155,82 +155,75 @@ export default function App() {
 
       {/* PRIMARY VIEWER PORTAL */}
       <main className="flex-1 pt-16">
-        <AnimatePresence mode="wait">
-          {activeTab === "home" && (
-            <motion.div
-              key="home-tab"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-            >
-              <HomeView
-                onNavigate={navigate}
-                onContactClick={() => setContactOpen(true)}
-              />
-            </motion.div>
-          )}
+        {activeTab === "home" && (
+          <motion.div
+            key="home-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <HomeView
+              onNavigate={navigate}
+              onContactClick={() => setContactOpen(true)}
+            />
+          </motion.div>
+        )}
 
-          {activeTab === "blog" && (
-            <motion.div
-              key="blog-tab"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-            >
-              <BlogView
-                currentPath={currentPath}
-                navigate={navigate}
-                onContactClick={() => setContactOpen(true)}
-                onLinkHighlight={() => triggerToast("NAVIGATING OUTSIDE SANDBOX")}
-              />
-            </motion.div>
-          )}
+        {activeTab === "blog" && (
+          <motion.div
+            key="blog-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <BlogView
+              currentPath={currentPath}
+              navigate={navigate}
+              onContactClick={() => setContactOpen(true)}
+              onLinkHighlight={() => triggerToast("NAVIGATING OUTSIDE SANDBOX")}
+            />
+          </motion.div>
+        )}
 
-          {activeTab === "docs" && (
-            <motion.div
-              key="docs-tab"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-            >
-              <BookdownView
-                currentPath={currentPath}
-                navigate={navigate}
-                themePreference={preference}
-                resolvedTheme={resolvedTheme}
-                isDark={isDark}
-                onSetTheme={setPreference}
-              />
-            </motion.div>
-          )}
+        {activeTab === "docs" && (
+          <motion.div
+            key="docs-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <BookdownView
+              currentPath={currentPath}
+              navigate={navigate}
+              themePreference={preference}
+              resolvedTheme={resolvedTheme}
+              isDark={isDark}
+              onSetTheme={setPreference}
+            />
+          </motion.div>
+        )}
 
-          {activeTab === "notes" && (
-            <motion.div
-              key="notes-tab"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-            >
-              <NotesView />
-            </motion.div>
-          )}
+        {activeTab === "notes" && (
+          <motion.div
+            key="notes-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <NotesView />
+          </motion.div>
+        )}
 
-          {activeTab === "about" && (
-            <motion.div
-              key="about-tab"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-            >
-              <AboutView onContactClick={() => setContactOpen(true)} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {activeTab === "about" && (
+          <motion.div
+            key="about-tab"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <AboutView onContactClick={() => setContactOpen(true)} />
+          </motion.div>
+        )}
       </main>
 
       {/* FOOTER Wordmark & Profiles links */}

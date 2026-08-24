@@ -32,11 +32,11 @@ export default function HomeView(_props: HomeViewProps) {
   const [showAvatarInfo, setShowAvatarInfo] = useState(false);
 
   return (
-    <section className="w-full min-h-[calc(100svh-4rem)] flex flex-col justify-center items-center px-4 md:px-6 py-8 md:py-12 bg-brand-bg transition-colors duration-200">
+    <section className="w-full min-h-[calc(100svh-4rem)] flex flex-col justify-center items-center px-4 md:px-6 py-8 md:py-12 bg-brand-bg">
       <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1, ease: "easeOut" }}
         className="max-w-container-max w-full flex flex-col"
       >
         {/* ========================================================= */}
@@ -67,7 +67,7 @@ export default function HomeView(_props: HomeViewProps) {
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   exit={{ opacity: 0, x: 8, scale: 0.95 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="absolute sm:right-full sm:top-1/2 sm:-translate-y-1/2 sm:mr-3.5 max-sm:bottom-full max-sm:mb-2.5 z-30 px-3.5 py-2 rounded-md bg-brand-surface-lowest dark:bg-[#0d1117] border border-brand-surface-highest dark:border-[#30363d] shadow-md text-center sm:text-right font-sans text-[11.5px] leading-tight whitespace-nowrap pointer-events-auto"
+                  className="absolute sm:right-full sm:top-1/2 sm:-translate-y-1/2 sm:mr-3.5 max-sm:bottom-full max-sm:mb-2.5 z-30 px-3.5 py-2 rounded-md bg-brand-surface-lowest border border-brand-surface-highest shadow-md text-center sm:text-right font-sans text-[11.5px] leading-tight whitespace-nowrap pointer-events-auto"
                 >
                   <div className="font-semibold text-brand-primary">Chiikawa HUSTer</div>
                   <div className="text-[10px] text-brand-secondary mt-0.5">(Edited by Minh Ngọc)</div>
@@ -132,7 +132,7 @@ export default function HomeView(_props: HomeViewProps) {
               </h4>
             }
             leftSlot={
-              <div className="flex-1 min-w-0 bg-brand-surface-lowest dark:bg-[#0d1117] border border-brand-surface-highest dark:border-[#30363d] rounded-md px-5 py-3 sm:px-6 sm:py-3.5 shadow-sm flex flex-col justify-between">
+              <div className="flex-1 min-w-0 bg-brand-surface-lowest border border-brand-surface-highest rounded-md px-5 py-3 sm:px-6 sm:py-3.5 shadow-sm flex flex-col justify-between">
                 <p className="font-sans text-[12px] sm:text-[12.5px] leading-relaxed text-brand-on-surface-variant text-justify">
                   Biology is like magic, but there's also this saying: <em>"any sufficiently advanced technology is indistinguishable from magic"</em> (Clarke's 3rd law). In other words, biology is probably one of the most advanced technologies that we see but are still struggling to understand (and it is the task of biologists, such as the future you, to crack this tech wide open!).
                 </p>

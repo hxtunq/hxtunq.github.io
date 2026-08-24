@@ -1,12 +1,12 @@
 ---
 id: "bash-daily-quest-1"
-title: "Bash Daily Quest from Dr. Ming Tang"
+title: "[Daily Bash #1] Phân tích cú pháp tìm và đếm số lượng biến thể trùng nhau giữa các file VCF"
 category: "Daily Quest"
 date: "2026-08-22"
 dateDisplay: "Aug 22, 2026"
 abstract: ""
 author: "Xuan Tung Hoang"
-language: "Vietnamese"
+language: "Tiếng Việt"
 status: "Published"
 tags: ["Linux", "Bash", "Bioinformatics"]
 ---

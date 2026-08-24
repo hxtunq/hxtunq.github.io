@@ -18,16 +18,20 @@ function parseToISODate(dateVal?: string | number): string | null {
   if (!dateVal) return null;
   if (typeof dateVal === "number") return null;
 
-  const d = new Date(dateVal);
+  const str = String(dateVal).trim();
+  
+  // 1. Exact match for YYYY-MM-DD or ISO timestamp (e.g. "2026-08-25T10:00:00Z")
+  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+  // 2. Standard Date string parse (e.g. "Aug 22, 2026")
+  const d = new Date(str);
   if (!isNaN(d.getTime())) {
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   }
-
-  const match = String(dateVal).match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (match) return match[0];
 
   return null;
 }
@@ -61,7 +65,7 @@ export default function ActivityHeatmap({
 
     // 1. Blog posts
     blogPosts.forEach((post) => {
-      const iso = parseToISODate(post.date);
+      const iso = parseToISODate(post.date) || parseToISODate(post.yamlHeader?.match(/date:\s*"([^"]+)"/)?.[1]);
       if (iso) {
         const list = map.get(iso) || [];
         list.push({ type: "Blog Post", title: post.title, date: iso });
@@ -90,7 +94,7 @@ export default function ActivityHeatmap({
 
     // 3. News items
     newsItems.forEach((item) => {
-      const iso = parseToISODate(item.date);
+      const iso = parseToISODate(item.createdAt) || parseToISODate(item.date);
       if (iso) {
         const list = map.get(iso) || [];
         list.push({
@@ -261,7 +265,7 @@ export default function ActivityHeatmap({
         {/* Left Slot Card (Quote Card - strictly equal height and top baseline) */}
         {leftSlot && leftSlot}
         {/* GitHub Card Container */}
-        <div className="w-full lg:w-[670px] lg:shrink-0 bg-brand-surface-lowest dark:bg-[#0d1117] border border-brand-surface-highest dark:border-[#30363d] rounded-md px-3.5 sm:px-4 py-2.5 sm:py-3 shadow-sm flex flex-col justify-between">
+        <div className="w-full lg:w-[670px] lg:shrink-0 bg-brand-surface-lowest border border-brand-surface-highest rounded-md px-3.5 sm:px-4 py-2.5 sm:py-3 shadow-sm flex flex-col justify-between">
           {/* Heatmap Grid Wrapper */}
           <div className="w-full overflow-hidden flex flex-col items-center">
             <div className="w-full max-w-full">

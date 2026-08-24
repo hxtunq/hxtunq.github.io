@@ -46,10 +46,10 @@ function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: s
       }
     }
 
-    // Strip inline comments starting with whitespace and # (e.g. "  # comment")
-    const cleanLine = line.replace(/\s+#.*$/, "");
+    // Skip whole-line comments
+    if (/^\s*#/.test(line)) continue;
 
-    const match = cleanLine.match(/^([a-zA-Z_][\w]*)\s*:\s*(.*)/);
+    const match = line.match(/^([a-zA-Z_][\w]*)\s*:\s*(.*)/);
     if (!match) continue;
 
     const key = match[1];
@@ -64,12 +64,13 @@ function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: s
     }
 
     // Parse JSON-style arrays: ["a", "b", "c"]
-    if (value.startsWith("[") && value.endsWith("]")) {
+    if (value.startsWith("[") && value.includes("]")) {
+      const endBracket = value.lastIndexOf("]");
+      const arrayPart = value.slice(0, endBracket + 1);
       try {
-        meta[key] = JSON.parse(value);
+        meta[key] = JSON.parse(arrayPart);
       } catch {
-        // Fallback: parse as comma-separated
-        meta[key] = value
+        meta[key] = arrayPart
           .slice(1, -1)
           .split(",")
           .map((s) => s.trim().replace(/^["']|["']$/g, ""));
@@ -77,11 +78,23 @@ function parseFrontmatter(raw: string): { meta: Record<string, unknown>; body: s
       continue;
     }
 
-    // Strip surrounding quotes
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-      value = value.slice(1, -1);
+    // Quoted strings: preserve all characters inside quotes (including #)
+    if (value.startsWith('"')) {
+      const closingQuote = value.lastIndexOf('"');
+      if (closingQuote > 0) {
+        meta[key] = value.slice(1, closingQuote);
+        continue;
+      }
+    } else if (value.startsWith("'")) {
+      const closingQuote = value.lastIndexOf("'");
+      if (closingQuote > 0) {
+        meta[key] = value.slice(1, closingQuote);
+        continue;
+      }
     }
 
+    // Unquoted values: strip inline comments
+    value = value.replace(/\s+#.*$/, "").trim();
     meta[key] = value;
   }
 

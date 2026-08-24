@@ -18,11 +18,11 @@ export default function AboutView({ onContactClick }: AboutViewProps) {
   const favPlaceUrl = "https://maps.app.goo.gl/UmcaU3WdBH1uFqth8";
 
   return (
-    <section className="w-full min-h-[calc(100svh-4rem)] flex items-center justify-center px-4 sm:px-6 py-12 bg-brand-bg transition-colors duration-200">
+    <section className="w-full min-h-[calc(100svh-4rem)] flex items-center justify-center px-4 sm:px-6 py-12 bg-brand-bg">
       <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.1, ease: "easeOut" }}
         className="max-w-2xl w-full space-y-6"
       >
         <div>

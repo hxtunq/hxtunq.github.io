@@ -73,6 +73,7 @@ export interface NewsItem {
   id: string;
   date: string;
   content: string;
+  createdAt?: string;
 }
 
 export interface NotesPost {
