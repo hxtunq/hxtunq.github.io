@@ -18,7 +18,20 @@
             l.pathname.slice(0, -1) + decoded + l.hash
         );
       }
-    }(window.location))
+    }(window.location));
+
+    // Theme initialization to prevent theme flash (FOUC)
+    (function() {
+      try {
+        var saved = localStorage.getItem('theme');
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || ((!saved || saved === 'system') && prefersDark)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    })();
   </script>
 </head>
 

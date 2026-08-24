@@ -7,10 +7,12 @@ import React, { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
 export interface MarkdownBlock {
-  type: "heading" | "paragraph" | "code" | "quote" | "image" | "list" | "details";
+  type: "heading" | "paragraph" | "code" | "quote" | "image" | "list" | "details" | "hr";
   level?: number;
   text?: string;
   items?: string[];
+  ordered?: boolean;
+  start?: number;
   language?: string;
   code?: string;
   src?: string;
@@ -187,17 +189,59 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
       continue;
     }
 
+    // Horizontal rules (---, ***, ___)
+    if (/^(---|___|\*\*\*)$/.test(line.trim())) {
+      blocks.push({ type: "hr" });
+      i++;
+      continue;
+    }
+
+    // Ordered (numbered) lists (1. , 2. , etc.)
+    if (/^\d+\.\s+/.test(line.trim())) {
+      const items: string[] = [];
+      const startMatch = line.trim().match(/^(\d+)\.\s+/);
+      const start = startMatch ? parseInt(startMatch[1], 10) : 1;
+      while (i < lines.length) {
+        const currentTrim = lines[i].trim();
+        const itemMatch = currentTrim.match(/^\d+\.\s+(.*)/);
+        if (itemMatch) {
+          items.push(itemMatch[1].trim());
+          i++;
+        } else if (
+          items.length > 0 &&
+          (lines[i].startsWith("  ") || lines[i].startsWith("\t")) &&
+          currentTrim
+        ) {
+          items[items.length - 1] += "\n" + currentTrim;
+          i++;
+        } else {
+          break;
+        }
+      }
+      blocks.push({ type: "list", items, ordered: true, start });
+      continue;
+    }
+
     // Bullet lists
     if (line.trim().startsWith("- ") || line.trim().startsWith("* ")) {
       const items: string[] = [];
-      while (
-        i < lines.length &&
-        (lines[i].trim().startsWith("- ") || lines[i].trim().startsWith("* "))
-      ) {
-        items.push(lines[i].trim().slice(2).trim());
-        i++;
+      while (i < lines.length) {
+        const currentTrim = lines[i].trim();
+        if (currentTrim.startsWith("- ") || currentTrim.startsWith("* ")) {
+          items.push(currentTrim.slice(2).trim());
+          i++;
+        } else if (
+          items.length > 0 &&
+          (lines[i].startsWith("  ") || lines[i].startsWith("\t")) &&
+          currentTrim
+        ) {
+          items[items.length - 1] += "\n" + currentTrim;
+          i++;
+        } else {
+          break;
+        }
       }
-      blocks.push({ type: "list", items });
+      blocks.push({ type: "list", items, ordered: false });
       continue;
     }
 
@@ -226,6 +270,9 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
       !lines[i].trim().startsWith(">") &&
       !lines[i].trim().startsWith("- ") &&
       !lines[i].trim().startsWith("* ") &&
+      !/^\d+\.\s+/.test(lines[i].trim()) &&
+      !/^(---|___|\*\*\*)$/.test(lines[i].trim()) &&
+      !lines[i].trim().startsWith("<details>") &&
       !(lines[i].trim().startsWith("![") && lines[i].trim().includes("]("))
     ) {
       pText += (pText ? " " : "") + lines[i].trim();
@@ -291,16 +338,27 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
 }
 
 export function renderInlineStyles(text: string): React.JSX.Element {
-  const html = text
+  // Protect inline code from other replacements
+  const codeSnippets: string[] = [];
+  let processed = text.replace(/`([^`]+)`/g, (_, code) => {
+    const placeholder = `___INLINE_CODE_${codeSnippets.length}___`;
+    codeSnippets.push(
+      `<code class='font-mono bg-brand-surface-low px-1.5 py-0.5 rounded text-xs text-brand-secondary'>${code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")}</code>`
+    );
+    return placeholder;
+  });
+
+  let html = processed
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/\\n/g, "\n")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(
-      /`(.*?)`/g,
-      "<code class='font-mono bg-brand-surface-low px-1.5 py-0.5 rounded text-xs text-brand-secondary'>$1</code>"
-    )
     // Markdown links: [text](url)
     .replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
@@ -335,7 +393,12 @@ export function renderInlineStyles(text: string): React.JSX.Element {
         }
         return match;
       }
-    );
+    )
+    .replace(/\n/g, "<br class='my-0.5' />");
+
+  codeSnippets.forEach((snippet, idx) => {
+    html = html.replace(`___INLINE_CODE_${idx}___`, snippet);
+  });
 
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
 }
@@ -581,7 +644,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                   <details
                     className="border border-brand-surface-highest bg-brand-surface-low text-brand-on-surface rounded-[0.25rem] overflow-hidden font-mono group"
                   >
-                    <summary className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary select-none cursor-pointer outline-none hover:bg-brand-surface-high transition-colors flex items-center gap-1.5 list-none [&::-webkit-details-marker]:hidden">
+                    <summary className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary cursor-pointer outline-none hover:bg-brand-surface-high transition-colors flex items-center gap-1.5 list-none [&::-webkit-details-marker]:hidden">
                       <span className="text-[8px] transform group-open:rotate-90 transition-transform duration-200">▶</span>
                       <span>OUTPUT (CLICK TO EXPAND)</span>
                     </summary>
@@ -600,7 +663,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                   <div
                     className="border border-brand-surface-highest bg-brand-surface-low text-brand-on-surface rounded-[0.25rem] overflow-hidden font-mono"
                   >
-                    <div className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary select-none">
+                    <div className="bg-brand-surface-high/60 border-b border-brand-surface-highest px-4 py-1.5 font-mono text-[9px] text-brand-secondary">
                       OUTPUT
                     </div>
                     <div className="p-4 overflow-auto text-xs leading-relaxed max-h-[300px]">
@@ -664,21 +727,34 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                 </figure>
               );
             case "list":
+              if (block.ordered) {
+                return (
+                  <ol className="list-decimal pl-6 space-y-2 my-3" start={block.start || 1}>
+                    {block.items?.map((item, idx) => (
+                      <li key={idx} className="font-sans text-[13.5px] leading-relaxed text-brand-on-surface pl-1">
+                        {renderInlineStyles(item)}
+                      </li>
+                    ))}
+                  </ol>
+                );
+              }
               return (
-                <ul className="list-disc pl-5 space-y-2">
+                <ul className="list-disc pl-6 space-y-2 my-3">
                   {block.items?.map((item, idx) => (
-                    <li key={idx} className="font-sans text-[13px] leading-relaxed">
+                    <li key={idx} className="font-sans text-[13.5px] leading-relaxed text-brand-on-surface pl-1">
                       {renderInlineStyles(item)}
                     </li>
                   ))}
                 </ul>
               );
+            case "hr":
+              return <hr className="w-full my-8 border-0 border-t border-brand-surface-highest" />;
             case "details":
               return (
                 <details
                   className="border border-brand-surface-highest rounded-[0.25rem] bg-brand-surface-low/20 overflow-hidden"
                 >
-                  <summary className="font-sans text-sm font-bold text-brand-primary px-4 py-3 cursor-pointer select-none hover:bg-brand-surface-low/50 outline-none transition-colors">
+                  <summary className="font-sans text-sm font-bold text-brand-primary px-4 py-3 cursor-pointer hover:bg-brand-surface-low/50 outline-none transition-colors">
                     {block.text || "View Answer"}
                   </summary>
                   <div className="px-4 pb-4 pt-2 border-t border-brand-surface-highest bg-brand-surface-lowest/50">
@@ -708,6 +784,8 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
           wrapperMargin = "my-5";
         } else if (block.type === "list") {
           wrapperMargin = "my-3";
+        } else if (block.type === "hr") {
+          wrapperMargin = "my-4";
         } else if (block.type === "details") {
           wrapperMargin = "my-4";
         }

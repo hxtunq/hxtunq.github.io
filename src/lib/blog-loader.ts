@@ -128,8 +128,9 @@ const markdownModules = import.meta.glob("/content/blog/*.md", {
 });
 
 const posts: BlogPost[] = [];
+const seenIds = new Set<string>();
 
-for (const [, raw] of Object.entries(markdownModules)) {
+for (const [filePath, raw] of Object.entries(markdownModules)) {
   const { meta, body } = parseFrontmatter(raw as string);
 
   // Skip draft or unpublished posts
@@ -137,8 +138,23 @@ for (const [, raw] of Object.entries(markdownModules)) {
     continue;
   }
 
+  const fileSlug = filePath
+    .replace(/^.*[\\/]/, "")
+    .replace(/\.md$/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-");
+
+  let postId = (meta.id as string)?.trim() || fileSlug;
+  if (seenIds.has(postId)) {
+    postId = `${postId}-${fileSlug}`;
+  }
+  if (seenIds.has(postId)) {
+    postId = `${postId}-${posts.length + 1}`;
+  }
+  seenIds.add(postId);
+
   const post: BlogPost = {
-    id: (meta.id as string) || `post-${Date.now()}`,
+    id: postId,
     category: (meta.category as BlogPost["category"]) || "METHODOLOGY",
     date: (meta.dateDisplay as string) || (meta.date as string) || "",
     title: (meta.title as string) || "Untitled",

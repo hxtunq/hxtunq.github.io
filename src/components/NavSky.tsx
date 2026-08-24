@@ -27,18 +27,18 @@ const METEOR_WINDOW = 4;
 
 /** Horizontal band the shower starts in, as a percentage of the gap. It sits
  *  left of centre because every streak drifts right as it falls. */
-const METEOR_BAND: [number, number] = [5, 56];
+const METEOR_BAND: [number, number] = [10, 62];
 
 /** The stars are fixed: evenly spaced, lighting up in order once the shower
  *  has passed. Only the meteors are redrawn each cycle. */
 const STARS = [
-  { left: "17%", top: "8px", size: 9, delay: "6s" },
-  { left: "28%", top: "22px", size: 6, delay: "6.3s" },
-  { left: "38%", top: "5px", size: 11, delay: "6.15s" },
-  { left: "47%", top: "19px", size: 7, delay: "6.55s" },
-  { left: "56%", top: "10px", size: 8, delay: "6.4s" },
-  { left: "65%", top: "23px", size: 5, delay: "6.7s" },
-  { left: "74%", top: "12px", size: 8, delay: "6.85s" },
+  { left: "22%", top: "8px", size: 9, delay: "6s" },
+  { left: "33%", top: "22px", size: 6, delay: "6.3s" },
+  { left: "43%", top: "5px", size: 11, delay: "6.15s" },
+  { left: "52%", top: "19px", size: 7, delay: "6.55s" },
+  { left: "61%", top: "10px", size: 8, delay: "6.4s" },
+  { left: "70%", top: "23px", size: 5, delay: "6.7s" },
+  { left: "79%", top: "12px", size: 8, delay: "6.85s" },
 ];
 
 const rand = (min: number, max: number) => min + Math.random() * (max - min);
@@ -96,7 +96,7 @@ export default function NavSky() {
 
   return (
     <div
-      className="hidden sm:block relative flex-1 h-9 mx-6 overflow-hidden text-brand-primary"
+      className="hidden sm:block relative flex-1 h-9 ml-5 mr-7 overflow-hidden text-brand-primary"
       aria-hidden="true"
     >
       {meteors.map(({ left, top, delay, scale, travel }, i) => (

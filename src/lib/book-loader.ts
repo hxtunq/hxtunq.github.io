@@ -101,13 +101,16 @@ const chapters: BookChapter[] = [];
 for (const [, raw] of Object.entries(markdownModules)) {
   const { meta, body } = parseFrontmatter(raw as string);
 
-  // Skip draft or unpublished chapters
+  // Skip draft, hidden, unpublished, or empty chapters
   if (
     meta.published === false ||
     meta.published === "false" ||
     meta.draft === true ||
     meta.draft === "true" ||
-    (meta.status !== undefined && meta.status !== "Published")
+    meta.hidden === true ||
+    meta.hidden === "true" ||
+    (meta.status !== undefined && meta.status !== "Published") ||
+    !body.trim()
   ) {
     continue;
   }
@@ -128,7 +131,7 @@ for (const [, raw] of Object.entries(markdownModules)) {
   chapters.push(chapter);
 }
 
-// Only export books that are published (published !== false)
+// Only export books that are published and have at least 1 valid chapter
 export const bookItems: BookItem[] = bookMetadataList
   .filter((metadata) => metadata.published !== false)
   .map((metadata) => {
@@ -165,5 +168,7 @@ export const bookItems: BookItem[] = bookMetadataList
       ...metadata,
       chapters: rootChapters,
     };
-  });
+  })
+  .filter((book) => book.chapters.length > 0);
+
 

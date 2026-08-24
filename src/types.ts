@@ -58,6 +58,7 @@ export interface BookMetadata {
   title: string;
   description: string;
   iconName: "biotech" | "insights" | "terminal" | "scatter_plot" | "account_tree" | "bug_report";
+  category?: "projects" | "resources" | "technical-notes" | string;
   language?: string;
   typeLabel?: string;
   tags?: string[];

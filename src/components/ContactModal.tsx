@@ -111,7 +111,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
               </h3>
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center text-brand-on-surface-variant hover:text-brand-primary hover:bg-brand-surface-high transition-colors"
+                className="w-8 h-8 flex items-center justify-center text-brand-on-surface-variant hover:text-brand-primary hover:bg-brand-surface-high transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -142,7 +142,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Prof. Alan Turing, Stanford Univ."
-                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40"
+                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40 font-sans"
                     />
                   </div>
 
@@ -157,7 +157,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="e.g. turing@stanford.edu"
-                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40"
+                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40 font-sans"
                     />
                   </div>
 
@@ -169,12 +169,10 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <select
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
-                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all"
+                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all font-sans"
                     >
                       <option value="Research Discussion & Questions">Research Discussion & Questions</option>
                       <option value="Academic Feedback & Suggestions">Academic Feedback & Suggestions</option>
-                      <option value="Graduate & Internship Opportunities">Graduate & Internship Opportunities</option>
-                      <option value="General Inquiry / Saying Hello">General Inquiry / Saying Hello</option>
                     </select>
                   </div>
 
@@ -188,7 +186,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       rows={4}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40 resize-none"
+                      className="w-full bg-brand-bg border border-brand-surface-highest focus:border-brand-primary focus:ring-1 focus:ring-brand-primary rounded-none p-3 text-sm text-brand-on-surface outline-none transition-all placeholder:text-brand-on-surface-variant/40 resize-none font-sans"
                     />
                   </div>
 
@@ -204,7 +202,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="flex-1 bg-brand-accent hover:bg-cyan-800 text-brand-accent-ink py-3 text-xs uppercase font-bold tracking-widest flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer"
+                      className="flex-1 bg-brand-accent hover:opacity-90 text-brand-accent-ink py-3 text-xs uppercase font-bold tracking-widest flex items-center justify-center gap-2 transition-opacity disabled:opacity-50 cursor-pointer"
                     >
                       {isSubmitting ? (
                         <>

@@ -19,10 +19,17 @@ import {
   Home,
   Github,
   Linkedin,
-  Menu
+  Menu,
+  Sun,
+  Moon,
+  Monitor,
+  Check,
+  Settings,
+  Palette
 } from "lucide-react";
 import { bookItems } from "../lib/book-loader";
 import { RenderMarkdown, parseMarkdown, slugify, highlightBashCode } from "../lib/markdown";
+import { ThemePreference, ResolvedTheme } from "../lib/theme";
 
 function renderTOCTitle(title: string): React.JSX.Element {
   const match = title.match(/^([\d.]+)\.\s+(.*)$/);
@@ -42,9 +49,36 @@ function renderTOCTitle(title: string): React.JSX.Element {
 interface BookdownViewProps {
   currentPath: string;
   navigate: (path: string) => void;
+  themePreference?: ThemePreference;
+  resolvedTheme?: ResolvedTheme;
+  isDark?: boolean;
+  onSetTheme?: (preference: ThemePreference) => void;
 }
 
-export default function BookdownView({ currentPath, navigate }: BookdownViewProps) {
+export default function BookdownView({
+  currentPath,
+  navigate,
+  themePreference = "system",
+  resolvedTheme = "light",
+  isDark = false,
+  onSetTheme
+}: BookdownViewProps) {
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const themeMenuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
+        setThemeMenuOpen(false);
+      }
+    };
+    if (themeMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [themeMenuOpen]);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [showSearch, setShowSearch] = useState(false);
@@ -150,12 +184,21 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
       const matchesSearch =
         book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTag = activeTag
-        ? book.tags?.some((t) => t.toLowerCase() === activeTag.toLowerCase())
-        : true;
-      return matchesSearch && matchesTag;
+      return matchesSearch;
     });
-  }, [searchQuery, activeTag]);
+  }, [searchQuery]);
+
+  const projectBooks = useMemo(() => {
+    return filteredBooks.filter((book) => book.category === "projects" || !book.category);
+  }, [filteredBooks]);
+
+  const resourceBooks = useMemo(() => {
+    return filteredBooks.filter((book) => book.category === "resources");
+  }, [filteredBooks]);
+
+  const technicalNotesBooks = useMemo(() => {
+    return filteredBooks.filter((book) => book.category === "technical-notes");
+  }, [filteredBooks]);
 
   const getBookIcon = (iconName: string) => {
     switch (iconName) {
@@ -179,23 +222,21 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
   const getBookIconColor = (iconName: string) => {
     switch (iconName) {
       case "biotech":
-        return "bg-emerald-50 border-emerald-200 text-emerald-800";
+        return "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300";
       case "insights":
-        return "bg-indigo-50 border-indigo-200 text-indigo-800";
+        return "bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800/60 text-indigo-800 dark:text-indigo-300";
       case "terminal":
-        return "bg-lime-50 border-lime-200 text-lime-800";
+        return "bg-lime-50 dark:bg-lime-950/40 border-lime-200 dark:border-lime-800/60 text-lime-800 dark:text-lime-300";
       case "scatter_plot":
-        return "bg-pink-50 border-pink-200 text-pink-800";
+        return "bg-pink-50 dark:bg-pink-950/40 border-pink-200 dark:border-pink-800/60 text-pink-800 dark:text-pink-300";
       case "account_tree":
-        return "bg-purple-50 border-purple-200 text-purple-800";
+        return "bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-800/60 text-purple-800 dark:text-purple-300";
       case "bug_report":
-        return "bg-amber-50 border-amber-200 text-amber-800";
+        return "bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800/60 text-amber-800 dark:text-amber-300";
       default:
-        return "bg-slate-50 border-slate-200 text-brand-primary";
+        return "bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 text-brand-primary";
     }
   };
-
-
 
   const currentChapter = activePage;
 
@@ -210,8 +251,63 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
     }
   };
 
+  const renderBookCard = (book: typeof bookItems[0]) => (
+    <motion.div
+      key={book.id}
+      whileHover={{ y: -3, borderColor: "var(--color-brand-primary)" }}
+      transition={{ duration: 0.2 }}
+      className="bg-brand-surface-lowest border border-brand-surface-highest p-6 relative flex flex-col justify-between"
+    >
+      <div>
+        {/* Book header badge and icon layout */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className={`w-11 h-11 border flex items-center justify-center rounded-[0.125rem] ${getBookIconColor(book.iconName)}`}>
+            {getBookIcon(book.iconName)}
+          </div>
+          <div>
+            <div className="font-mono text-[9px] tracking-widest text-brand-secondary uppercase">
+              {book.typeLabel || "BOOKDOWN MANUAL"}
+            </div>
+            <div className="flex flex-wrap gap-1 mt-1">
+              <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70">
+                {book.chapters.length} {book.chapters.length === 1 ? "CHAPTER" : "CHAPTERS"}
+              </span>
+              {book.language && (
+                <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70 uppercase">
+                  {book.language}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Info title */}
+        <h3 className="font-sans font-bold text-lg text-brand-primary mb-3">
+          {book.title}
+        </h3>
+
+        {/* Description */}
+        <p className="font-sans text-xs text-brand-on-surface-variant leading-relaxed mb-6">
+          {book.description}
+        </p>
+      </div>
+
+        {/* Bookdown Link */}
+      <button
+        onClick={() => {
+          const firstChapter = book.chapters[0];
+          navigate(`/docs/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
+        }}
+        className="group flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-primary outline-none cursor-pointer border-b border-transparent hover:border-brand-primary pb-0.5 w-fit mt-2 transition-all"
+      >
+        <span>Read</span>
+        <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+      </button>
+    </motion.div>
+  );
+
   return (
-    <div className="w-full bg-brand-surface-lowest">
+    <div className="w-full bg-brand-bg">
       <AnimatePresence mode="wait">
         {!selectedBook ? (
           /* =========================================================
@@ -222,7 +318,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="max-w-container-max mx-auto px-4 md:px-6 py-12 space-y-10"
+            className="max-w-container-max mx-auto px-4 md:px-6 py-12 space-y-12"
           >
             {/* Header Content Section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -231,7 +327,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                   Docs
                 </h1>
                 <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed">
-                  Long-form projects, reproducible notebooks and hands-on guides I build and maintain — mostly around bioinformatics, computational biology, and data analysis.
+                  Projects, reproducible notebooks, research protocols, and hands-on guides I build and maintain.
                 </p>
               </div>
 
@@ -242,42 +338,13 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter online manuals..."
+                  placeholder="Filter docs & manuals..."
                   className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none py-3.5 pl-10 pr-4 text-xs font-sans tracking-wide text-brand-on-surface transition-all placeholder:text-brand-on-surface-variant/40"
                 />
               </div>
             </div>
 
             <div className="w-full h-[1px] bg-brand-surface-highest"></div>
-
-            {/* Tags Filter */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="font-mono text-[10px] text-brand-on-surface-variant/60 mr-2">Tags:</span>
-              <button
-                onClick={() => setActiveTag(null)}
-                className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${activeTag === null
-                  ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
-                  : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
-                  }`}
-              >
-                All Tags
-              </button>
-              {Object.entries(tagsList).map(([tagName, count]) => {
-                const isActive = activeTag === tagName;
-                return (
-                  <button
-                    key={tagName}
-                    onClick={() => setActiveTag(isActive ? null : tagName)}
-                    className={`px-3 py-1.5 border font-mono text-[10px] uppercase transition-all tracking-wider cursor-pointer ${isActive
-                      ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
-                      : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
-                      }`}
-                  >
-                    {tagName} ({count})
-                  </button>
-                );
-              })}
-            </div>
 
             {/* Grid structure of books */}
             {filteredBooks.length === 0 ? (
@@ -286,66 +353,56 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                 <p className="font-sans text-xs text-brand-on-surface-variant mt-1">Try resetting the spelling of your query to browse full lists of computational manuals.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {filteredBooks.map((book) => (
-                  <motion.div
-                    key={book.id}
-                    whileHover={{ y: -3, borderColor: "var(--color-brand-primary)" }}
-                    transition={{ duration: 0.2 }}
-                    className="bg-brand-surface-lowest border border-brand-surface-highest p-6 relative flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Book header badge and icon layout */}
-                      <div className="flex items-center gap-3 mb-5">
-                        <div className={`w-11 h-11 border flex items-center justify-center rounded-[0.125rem] ${getBookIconColor(book.iconName)}`}>
-                          {getBookIcon(book.iconName)}
-                        </div>
-                        <div>
-                          <div className="font-mono text-[9px] tracking-widest text-brand-secondary uppercase">
-                            {book.typeLabel || "BOOKDOWN MANUAL"}
-                          </div>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70">
-                              {book.chapters.length} CHAPTERS
-                            </span>
-                            {book.language && (
-                              <span className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70 uppercase">
-                                {book.language}
-                              </span>
-                            )}
-                            {book.tags && book.tags.map((tag) => (
-                              <span key={tag} className="font-mono text-[9px] bg-brand-surface-low px-1.5 py-0.25 text-brand-on-surface-variant/70 uppercase">
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Info title */}
-                      <h3 className="font-sans font-bold text-lg text-brand-primary mb-3">
-                        {book.title}
-                      </h3>
-
-                      {/* Description */}
-                      <p className="font-sans text-xs text-brand-on-surface-variant leading-relaxed mb-6">
-                        {book.description}
-                      </p>
+              <div className="space-y-12">
+                {/* 1. PROJECTS SECTION */}
+                <section className="space-y-4">
+                  <div>
+                    <h2 className="font-sans text-[11.5px] font-bold tracking-widest text-brand-secondary uppercase">
+                      Projects
+                    </h2>
+                  </div>
+                  {projectBooks.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                      {projectBooks.map(renderBookCard)}
                     </div>
+                  ) : (
+                    <p className="font-mono text-xs text-brand-on-surface-variant/50 italic py-1">
+                      Coming soon...
+                    </p>
+                  )}
+                </section>
 
-                    {/* Bookdown Link */}
-                    <button
-                      onClick={() => {
-                        const firstChapter = book.chapters[0];
-                        navigate(`/docs/${book.id}${firstChapter ? `/${firstChapter.id}` : ""}`);
-                      }}
-                      className="group flex items-center gap-1.5 font-sans font-bold text-[10px] tracking-widest uppercase text-brand-primary outline-none cursor-pointer border-b border-transparent hover:border-brand-primary pb-0.5 w-fit mt-2 transition-all"
-                    >
-                      <span>Read</span>
-                      <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </motion.div>
-                ))}
+                {/* 2. RESOURCES SECTION */}
+                {resourceBooks.length > 0 && (
+                  <section className="space-y-4">
+                    <div>
+                      <h2 className="font-sans text-[11.5px] font-bold tracking-widest text-brand-secondary uppercase">
+                        Resources
+                      </h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                      {resourceBooks.map(renderBookCard)}
+                    </div>
+                  </section>
+                )}
+
+                {/* 3. TECHNICAL NOTES SECTION */}
+                <section className="space-y-4">
+                  <div>
+                    <h2 className="font-sans text-[11.5px] font-bold tracking-widest text-brand-secondary uppercase">
+                      Technical Notes
+                    </h2>
+                  </div>
+                  {technicalNotesBooks.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+                      {technicalNotesBooks.map(renderBookCard)}
+                    </div>
+                  ) : (
+                    <p className="font-mono text-xs text-brand-on-surface-variant/50 italic py-1">
+                      Coming soon...
+                    </p>
+                  )}
+                </section>
               </div>
             )}
           </motion.div>
@@ -390,8 +447,8 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
 
                   {/* Catalog / Home link */}
                   <button
-                    onClick={() => navigate("/notebooks")}
-                    title="Notebook Catalog"
+                    onClick={() => navigate("/docs")}
+                    title="Docs Catalog"
                     className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
                   >
                     <Home className="w-[18px] h-[18px]" />
@@ -400,7 +457,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                   {/* Local search within Bookdown */}
                   <button
                     onClick={() => setShowSearch(!showSearch)}
-                    title="Search book..."
+                    title="Search within book..."
                     className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
                   >
                     <Search className="w-[18px] h-[18px]" />
@@ -419,8 +476,65 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                   )}
                 </div>
 
-                {/* Right Group: Social Media */}
-                <div className="flex items-center gap-4">
+                {/* Right Group: Settings Popover & Social Media */}
+                <div className="flex items-center gap-3.5 sm:gap-4">
+                  {onSetTheme && (
+                    <div className="relative" ref={themeMenuRef}>
+                      <button
+                        onClick={() => setThemeMenuOpen(!themeMenuOpen)}
+                        aria-label="Theme settings"
+                        title="Theme settings"
+                        className={`p-1 rounded-full transition-colors cursor-pointer outline-none ${
+                          themeMenuOpen
+                            ? "bg-brand-surface-high text-brand-primary"
+                            : "text-brand-on-surface-variant/70 hover:text-brand-primary hover:bg-brand-surface-high"
+                        }`}
+                      >
+                        <Settings className="w-[18px] h-[18px]" />
+                      </button>
+
+                      {/* Dropdown Popover */}
+                      <AnimatePresence>
+                        {themeMenuOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 6 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 6 }}
+                            transition={{ duration: 0.15, ease: "easeOut" }}
+                            className="absolute right-0 top-9 z-50 w-52 p-2 rounded-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-xl overflow-hidden font-sans space-y-1.5"
+                          >
+                            <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-brand-secondary font-medium">
+                              <Palette className="w-3.5 h-3.5" />
+                              <span>Theme</span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-1 p-0.5 bg-brand-surface-low rounded-lg border border-brand-surface-highest/80">
+                              {[
+                                { key: "light" as ThemePreference, label: "Light", Icon: Sun },
+                                { key: "dark" as ThemePreference, label: "Dark", Icon: Moon },
+                                { key: "system" as ThemePreference, label: "System", Icon: Monitor },
+                              ].map(({ key, label, Icon }) => {
+                                const isSelected = themePreference === key;
+                                return (
+                                  <button
+                                    key={key}
+                                    onClick={() => onSetTheme(key)}
+                                    className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded text-[10px] transition-colors cursor-pointer ${
+                                      isSelected
+                                        ? "bg-brand-surface-lowest text-brand-primary font-bold shadow-xs"
+                                        : "text-brand-on-surface-variant hover:text-brand-primary"
+                                    }`}
+                                  >
+                                    <Icon className="w-3 h-3" />
+                                    <span>{label}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
                   <a
                     href="https://linkedin.com/in/hxtunq"
                     target="_blank"
@@ -455,11 +569,13 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                       <div className="space-y-1">
                         {filteredChapters.map((chap, idx) => {
                           const isRootActive = activePage?.id === chap.id;
+                          const prevChap = idx > 0 ? filteredChapters[idx - 1] : null;
+                          const showSectionHeader = chap.section && (!prevChap || prevChap.section !== chap.section);
 
                           return (
                             <div key={chap.id} className="space-y-0.5">
-                              {chap.section && (
-                                <div className={`font-sans text-[10.5px] font-bold text-brand-secondary/80 tracking-wider uppercase px-2 select-none ${idx === 0 ? "pt-1 pb-0.5" : "pt-3 pb-0.5"}`}>
+                              {showSectionHeader && (
+                                <div className={`font-sans text-[10.5px] font-bold text-brand-secondary/80 tracking-wider uppercase px-2 select-none ${idx === 0 ? "pt-1 pb-0.5" : "pt-3.5 pb-0.5"}`}>
                                   {chap.section}
                                 </div>
                               )}
@@ -546,7 +662,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     onClick={() => {
                       const prevPage = flatPages[activePageIndex - 1];
                       if (prevPage) {
-                        navigate(`/notebooks/${selectedBook.id}/${prevPage.id}`);
+                        navigate(`/docs/${selectedBook.id}/${prevPage.id}`);
                       }
                     }}
                     className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase text-left"
@@ -561,7 +677,7 @@ export default function BookdownView({ currentPath, navigate }: BookdownViewProp
                     onClick={() => {
                       const nextPage = flatPages[activePageIndex + 1];
                       if (nextPage) {
-                        navigate(`/notebooks/${selectedBook.id}/${nextPage.id}`);
+                        navigate(`/docs/${selectedBook.id}/${nextPage.id}`);
                       }
                     }}
                     className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase text-right"

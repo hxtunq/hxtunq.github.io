@@ -1,26 +1,19 @@
-/**
- * @license
- * SPDX-License-Identifier: MIT
- */
-
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Share2, MoreHorizontal, ExternalLink, Copy, Check, Facebook, Twitter, Send, X } from "lucide-react";
 import { notesPosts } from "../lib/notes-loader";
 
-// Helper function to format post date dynamically
-const formatPostDate = (isoString: string): string => {
-  const date = new Date(isoString);
-  const now = new Date();
-  
-  // Calculate day difference by resetting hours to midnight
-  const postReset = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-  const nowReset = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffTime = Math.abs(nowReset.getTime() - postReset.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+// Helper to format date relative or formatted like X (e.g. 5m, 2h, 1d, 12-Feb-2026)
+const formatRelativeDate = (dateString: string) => {
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
 
-  if (diffDays >= 3) {
-    const day = date.getDate();
+  const now = new Date();
+  const diffDays = (now.getTime() - date.getTime()) / (1000 * 3600 * 24);
+
+  // If older than 3 days, format as "12-Feb-2026"
+  if (diffDays > 3) {
+    const day = date.getDate().toString().padStart(2, "0");
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const month = months[date.getMonth()];
     const year = date.getFullYear();
@@ -35,7 +28,7 @@ const formatPostDate = (isoString: string): string => {
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) return `${diffHours}h`;
-
+  
   const diffDaysRound = Math.floor(diffHours / 24);
   return `${diffDaysRound}d`;
 };
@@ -178,7 +171,7 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
       href={preview.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="mt-3 flex flex-col sm:flex-row overflow-hidden rounded-lg border border-brand-surface-highest hover:bg-brand-surface-low/30 active:bg-brand-surface-low/60 transition-colors group select-none"
+      className="mt-3 flex flex-col sm:flex-row overflow-hidden rounded-lg border border-brand-surface-highest hover:bg-brand-surface-low/30 active:bg-brand-surface-low/60 transition-colors group"
     >
       {/* Link Preview Image */}
       {preview.imageUrl && (
@@ -325,7 +318,7 @@ export default function NotesView() {
   return (
     <section className="w-full min-h-[calc(100svh-4rem)] bg-brand-bg px-4 py-8 md:py-12 flex justify-center">
       <div className="max-w-[630px] w-full">
-        <div className="pb-3.5 select-none text-[11px] font-sans text-brand-secondary/60">
+        <div className="pb-3.5 text-[11px] font-sans text-brand-secondary/60">
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <div>
               <span className="font-bold text-brand-primary">{notesPosts.length}</span> {notesPosts.length === 1 ? "post" : "posts"} <span className="text-green-600 font-semibold">({getYearlyPercentageChange()} vs {new Date().getFullYear() - 1})</span>
@@ -369,14 +362,14 @@ export default function NotesView() {
                 {/* Right Side: Post Contents */}
                 <div className="flex-1 min-w-0">
                   {/* Top line metadata */}
-                  <div className="flex items-center justify-between select-none">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="font-sans font-semibold text-[13.5px] text-brand-primary">
                         {post.authorName}
                       </span>
-                      <span className="font-sans text-xs text-brand-secondary/50">·</span>
-                      <span className="font-mono text-xs text-brand-secondary/80">
-                        {formatPostDate(post.createdAt)}
+                      <span className="text-brand-surface-highest" aria-hidden="true">·</span>
+                      <span className="font-mono text-xs text-brand-on-surface-variant/40 hover:underline">
+                        {formatRelativeDate(post.createdAt)}
                       </span>
                     </div>
                     
@@ -384,7 +377,8 @@ export default function NotesView() {
                     <div className="relative" ref={activeShareMenu === post.id ? menuRef : null}>
                       <button
                         onClick={() => setActiveShareMenu(activeShareMenu === post.id ? null : post.id)}
-                        className="text-brand-secondary/50 hover:text-brand-primary transition-colors cursor-pointer p-1 rounded-full hover:bg-brand-surface-low outline-none"
+                        className="text-brand-on-surface-variant/40 hover:text-brand-primary p-1 rounded-full hover:bg-brand-surface-high transition-colors cursor-pointer"
+                        aria-label="More options"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
@@ -421,7 +415,7 @@ export default function NotesView() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setActiveShareMenu(null)}
-                              className="w-full px-3 py-2 text-left hover:bg-brand-surface-low flex items-center gap-2 cursor-pointer transition-colors flex items-center"
+                              className="w-full px-3 py-2 text-left hover:bg-brand-surface-low flex items-center gap-2 cursor-pointer transition-colors"
                             >
                               <Facebook className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                               <span>Share to Facebook</span>
@@ -432,7 +426,7 @@ export default function NotesView() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setActiveShareMenu(null)}
-                              className="w-full px-3 py-2 text-left hover:bg-brand-surface-low flex items-center gap-2 cursor-pointer transition-colors flex items-center"
+                              className="w-full px-3 py-2 text-left hover:bg-brand-surface-low flex items-center gap-2 cursor-pointer transition-colors"
                             >
                               <Send className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                               <span>Share to Zalo</span>
@@ -443,7 +437,7 @@ export default function NotesView() {
                               target="_blank"
                               rel="noopener noreferrer"
                               onClick={() => setActiveShareMenu(null)}
-                              className="w-full px-3 py-2 text-left hover:bg-brand-surface-low flex items-center gap-2 cursor-pointer transition-colors flex items-center"
+                              className="w-full px-3 py-2 text-left hover:bg-brand-surface-low flex items-center gap-2 cursor-pointer transition-colors"
                             >
                               <Twitter className="w-3.5 h-3.5 text-brand-primary shrink-0" />
                               <span>Share to X (Twitter)</span>

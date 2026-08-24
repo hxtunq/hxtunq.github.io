@@ -5,15 +5,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  Search,
-  X,
-  FileText,
-  Bookmark,
-  ArrowRight,
-  Clipboard,
-  ExternalLink
-} from "lucide-react";
 
 // Components Imports
 import Navbar from "./components/Navbar";
@@ -24,20 +15,42 @@ import BookdownView from "./components/BookdownView";
 import AboutView from "./components/AboutView";
 import NotesView from "./components/NotesView";
 import ContactModal from "./components/ContactModal";
+import SearchModal from "./components/SearchModal";
 
 // Data & Types Imports
-import { selectedPublications, bookMetadataList } from "./data";
 import { blogPosts } from "./lib/blog-loader";
-import { bookItems } from "./lib/book-loader";
-import { notesPosts } from "./lib/notes-loader";
-import { SelectedPublication, BlogPost } from "./types";
+import { useTheme } from "./lib/theme";
 
 export default function App() {
+  const { preference, resolvedTheme, isDark, setPreference } = useTheme();
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [contactOpen, setContactOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [globalSearchQuery, setGlobalSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Keyboard shortcut listener (Cmd/Ctrl+K or '/' to open, Esc handled in modal)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      } else if (e.key === "/" && !searchOpen) {
+        const activeEl = document.activeElement;
+        const isInput = activeEl && (
+          activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          (activeEl as HTMLElement).isContentEditable
+        );
+        if (!isInput) {
+          e.preventDefault();
+          setSearchOpen(true);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [searchOpen]);
 
   // Sync state with browser back/forward buttons
   useEffect(() => {
@@ -57,139 +70,69 @@ export default function App() {
       document.title = post ? `${post.title} — Xuan Tung Hoang` : "Xuan Tung Hoang";
     } else if (cleanPath === "blog" || cleanPath.startsWith("blog/")) {
       document.title = "Blog — Xuan Tung Hoang";
-    } else if (cleanPath === "docs" || cleanPath.startsWith("docs/")) {
-      if (cleanPath.startsWith("docs/")) {
-        const parts = cleanPath.substring("docs/".length).split("/");
-        const bookId = parts[0];
-        const chapterId = parts[1];
-        const book = bookItems.find((b) => b.id === bookId);
-
-        let displayTitle = book ? book.title : "Docs";
-        if (chapterId && book) {
-          let chapterTitle = "";
-          for (const chap of book.chapters) {
-            if (chap.id === chapterId) {
-              chapterTitle = chap.title;
-              break;
-            }
-            if (chap.subsections) {
-              const sub = chap.subsections.find((s) => s.id === chapterId);
-              if (sub) {
-                chapterTitle = sub.title;
-                break;
-              }
-            }
-          }
-          if (chapterTitle) {
-            const cleanChapterTitle = chapterTitle.replace(/^[\d.]+\.\s+/, "");
-            displayTitle = `${cleanChapterTitle} — ${displayTitle}`;
-          } else {
-            const formattedChapter = chapterId
-              .split("-")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" ");
-            displayTitle = `${formattedChapter} — ${displayTitle}`;
-          }
-        }
-        document.title = displayTitle;
-      } else {
-        document.title = "Docs — Xuan Tung Hoang";
-      }
-    } else if (cleanPath === "about" || cleanPath.startsWith("about/")) {
-      document.title = "About — Xuan Tung Hoang";
     } else if (cleanPath === "notes" || cleanPath.startsWith("notes/")) {
       document.title = "Notes — Xuan Tung Hoang";
+    } else if (cleanPath === "docs" || cleanPath.startsWith("docs/")) {
+      document.title = "Docs — Xuan Tung Hoang";
+    } else if (cleanPath === "about" || cleanPath.startsWith("about/")) {
+      document.title = "About — Xuan Tung Hoang";
     } else {
       document.title = "Xuan Tung Hoang";
     }
   }, [currentPath]);
 
+  // Navigate helper
   const navigate = (path: string) => {
-    if (window.location.pathname !== path) {
-      window.history.pushState(null, "", path);
-      setCurrentPath(path);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    if (path === currentPath) return;
+    window.history.pushState({}, "", path);
+    setCurrentPath(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Derive activeTab from currentPath.
-  const getActiveTab = (path: string): "home" | "blog" | "notes" | "docs" | "about" => {
-    const cleanPath = path.replace(/^\/+|\/+$/g, "");
-    if (cleanPath.startsWith("blog") || cleanPath.startsWith("post/")) {
+  // Toast notification trigger
+  const triggerToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 2500);
+  };
+
+  // Derived state: Active Tab
+  const activeTab = useMemo(() => {
+    const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
+    if (cleanPath.startsWith("post/") || cleanPath === "blog" || cleanPath.startsWith("blog/")) {
       return "blog";
     }
-    if (cleanPath.startsWith("notes")) {
+    if (cleanPath.startsWith("notes") || cleanPath.startsWith("notes/")) {
       return "notes";
     }
-    if (cleanPath.startsWith("docs")) {
+    if (cleanPath.startsWith("docs") || cleanPath.startsWith("docs/")) {
       return "docs";
     }
-    if (cleanPath.startsWith("about")) {
+    if (cleanPath === "about") {
       return "about";
     }
     return "home";
-  };
-
-  const activeTab = getActiveTab(currentPath);
-
-  const isBookdownReader = useMemo(() => {
-    const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
-    if (cleanPath.startsWith("docs/")) {
-      const parts = cleanPath.substring("docs/".length).split("/");
-      return !!parts[0];
-    }
-    return false;
   }, [currentPath]);
 
-  // Trigger quick interactive notification
-  const triggerToast = (message: string) => {
-    setToastMessage(message);
-    setTimeout(() => setToastMessage(null), 3000);
-  };
-
-  // Compute search results across all content
-  const q = globalSearchQuery.toLowerCase();
-
-  const matchedPublications = selectedPublications.filter(
-    (pub) =>
-      pub.title.toLowerCase().includes(q) ||
-      pub.abstract.toLowerCase().includes(q) ||
-      pub.journal.toLowerCase().includes(q)
-  );
-
-  const matchedBlogs = blogPosts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(q) ||
-      post.abstract.toLowerCase().includes(q) ||
-      post.category.toLowerCase().includes(q)
-  );
-
-  const matchedNotes = notesPosts.filter(
-    (post) =>
-      post.content.toLowerCase().includes(q) ||
-      post.authorName.toLowerCase().includes(q)
-  );
-
-  const matchedDocs = bookItems.flatMap((book) =>
-    book.chapters
-      .filter(
-        (ch) =>
-          ch.title.toLowerCase().includes(q) ||
-          ch.contents.toLowerCase().includes(q)
-      )
-      .map((ch) => ({ ...ch, bookTitle: book.title, bookId: book.id }))
-  );
+  // Check if current route is a bookdown reader view
+  const isBookdownReader = useMemo(() => {
+    const cleanPath = currentPath.replace(/^\/+|\/+$/g, "");
+    const parts = cleanPath.split("/");
+    return parts[0] === "docs" && parts.length >= 2;
+  }, [currentPath]);
 
   return (
-    <div className="min-h-screen bg-brand-bg text-brand-on-surface flex flex-col justify-between selection:bg-brand-accent selection:text-brand-accent-ink">
-      {/* Dynamic Toast feedback */}
+    <div className="min-h-screen flex flex-col justify-between bg-brand-bg text-brand-on-surface antialiased selection:bg-brand-accent selection:text-brand-accent-ink transition-colors duration-200">
+      {/* TOAST SYSTEM NOTIFICATION */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-brand-accent text-brand-accent-ink text-xs font-mono tracking-widest px-6 py-3 border border-cyan-300/40 shadow-lg"
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-brand-primary text-brand-surface-lowest font-mono text-[11px] font-bold px-4 py-2 rounded-full shadow-lg border border-brand-surface-highest tracking-wider uppercase select-none pointer-events-none"
           >
             {toastMessage}
           </motion.div>
@@ -203,6 +146,10 @@ export default function App() {
           onNavigate={navigate}
           onContactClick={() => setContactOpen(true)}
           onSearchToggle={() => setSearchOpen(true)}
+          themePreference={preference}
+          resolvedTheme={resolvedTheme}
+          isDark={isDark}
+          onSetTheme={setPreference}
         />
       )}
 
@@ -252,6 +199,10 @@ export default function App() {
               <BookdownView
                 currentPath={currentPath}
                 navigate={navigate}
+                themePreference={preference}
+                resolvedTheme={resolvedTheme}
+                isDark={isDark}
+                onSetTheme={setPreference}
               />
             </motion.div>
           )}
@@ -288,198 +239,18 @@ export default function App() {
       )}
 
       {/* COLLABORATIVE CONTACT DIALOGUE FORM */}
-      <ContactModal isOpen={contactOpen} onClose={() => setContactOpen(false)} />
+      <ContactModal
+        isOpen={contactOpen}
+        onClose={() => setContactOpen(false)}
+      />
 
-      {/* GLOBAL SEARCH DIALOG DRAWER */}
-      <AnimatePresence>
-        {searchOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-[10vh]">
-            {/* Blur dark shield */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
-              onClick={() => {
-                setSearchOpen(false);
-                setGlobalSearchQuery("");
-              }}
-              className="absolute inset-0 bg-brand-primary/60"
-            />
-
-            {/* Popup Box */}
-            <motion.div
-              initial={{ opacity: 0, y: -8, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -8, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="relative w-full max-w-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-2xl p-6 z-10 rounded-none overflow-hidden"
-            >
-              <div className="flex justify-between items-center border-b border-brand-surface-highest pb-4 mb-4">
-                <div className="flex items-center gap-2">
-                  <Search className="w-5 h-5 text-brand-secondary" />
-                  <span className="font-serif font-bold text-lg text-brand-primary">Search Portal</span>
-                </div>
-                <button
-                  onClick={() => {
-                    setSearchOpen(false);
-                    setGlobalSearchQuery("");
-                  }}
-                  className="w-8 h-8 flex items-center justify-center hover:bg-brand-surface-low text-brand-on-surface-variant hover:text-brand-primary transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Text Input */}
-              <input
-                type="text"
-                autoFocus
-                value={globalSearchQuery}
-                onChange={(e) => setGlobalSearchQuery(e.target.value)}
-                placeholder="Type keywords (e.g. biophysics, transformer, ggplot2)..."
-                className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none px-4 py-3.5 text-sm rounded-none text-brand-on-surface placeholder:text-brand-on-surface-variant/40"
-              />
-
-              {/* Dynamic search outputs layout portal */}
-              <div className="mt-6 max-h-[360px] overflow-y-auto space-y-6 pr-1 whitespace-normal">
-                {globalSearchQuery === "" ? (
-                  <div className="text-center py-8 text-brand-on-surface-variant/60">
-                    <span className="font-mono text-xs">Search across all posts, notes, docs & publications.</span>
-                  </div>
-                ) : matchedPublications.length === 0 && matchedBlogs.length === 0 && matchedNotes.length === 0 && matchedDocs.length === 0 ? (
-                  <div className="text-center py-8">
-                    <span className="font-mono text-xs text-rose-700 font-bold">No results found</span>
-                    <p className="font-sans text-xs text-brand-on-surface-variant mt-1">Try different keywords.</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Notes matches */}
-                    {matchedNotes.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                          Notes ({matchedNotes.length})
-                        </h4>
-                        <div className="space-y-2">
-                          {matchedNotes.map((post) => (
-                            <div
-                              key={post.id}
-                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-pointer flex justify-between items-center rounded-md"
-                              onClick={() => {
-                                navigate("/notes");
-                                setSearchOpen(false);
-                                setGlobalSearchQuery("");
-                                setTimeout(() => {
-                                  document.getElementById(post.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                                }, 300);
-                              }}
-                            >
-                              <div className="min-w-0">
-                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{new Date(post.createdAt).toLocaleDateString()}</span>
-                                <span className="font-sans text-sm text-brand-primary block line-clamp-1">{post.content.slice(0, 100)}</span>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-brand-secondary shrink-0 ml-3" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Blog matches */}
-                    {matchedBlogs.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                          Blog Posts ({matchedBlogs.length})
-                        </h4>
-                        <div className="space-y-2">
-                          {matchedBlogs.map((post) => (
-                            <div
-                              key={post.id}
-                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-pointer flex justify-between items-center rounded-md"
-                              onClick={() => {
-                                navigate(`/post/${post.id}`);
-                                setSearchOpen(false);
-                                setGlobalSearchQuery("");
-                              }}
-                            >
-                              <div className="min-w-0">
-                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{post.category}</span>
-                                <span className="font-sans text-sm font-bold text-brand-primary block line-clamp-1">{post.title}</span>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-brand-secondary shrink-0 ml-3" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Docs matches */}
-                    {matchedDocs.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                          Docs ({matchedDocs.length})
-                        </h4>
-                        <div className="space-y-2">
-                          {matchedDocs.map((ch) => (
-                            <div
-                              key={`${ch.bookId}-${ch.id}`}
-                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-pointer flex justify-between items-center rounded-md"
-                              onClick={() => {
-                                navigate(`/docs/${ch.bookId}/${ch.id}`);
-                                setSearchOpen(false);
-                                setGlobalSearchQuery("");
-                              }}
-                            >
-                              <div className="min-w-0">
-                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{ch.bookTitle}</span>
-                                <span className="font-sans text-sm font-bold text-brand-primary block line-clamp-1">{ch.title}</span>
-                              </div>
-                              <ArrowRight className="w-3.5 h-3.5 text-brand-secondary shrink-0 ml-3" />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Publication matches */}
-                    {matchedPublications.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-sans text-[11px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                          Publications ({matchedPublications.length})
-                        </h4>
-                        <div className="space-y-2">
-                          {matchedPublications.map((pub) => (
-                            <div
-                              key={pub.id}
-                              className="p-3 border border-brand-surface-highest bg-brand-surface-low/50 hover:bg-brand-surface-low cursor-default flex justify-between items-center rounded-md"
-                            >
-                              <div className="min-w-0">
-                                <span className="font-mono text-[9px] text-brand-secondary block tracking-wider uppercase mb-0.5">{pub.journal} • {pub.year}</span>
-                                <span className="font-serif text-sm font-bold text-brand-primary block line-clamp-1">{pub.title}</span>
-                              </div>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(pub.doi);
-                                  triggerToast("Copied DOI");
-                                  setSearchOpen(false);
-                                  setGlobalSearchQuery("");
-                                }}
-                                className="font-mono text-[9px] font-bold tracking-widest uppercase text-brand-secondary border border-brand-surface-highest bg-brand-surface-low hover:border-brand-accent hover:text-brand-accent px-3 py-1.5 shrink-0 ml-4 transition-colors cursor-pointer rounded"
-                              >
-                                DOI
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* GLOBAL SEARCH MODAL (ISOLATED & HIGH PERFORMANCE) */}
+      <SearchModal
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        navigate={navigate}
+        triggerToast={triggerToast}
+      />
     </div>
   );
 }

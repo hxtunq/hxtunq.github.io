@@ -1,11 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Newsreader", Georgia, Cambria, "Times New Roman", serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+@custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  color-scheme: light;
   /* Clean light "academic white" palette.
      Surfaces get lighter as they are raised: bg < surface-low < surface-lowest. */
   --color-brand-primary: #091426;        /* near-black ink: headings, emphasis, active nav */
@@ -21,6 +20,44 @@
   --color-brand-on-surface-variant: #45474c; /* muted body text */
   --color-brand-nav: #f2f4f6;            /* floating nav pill, tinted against the white page */
   --color-brand-nav-border: #e2e6ea;     /* outline around the pill */
+}
+
+.dark {
+  color-scheme: dark;
+  /* Sleek modern dark "academic night" palette */
+  --color-brand-primary: #f8fafc;        /* crisp off-white for headings & primary ink */
+  --color-brand-secondary: #94a3b8;      /* muted slate for labels & meta */
+  --color-brand-accent: #38bdf8;         /* glowing sky teal for interactive & accent */
+  --color-brand-accent-ink: #0a0f18;     /* dark contrast ink inside solid accent badges */
+  --color-brand-bg: #0a0e17;             /* deep obsidian canvas background */
+  --color-brand-surface-low: #101623;    /* recessed panels, inputs & sidebar */
+  --color-brand-surface-lowest: #141c2c; /* elevated cards, dialogs & reader canvas */
+  --color-brand-surface-high: #1c2638;   /* hover states & raised elements */
+  --color-brand-surface-highest: #243247;/* crisp hairline borders & dividers */
+  --color-brand-on-surface: #e2e8f0;     /* high-legibility body text */
+  --color-brand-on-surface-variant: #94a3b8; /* secondary / muted text */
+  --color-brand-nav: #101724;            /* floating dark nav pill */
+  --color-brand-nav-border: #223044;     /* outline around floating nav */
+}
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Newsreader", Georgia, Cambria, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-secondary: var(--color-brand-secondary);
+  --color-brand-accent: var(--color-brand-accent);
+  --color-brand-accent-ink: var(--color-brand-accent-ink);
+  --color-brand-bg: var(--color-brand-bg);
+  --color-brand-surface-low: var(--color-brand-surface-low);
+  --color-brand-surface-lowest: var(--color-brand-surface-lowest);
+  --color-brand-surface-high: var(--color-brand-surface-high);
+  --color-brand-surface-highest: var(--color-brand-surface-highest);
+  --color-brand-on-surface: var(--color-brand-on-surface);
+  --color-brand-on-surface-variant: var(--color-brand-on-surface-variant);
+  --color-brand-nav: var(--color-brand-nav);
+  --color-brand-nav-border: var(--color-brand-nav-border);
 }
 
 body {
