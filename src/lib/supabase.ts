@@ -115,6 +115,8 @@ export async function addComment(
   const userAvatar =
     rawMetadata.avatar_url ||
     rawMetadata.picture ||
+    currentUser.identities?.[0]?.identity_data?.avatar_url ||
+    currentUser.identities?.[0]?.identity_data?.picture ||
     "";
 
   try {

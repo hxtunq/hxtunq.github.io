@@ -70,9 +70,11 @@ export default function CommentSection({ postId }: CommentSectionProps) {
   // Close reaction picker on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
-        setActiveReactionPickerId(null);
+      const target = e.target as HTMLElement | null;
+      if (target?.closest('[data-reaction-container="true"]')) {
+        return;
       }
+      setActiveReactionPickerId(null);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -149,19 +151,20 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     }));
   };
 
-  const isAuthorUserId = (id: string) => {
+  const isAuthorUserId = useCallback((id: string) => {
     if (id === "demo-user-author" || id === "author") return true;
     if (user && user.id === id) {
       const name = (
         user.user_metadata?.full_name ||
         user.user_metadata?.name ||
+        user.user_metadata?.user_name ||
         user.email ||
         ""
       ).toLowerCase();
-      if (name.includes("tung") || name.includes("hxtunq")) return true;
+      if (name.includes("tung") || name.includes("hxtunq") || name.includes("hoang")) return true;
     }
     return false;
-  };
+  }, [user]);
 
   // Submit main comment
   const handleSubmit = async (e: React.FormEvent) => {
@@ -174,7 +177,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         post_id: postId,
         parent_id: null,
         user_id: "demo-guest",
-        user_name: "Guest Reader (Demo)",
+        user_name: "Guest Reader",
         user_avatar: "",
         user_provider: "google",
         content: commentText.trim(),
@@ -183,7 +186,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       };
       setComments((prev) => [...prev, demo]);
       setCommentText("");
-      setStatusMessage({ type: "success", text: "Comment submitted (Demo mode)." });
+      setStatusMessage({ type: "success", text: "Comment submitted." });
       setTimeout(() => setStatusMessage(null), 3000);
       return;
     }
@@ -226,7 +229,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         parent_id: parentId,
         user_id: user.id || "demo-guest",
         user_name: getUserDisplayName(),
-        user_avatar: "",
+        user_avatar: getUserAvatar(),
         user_provider: "google",
         content: replyText.trim(),
         reactions: {},
@@ -294,7 +297,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     }
   };
 
-  // Delete comment / reply
+  // Delete comment / reply (Author or Owner can delete)
   const handleDelete = async (commentId: string) => {
     if (!confirm("Are you sure you want to delete this comment?")) return;
 
@@ -316,8 +319,21 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     return (
       user.user_metadata?.full_name ||
       user.user_metadata?.name ||
+      user.user_metadata?.user_name ||
       user.email?.split("@")[0] ||
       "Reader"
+    );
+  };
+
+  const getUserAvatar = () => {
+    if (!user) return "";
+    const meta = user.user_metadata || {};
+    return (
+      meta.avatar_url ||
+      meta.picture ||
+      user.identities?.[0]?.identity_data?.avatar_url ||
+      user.identities?.[0]?.identity_data?.picture ||
+      ""
     );
   };
 
@@ -333,6 +349,8 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
   const renderCommentItem = (item: CommentItem, isReply = false) => {
     const isOwner = user && user.id === item.user_id;
+    const isAuthor = user && isAuthorUserId(user.id);
+    const canDelete = isOwner || isAuthor;
     const currentUserId = user ? user.id : "";
     const reactions = item.reactions || {};
     const reactionEntries = Object.entries(reactions).filter(([_, uIds]) => uIds.length > 0);
@@ -353,196 +371,224 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     return (
       <article
         key={item.id}
-        className={`${isReply ? "pt-2.5 pb-2" : "py-4 first:pt-0"} transition-colors`}
+        className={`${isReply ? "pt-3 pb-2" : "py-4 first:pt-0"} flex gap-3 sm:gap-3.5 transition-colors`}
       >
-        {/* Author & Timestamp Row */}
-        <div className="flex items-baseline justify-between gap-3 mb-1">
-          <div className="flex items-baseline gap-2">
-            <span className="font-sans font-semibold text-xs sm:text-[13px] text-brand-primary">
-              {item.user_name}
-            </span>
-            <span className="text-[10.5px] font-mono text-brand-secondary">
-              {formatCommentDate(item.created_at)}
-            </span>
-          </div>
-
-          {isOwner && (
-            <button
-              onClick={() => handleDelete(item.id)}
-              className="text-[11px] text-brand-secondary hover:text-rose-500 underline transition-colors cursor-pointer"
+        {/* Left: YouTube-style Prominent Circular Avatar */}
+        <div className="shrink-0 pt-0.5">
+          {item.user_avatar ? (
+            <img
+              src={item.user_avatar}
+              alt={item.user_name}
+              className={`${
+                isReply ? "w-6 h-6 sm:w-7 sm:h-7" : "w-8 h-8 sm:w-9 sm:h-9"
+              } rounded-full object-cover border border-brand-surface-highest shrink-0`}
+              referrerPolicy="no-referrer"
+            />
+          ) : (
+            <div
+              className={`${
+                isReply
+                  ? "w-6 h-6 sm:w-7 sm:h-7 text-[11px]"
+                  : "w-8 h-8 sm:w-9 sm:h-9 text-xs"
+              } rounded-full bg-brand-surface-highest text-brand-primary flex items-center justify-center font-bold uppercase shrink-0 border border-brand-surface-highest/60`}
             >
-              Delete
-            </button>
+              {item.user_name ? item.user_name.charAt(0) : "U"}
+            </div>
           )}
         </div>
 
-        {/* Comment Body */}
-        <p className="font-sans text-xs sm:text-[13px] leading-relaxed text-brand-on-surface whitespace-pre-wrap mb-2">
-          {item.content}
-        </p>
+        {/* Right: Content Column (Name + Body + Reactions + Replies) */}
+        <div className="flex-1 min-w-0">
+          {/* Author Name + Timestamp + Delete */}
+          <div className="flex items-center justify-between gap-2 mb-1">
+            <div className="flex items-center gap-2">
+              <span className="font-sans font-semibold text-xs sm:text-[13px] text-brand-primary leading-none">
+                {item.user_name}
+              </span>
+              <span className="text-[10.5px] font-mono text-brand-secondary leading-none">
+                {formatCommentDate(item.created_at)}
+              </span>
+            </div>
 
-        {/* Actions Row: Reactions + Author Heart Badge + Reply Button */}
-        <div className="flex flex-wrap items-center gap-3 text-[11px] text-brand-secondary relative">
-          {/* Reaction Bar / Button (Auth Guarded) */}
-          <div className="relative inline-block">
-            <button
-              onClick={() => {
-                if (!user) {
-                  setStatusMessage({ type: "error", text: "Please sign in to react to comments." });
-                  setTimeout(() => setStatusMessage(null), 3000);
-                  return;
-                }
-                setActiveReactionPickerId(isPickerOpen ? null : item.id);
-              }}
-              className="hover:text-brand-primary transition-colors cursor-pointer flex items-center gap-1"
-            >
-              <span>React</span>
-            </button>
-
-            {/* Floating Facebook-style Reactions Popover */}
-            {isPickerOpen && (
-              <div
-                ref={pickerRef}
-                className="absolute bottom-full left-0 mb-1.5 z-30 flex items-center gap-1.5 px-2.5 py-1.5 bg-brand-surface-lowest border border-brand-surface-highest rounded-full shadow-lg animate-in fade-in zoom-in-95 duration-150"
+            {canDelete && (
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="text-[11px] text-brand-secondary hover:text-rose-500 underline transition-colors cursor-pointer leading-none"
               >
-                {EMOJI_REACTIONS.map(({ emoji, label }) => (
-                  <button
-                    key={emoji}
-                    onClick={() => handleToggleReaction(item.id, emoji)}
-                    title={label}
-                    className="text-base sm:text-lg hover:scale-125 transition-transform duration-100 p-0.5 cursor-pointer"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
+                Delete
+              </button>
             )}
           </div>
 
-          {/* Render Active Reaction Badges */}
-          {reactionEntries.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {reactionEntries.map(([emoji, userList]) => {
-                const active = hasUserReacted(emoji);
-                return (
-                  <button
-                    key={emoji}
-                    onClick={() => {
-                      if (!user) {
-                        setStatusMessage({ type: "error", text: "Please sign in to react to comments." });
-                        setTimeout(() => setStatusMessage(null), 3000);
-                        return;
-                      }
-                      handleToggleReaction(item.id, emoji);
-                    }}
-                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-mono border transition-all cursor-pointer ${
-                      active
-                        ? "bg-brand-surface-low border-brand-primary/60 text-brand-primary font-bold shadow-2xs"
-                        : "bg-brand-surface-lowest border-brand-surface-highest text-brand-secondary hover:border-brand-primary/40"
-                    }`}
-                  >
-                    <span>{emoji}</span>
-                    <span>{userList.length}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {/* Comment Body */}
+          <p className="font-sans text-xs sm:text-[13px] leading-relaxed text-brand-on-surface whitespace-pre-wrap mb-2">
+            {item.content}
+          </p>
 
-          {/* Author Badge (Clean avatar + text) */}
-          {authorReactEmoji && (
-            <div
-              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-brand-surface-low border border-brand-surface-highest/80 text-[10.5px] select-none"
-              title="Liked by author (Hoang Xuan Tung)"
-            >
-              <img
-                src={AUTHOR_AVATAR}
-                alt="Author Avatar"
-                className="w-3.5 h-3.5 rounded-full object-cover border border-brand-surface-highest bg-brand-bg shrink-0"
+          {/* Actions Row: Reactions + Author Heart Badge + Reply Button */}
+          <div className="flex flex-wrap items-center gap-3 text-[11px] text-brand-secondary relative">
+            {/* Reaction Bar / Button (Auth Guarded with 1-click toggle) */}
+            <div data-reaction-container="true" className="relative inline-block">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!user) {
+                    setStatusMessage({ type: "error", text: "Please sign in to react to comments." });
+                    setTimeout(() => setStatusMessage(null), 3000);
+                    return;
+                  }
+                  setActiveReactionPickerId((prev) => (prev === item.id ? null : item.id));
+                }}
+                className="hover:text-brand-primary transition-colors cursor-pointer flex items-center gap-1 font-medium"
+              >
+                <span>React</span>
+              </button>
+
+              {/* Floating Facebook-style Reactions Popover */}
+              {isPickerOpen && (
+                <div
+                  ref={pickerRef}
+                  className="absolute bottom-full left-0 mb-1.5 z-30 flex items-center gap-1 px-2.5 py-1.5 bg-brand-surface-lowest border border-brand-surface-highest rounded-full shadow-lg animate-in fade-in zoom-in-95 duration-150 max-w-[90vw] overflow-x-auto"
+                >
+                  {EMOJI_REACTIONS.map(({ emoji, label }) => (
+                    <button
+                      key={emoji}
+                      onClick={() => handleToggleReaction(item.id, emoji)}
+                      title={label}
+                      className="text-base sm:text-lg hover:scale-125 transition-transform duration-100 p-0.5 cursor-pointer"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Render Active Reaction Badges */}
+            {reactionEntries.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                {reactionEntries.map(([emoji, userList]) => {
+                  const active = hasUserReacted(emoji);
+                  return (
+                    <button
+                      key={emoji}
+                      onClick={() => {
+                        if (!user) {
+                          setStatusMessage({ type: "error", text: "Please sign in to react to comments." });
+                          setTimeout(() => setStatusMessage(null), 3000);
+                          return;
+                        }
+                        handleToggleReaction(item.id, emoji);
+                      }}
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-mono border transition-all cursor-pointer ${
+                        active
+                          ? "bg-brand-surface-low border-brand-primary/60 text-brand-primary font-bold shadow-2xs"
+                          : "bg-brand-surface-lowest border-brand-surface-highest text-brand-secondary hover:border-brand-primary/40"
+                      }`}
+                    >
+                      <span>{emoji}</span>
+                      <span>{userList.length}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* YouTube Style Author Heart Badge (Author Avatar + mini ❤️ pin) */}
+            {authorReactEmoji && (
+              <div
+                className="relative inline-flex items-center justify-center shrink-0 cursor-default"
+                title={`Hearted by Author (${authorReactEmoji})`}
+              >
+                <img
+                  src={AUTHOR_AVATAR}
+                  alt="Author"
+                  className="w-4.5 h-4.5 rounded-full object-cover border border-brand-surface-highest bg-brand-bg shadow-2xs"
+                />
+                <span className="absolute -bottom-1 -right-1 text-[9px] leading-none select-none">
+                  ❤️
+                </span>
+              </div>
+            )}
+
+            {/* Reply Button (Only on top-level comments) */}
+            {!isReply && (
+              <button
+                onClick={() => {
+                  if (!user) {
+                    setStatusMessage({ type: "error", text: "Please sign in to reply." });
+                    setTimeout(() => setStatusMessage(null), 3000);
+                    return;
+                  }
+                  setReplyingToId(replyingToId === item.id ? null : item.id);
+                  setReplyText("");
+                }}
+                className="hover:text-brand-primary transition-colors cursor-pointer font-medium"
+              >
+                {replyingToId === item.id ? "Cancel reply" : "Reply"}
+              </button>
+            )}
+          </div>
+
+          {/* Inline Reply Form */}
+          {replyingToId === item.id && (
+            <div className="mt-3 pl-3 sm:pl-3.5 border-l-2 border-brand-surface-highest">
+              <div className="text-[11px] text-brand-secondary mb-1.5">
+                Replying to <strong className="text-brand-primary">{item.user_name}</strong>
+              </div>
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                rows={2}
+                placeholder="Write a reply..."
+                className="w-full p-2.5 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs focus:outline-none focus:border-brand-primary transition-colors"
               />
-              <span className="text-[10px] font-medium text-brand-primary">
-                Liked by author
-              </span>
+              <div className="flex items-center justify-end gap-2 mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setReplyingToId(null)}
+                  className="px-3 py-1 text-xs text-brand-secondary hover:text-brand-primary cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={submittingReply || !replyText.trim()}
+                  onClick={() => handleReplySubmit(item.id)}
+                  className="px-3.5 py-1 bg-brand-primary text-brand-surface-lowest text-xs font-medium hover:opacity-90 disabled:opacity-40 cursor-pointer"
+                >
+                  {submittingReply ? "Replying..." : "Post Reply"}
+                </button>
+              </div>
             </div>
           )}
 
-          {/* Reply Button (Only on top-level comments) */}
-          {!isReply && (
-            <button
-              onClick={() => {
-                if (!user) {
-                  setStatusMessage({ type: "error", text: "Please sign in to reply." });
-                  setTimeout(() => setStatusMessage(null), 3000);
-                  return;
-                }
-                setReplyingToId(replyingToId === item.id ? null : item.id);
-                setReplyText("");
-              }}
-              className="hover:text-brand-primary transition-colors cursor-pointer"
-            >
-              {replyingToId === item.id ? "Cancel reply" : "Reply"}
-            </button>
+          {/* Collapsible Trigger for Child Replies (YouTube Style: ▼ N replies) */}
+          {!isReply && childReplies.length > 0 && (
+            <div className="mt-2.5">
+              <button
+                onClick={() => toggleReplies(item.id)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-brand-secondary hover:text-brand-primary transition-colors cursor-pointer py-0.5"
+              >
+                <span className="text-[9px] transform transition-transform">
+                  {isExpanded ? "▲" : "▼"}
+                </span>
+                <span>
+                  {isExpanded
+                    ? "Hide replies"
+                    : `${childReplies.length} ${childReplies.length === 1 ? "reply" : "replies"}`}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {/* Collapsible Nested Child Replies */}
+          {childReplies.length > 0 && isExpanded && (
+            <div className="mt-2 space-y-1">
+              {childReplies.map((reply) => renderCommentItem(reply, true))}
+            </div>
           )}
         </div>
-
-        {/* Inline Reply Form */}
-        {replyingToId === item.id && (
-          <div className="mt-3 ml-4 sm:ml-6 pl-3 sm:pl-4 border-l-2 border-brand-surface-highest">
-            <div className="text-[11px] text-brand-secondary mb-1.5">
-              Replying to <strong className="text-brand-primary">@{item.user_name}</strong>
-            </div>
-            <textarea
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              rows={2}
-              placeholder="Write a reply..."
-              className="w-full p-2.5 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs focus:outline-none focus:border-brand-primary transition-colors"
-            />
-            <div className="flex items-center justify-end gap-2 mt-1.5">
-              <button
-                type="button"
-                onClick={() => setReplyingToId(null)}
-                className="px-3 py-1 text-xs text-brand-secondary hover:text-brand-primary cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={submittingReply || !replyText.trim()}
-                onClick={() => handleReplySubmit(item.id)}
-                className="px-3.5 py-1 bg-brand-primary text-brand-surface-lowest text-xs font-medium hover:opacity-90 disabled:opacity-40 cursor-pointer"
-              >
-                {submittingReply ? "Replying..." : "Post Reply"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Collapsible Trigger for Child Replies */}
-        {!isReply && childReplies.length > 0 && (
-          <div className="mt-2">
-            <button
-              onClick={() => toggleReplies(item.id)}
-              className="flex items-center gap-1 text-[11.5px] font-medium text-brand-secondary hover:text-brand-primary transition-colors cursor-pointer py-0.5"
-            >
-              <span className="text-[9px] transform transition-transform">
-                {isExpanded ? "▲" : "▼"}
-              </span>
-              <span>
-                {isExpanded
-                  ? "Hide replies"
-                  : `View ${childReplies.length} ${childReplies.length === 1 ? "reply" : "replies"}`}
-              </span>
-            </button>
-          </div>
-        )}
-
-        {/* Collapsible Nested Child Replies (Indented by 1 clear step) */}
-        {childReplies.length > 0 && isExpanded && (
-          <div className="mt-2.5 ml-4 sm:ml-7 pl-3 sm:pl-4 border-l-2 border-brand-surface-highest/80 divide-y divide-brand-surface-highest/40 space-y-1">
-            {childReplies.map((reply) => renderCommentItem(reply, true))}
-          </div>
-        )}
       </article>
     );
   };
@@ -577,94 +623,110 @@ export default function CommentSection({ postId }: CommentSectionProps) {
         </div>
       )}
 
-      {/* Clean Minimalist Comment Input Box */}
-      <div className="mb-8">
-        {user ? (
-          /* User Logged In Form */
-          <form onSubmit={handleSubmit} className="space-y-2.5">
-            <div className="flex items-center justify-between text-xs text-brand-secondary pb-0.5">
-              <span className="text-brand-on-surface">
-                Commenting as: <strong className="text-brand-primary">{getUserDisplayName()}</strong>
-              </span>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="text-brand-secondary hover:text-brand-primary underline transition-colors cursor-pointer text-[11.5px]"
-              >
-                Sign out
-              </button>
-            </div>
-
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              rows={3}
-              placeholder="Share your perspective or leave a comment..."
-              className="w-full p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
+      {/* Clean YouTube-style Comment Input Box */}
+      <div className="mb-8 flex gap-3 sm:gap-3.5 items-start">
+        {/* Left: Prominent Avatar */}
+        <div className="shrink-0 pt-0.5">
+          {getUserAvatar() ? (
+            <img
+              src={getUserAvatar()}
+              alt="avatar"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-brand-surface-highest shrink-0"
+              referrerPolicy="no-referrer"
             />
-
-            <div className="flex items-center justify-between pt-0.5">
-              <span className="text-[11px] text-brand-secondary font-mono">
-                Press submit to publish
-              </span>
-              <button
-                type="submit"
-                disabled={submitting || !commentText.trim()}
-                className="px-4 py-1.5 bg-brand-primary text-brand-surface-lowest text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-40 cursor-pointer"
-              >
-                {submitting ? "Posting..." : "Post Comment"}
-              </button>
+          ) : (
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-brand-surface-highest text-brand-primary flex items-center justify-center text-xs font-bold uppercase shrink-0 border border-brand-surface-highest/60">
+              {user ? (getUserDisplayName().charAt(0) || "U") : "?"}
             </div>
-          </form>
-        ) : (
-          /* User Not Logged In Form (Pure clean textarea + Bottom Sign-in action) */
-          <form onSubmit={handleSubmit} className="space-y-2.5">
-            <textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              rows={3}
-              placeholder="Share your perspective or leave a comment..."
-              className="w-full p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
-            />
+          )}
+        </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-brand-on-surface-variant text-[11.5px]">Sign in to post:</span>
+        {/* Right: Textarea + Action buttons */}
+        <div className="flex-1 min-w-0">
+          {user ? (
+            /* User Logged In Form */
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-brand-secondary pb-0.5">
+                <span className="text-brand-on-surface">
+                  Commenting as: <strong className="text-brand-primary">{getUserDisplayName()}</strong>
+                </span>
                 <button
                   type="button"
-                  onClick={() => handleLogin("google")}
-                  className="flex items-center gap-1 px-2.5 py-1 border border-brand-surface-highest hover:border-brand-primary bg-brand-surface-lowest text-brand-primary font-medium text-xs transition-colors cursor-pointer"
+                  onClick={handleLogout}
+                  className="text-brand-secondary hover:text-brand-primary underline transition-colors cursor-pointer text-[11.5px]"
                 >
-                  <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  <span>Google</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleLogin("github")}
-                  className="flex items-center gap-1 px-2.5 py-1 border border-brand-surface-highest hover:border-brand-primary bg-brand-surface-lowest text-brand-primary font-medium text-xs transition-colors cursor-pointer"
-                >
-                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                  </svg>
-                  <span>GitHub</span>
+                  Sign out
                 </button>
               </div>
 
-              <button
-                type="submit"
-                className="px-4 py-1.5 bg-brand-primary text-brand-surface-lowest text-xs font-medium hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Post Comment
-              </button>
-            </div>
-          </form>
-        )}
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                rows={3}
+                placeholder="Share your perspective or leave a comment..."
+                className="w-full p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
+              />
+
+              <div className="flex items-center justify-end pt-0.5">
+                <button
+                  type="submit"
+                  disabled={submitting || !commentText.trim()}
+                  className="px-4 py-1.5 bg-brand-primary text-brand-surface-lowest text-xs font-medium hover:opacity-90 transition-opacity disabled:opacity-40 cursor-pointer"
+                >
+                  {submitting ? "Posting..." : "Post Comment"}
+                </button>
+              </div>
+            </form>
+          ) : (
+            /* User Not Logged In Form */
+            <form onSubmit={handleSubmit} className="space-y-2">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                rows={3}
+                placeholder="Share your perspective or leave a comment..."
+                className="w-full p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
+              />
+
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-brand-on-surface-variant text-[11.5px]">Sign in to post:</span>
+                  <button
+                    type="button"
+                    onClick={() => handleLogin("google")}
+                    className="flex items-center gap-1 px-2.5 py-1 border border-brand-surface-highest hover:border-brand-primary bg-brand-surface-lowest text-brand-primary font-medium text-xs transition-colors cursor-pointer"
+                  >
+                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                    </svg>
+                    <span>Google</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleLogin("github")}
+                    className="flex items-center gap-1 px-2.5 py-1 border border-brand-surface-highest hover:border-brand-primary bg-brand-surface-lowest text-brand-primary font-medium text-xs transition-colors cursor-pointer"
+                  >
+                    <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                    </svg>
+                    <span>GitHub</span>
+                  </button>
+                </div>
+
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 bg-brand-primary text-brand-surface-lowest text-xs font-medium hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  Post Comment
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
 
       {/* Full-width Comments Stream */}
