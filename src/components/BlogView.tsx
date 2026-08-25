@@ -18,8 +18,8 @@ import {
   Quote
 } from "lucide-react";
 import { blogPosts } from "../lib/blog-loader";
-import { BlogPost } from "../types";
 import { slugify, parseMarkdown, renderInlineStyles, RenderMarkdown } from "../lib/markdown";
+import CommentSection from "./CommentSection";
 
 interface BlogViewProps {
   currentPath: string;
@@ -512,35 +512,39 @@ export default function BlogView({
                   </div>
 
                   {/* ARTICLE HEADER CONTAINER */}
-                  <header className="mb-12">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-mono text-brand-on-surface-variant/70 mb-4 uppercase tracking-wider">
-                      <span className="font-bold text-brand-secondary">{selectedPost.category}</span>
-                      <span>•</span>
-                      <span>{selectedPost.date}</span>
+                  <header className="mb-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-mono text-brand-on-surface-variant/70 mb-6 tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <span className="font-sans font-bold text-brand-secondary uppercase">{selectedPost.category}</span>
+                        <span>•</span>
+                        <span>{selectedPost.date}</span>
+                      </div>
+
+                      {/* Top-Right Borderless Clean Tags (Matching Card Style) */}
+                      {selectedPost.tags && selectedPost.tags.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          {selectedPost.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="font-mono text-[10.5px] sm:text-[11px] text-brand-secondary/80"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <h1 className="font-sans text-3xl sm:text-4.5xl leading-[1.1] text-brand-primary font-bold tracking-tight mb-6">
+                    <h1 className="font-sans text-xl sm:text-2xl leading-snug text-brand-primary font-bold tracking-tight mb-3.5">
                       {selectedPost.title}
                     </h1>
-                    <p className="font-sans text-brand-on-surface-variant text-base sm:text-lg leading-relaxed font-light mb-6">
+                    <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed font-light">
                       {selectedPost.abstract}
                     </p>
-                    {selectedPost.tags && selectedPost.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {selectedPost.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="font-mono text-[10px] text-brand-on-surface-variant/80 bg-brand-surface-low px-2.5 py-1 rounded"
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
                   </header>
 
                   {/* FEATURED DIAGRAM CONTAINER (Active if featured, fallback styling otherwise) */}
                   {selectedPost.id === "featured-ai" ? (
-                    <figure className="mb-12">
+                    <figure className="mb-6">
                       <div className="w-full aspect-[16/10] sm:h-[400px] bg-[#0c182a] rounded-lg overflow-hidden relative border border-brand-surface-highest">
                         {/* Generates depth overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 to-transparent z-10 pointer-events-none"></div>
@@ -551,12 +555,12 @@ export default function BlogView({
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <figcaption className="mt-4 font-mono text-[10px] text-brand-on-surface-variant tracking-wider uppercase text-center">
+                      <figcaption className="mt-3 font-mono text-[10px] text-brand-on-surface-variant tracking-wider uppercase text-center">
                         {selectedPost.caption}
                       </figcaption>
                     </figure>
                   ) : (
-                    <div className="h-[2px] bg-brand-surface-highest mb-12"></div>
+                    <div className="h-[1.5px] bg-brand-surface-highest mb-6"></div>
                   )}
 
                   {/* DETAILED CONTENT SECTIONS */}
@@ -568,6 +572,11 @@ export default function BlogView({
                     </div>
                   )}
 
+                  {/* SUPABASE DISCUSSION & COMMENTS */}
+                  <CommentSection
+                    postId={selectedPost.id}
+                    postTitle={selectedPost.title}
+                  />
 
                 </article>
               </div>

@@ -17,12 +17,13 @@ const siteTags = [
   "Space Biology",
   "Microbiology",
   "Molecular Biology",
-  "Biochemistry",
   "Genomics",
+  "Metagenomics",
   "Transcriptomics",
+  "Biochemistry",
   "Immunology",
-  "Data Science & Visualization",
-  "Computer Science",
+  "Data Science",
+  "Data Visualization",
   "Environmental Science",
   "Geology",
   "Research Skills",
@@ -50,7 +51,7 @@ export default function HomeView(_props: HomeViewProps) {
               onClick={() => setShowAvatarInfo((prev) => !prev)}
               aria-label="Toggle character avatar information"
               title="Click to view avatar details"
-              className="w-[168px] h-[168px] sm:w-[198px] sm:h-[198px] md:w-[214px] md:h-[214px] rounded-full border-2 border-brand-surface-highest overflow-hidden shadow-sm bg-brand-surface-low flex items-center justify-center cursor-pointer hover:border-brand-primary/60 transition-all outline-none focus:ring-2 focus:ring-brand-primary/20"
+              className="w-[168px] h-[168px] sm:w-[198px] sm:h-[198px] md:w-[214px] md:h-[214px] rounded-full border-2 border-brand-surface-highest overflow-hidden shadow-sm bg-brand-bg flex items-center justify-center cursor-pointer hover:border-brand-primary/60 transition-all outline-none focus:ring-2 focus:ring-brand-primary/20"
             >
               <img
                 src="/assets/images/user-nam8.png"

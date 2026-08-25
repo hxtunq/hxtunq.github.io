@@ -12,11 +12,12 @@ import {
   Home,
   BookOpen,
   FolderGit2,
-  Mail,
   User,
   MessageSquare,
   Sun,
   Moon,
+  Sparkles,
+  Flower2,
   Monitor,
   Settings,
   Palette
@@ -75,6 +76,8 @@ export default function Navbar({
 
   const themeButtons: { key: ThemePreference; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
     { key: "light", label: "Light", Icon: Sun },
+    { key: "orange", label: "Orange", Icon: Sparkles },
+    { key: "sakura", label: "Sakura", Icon: Flower2 },
     { key: "dark", label: "Dark", Icon: Moon },
     { key: "system", label: "System", Icon: Monitor },
   ];
@@ -143,20 +146,20 @@ export default function Navbar({
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: 6 }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="absolute right-0 top-11 z-50 w-52 p-2 rounded-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-xl overflow-hidden font-sans space-y-1.5"
+                    className="absolute right-0 top-11 z-50 w-[340px] p-2 rounded-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-xl overflow-hidden font-sans space-y-1.5"
                   >
                     <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-brand-secondary font-medium">
                       <Palette className="w-3.5 h-3.5" />
                       <span>Theme</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-1 p-1 bg-brand-surface-low rounded-xl border border-brand-surface-highest/80">
+                    <div className="grid grid-cols-5 gap-1 p-1 bg-brand-surface-low rounded-xl border border-brand-surface-highest/80">
                       {themeButtons.map(({ key, label, Icon }) => {
                         const isSelected = themePreference === key;
                         return (
                           <button
                             key={key}
                             onClick={() => onSetTheme(key)}
-                            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-xs font-sans transition-all duration-150 cursor-pointer ${
+                            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-0.5 rounded-lg text-xs font-sans transition-all duration-150 cursor-pointer ${
                               isSelected
                                 ? "bg-brand-surface-lowest text-brand-primary shadow-xs font-bold ring-1 ring-brand-surface-highest"
                                 : "text-brand-on-surface-variant hover:text-brand-primary hover:bg-brand-surface-high/50"
@@ -165,15 +168,19 @@ export default function Navbar({
                             <Icon
                               className={`w-3.5 h-3.5 ${
                                 isSelected
-                                  ? key === "dark"
+                                  ? key === "sakura"
+                                    ? "text-[#e85d88]"
+                                    : key === "dark"
                                     ? "text-sky-400"
+                                    : key === "orange"
+                                    ? "text-[#c96442]"
                                     : key === "light"
                                     ? "text-amber-500"
                                     : "text-brand-accent"
                                   : "text-brand-secondary"
                               }`}
                             />
-                            <span className="text-[10.5px] leading-tight">{label}</span>
+                            <span className="text-[10px] leading-tight truncate max-w-full">{label}</span>
                           </button>
                         );
                       })}
@@ -278,14 +285,14 @@ export default function Navbar({
                       <Palette className="w-3 h-3" />
                       <span>Theme</span>
                     </div>
-                    <div className="grid grid-cols-3 gap-1.5 p-1 bg-brand-surface-high/60 rounded-xl border border-brand-surface-highest">
+                    <div className="grid grid-cols-5 gap-1 p-1 bg-brand-surface-high/60 rounded-xl border border-brand-surface-highest">
                       {themeButtons.map(({ key, label, Icon }) => {
                         const isSelected = themePreference === key;
                         return (
                           <button
                             key={key}
                             onClick={() => onSetTheme(key)}
-                            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-lg text-xs font-sans transition-all duration-150 cursor-pointer ${
+                            className={`flex flex-col items-center justify-center gap-1 py-1.5 px-0.5 rounded-lg text-xs font-sans transition-all duration-150 cursor-pointer ${
                               isSelected
                                 ? "bg-brand-surface-lowest text-brand-primary shadow-xs font-bold"
                                 : "text-brand-on-surface-variant hover:text-brand-primary"
@@ -294,38 +301,25 @@ export default function Navbar({
                             <Icon
                               className={`w-3.5 h-3.5 ${
                                 isSelected
-                                  ? key === "dark"
+                                  ? key === "sakura"
+                                    ? "text-[#e85d88]"
+                                    : key === "dark"
                                     ? "text-sky-400"
+                                    : key === "orange"
+                                    ? "text-[#c96442]"
                                     : key === "light"
                                     ? "text-amber-500"
                                     : "text-brand-accent"
                                   : "text-brand-secondary"
                               }`}
                             />
-                            <span className="text-[10.5px]">{label}</span>
+                            <span className="text-[9.5px] truncate max-w-full">{label}</span>
                           </button>
                         );
                       })}
                     </div>
                   </div>
                 )}
-
-                {/* Contact button */}
-                <motion.button
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, delay: (navItems.length + 1) * 0.04, ease: "easeOut" }}
-                  onClick={() => {
-                    onContactClick();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-brand-on-surface-variant hover:bg-brand-surface-high active:scale-[0.98] transition-all duration-200 cursor-pointer"
-                >
-                  <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-brand-surface-high text-brand-on-surface-variant">
-                    <Mail className="w-[16px] h-[16px]" />
-                  </div>
-                  <span className="font-sans text-[13.5px] tracking-wide font-medium">Contact</span>
-                </motion.button>
               </div>
             </motion.div>
           </>

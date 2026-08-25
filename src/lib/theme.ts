@@ -5,8 +5,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-export type ThemePreference = "light" | "dark" | "system";
-export type ResolvedTheme = "light" | "dark";
+export type ThemePreference = "light" | "orange" | "dark" | "sakura" | "system";
+export type ResolvedTheme = "light" | "orange" | "dark" | "sakura";
 
 export function getSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined" || !window.matchMedia) return "light";
@@ -16,9 +16,12 @@ export function getSystemTheme(): ResolvedTheme {
 export function getInitialPreference(): ThemePreference {
   if (typeof window === "undefined") return "system";
   try {
-    const saved = localStorage.getItem("theme") as ThemePreference | null;
-    if (saved === "light" || saved === "dark" || saved === "system") {
-      return saved;
+    const saved = localStorage.getItem("theme") as string | null;
+    if (saved === "light" || saved === "orange" || saved === "dark" || saved === "sakura" || saved === "system") {
+      return saved as ThemePreference;
+    }
+    if (saved === "claude") {
+      return "orange";
     }
   } catch (e) {
     console.error("Error reading theme preference from localStorage", e);
@@ -29,10 +32,13 @@ export function getInitialPreference(): ThemePreference {
 export function applyThemeClass(resolved: ResolvedTheme) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  if (resolved === "dark") {
+  root.classList.remove("dark", "orange", "claude", "sakura");
+  if (resolved === "orange") {
+    root.classList.add("orange");
+  } else if (resolved === "sakura") {
+    root.classList.add("sakura");
+  } else if (resolved === "dark") {
     root.classList.add("dark");
-  } else {
-    root.classList.remove("dark");
   }
 }
 
@@ -44,7 +50,7 @@ export function useTheme() {
   const resolvedTheme: ResolvedTheme = preference === "system" ? systemTheme : preference;
   const isDark = resolvedTheme === "dark";
 
-  // Apply .dark class to root
+  // Apply theme classes to root
   useEffect(() => {
     applyThemeClass(resolvedTheme);
   }, [resolvedTheme]);
@@ -73,7 +79,9 @@ export function useTheme() {
     setPreferenceState((prev) => {
       let next: ThemePreference = "light";
       if (prev === "system") next = "light";
-      else if (prev === "light") next = "dark";
+      else if (prev === "light") next = "orange";
+      else if (prev === "orange") next = "sakura";
+      else if (prev === "sakura") next = "dark";
       else if (prev === "dark") next = "system";
 
       try {

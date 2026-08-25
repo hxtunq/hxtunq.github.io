@@ -20,24 +20,108 @@
   --color-brand-on-surface-variant: #45474c; /* muted body text */
   --color-brand-nav: #f2f4f6;            /* floating nav pill, tinted against the white page */
   --color-brand-nav-border: #e2e6ea;     /* outline around the pill */
+
+  /* Heatmap levels (Classic GitHub Green) */
+  --heatmap-empty: #ebedf0;
+  --heatmap-empty-border: rgba(208, 215, 222, 0.5);
+  --heatmap-l1: #9be9a8;
+  --heatmap-l1-border: #82e293;
+  --heatmap-l2: #40c463;
+  --heatmap-l2-border: #34b355;
+  --heatmap-l3: #30a14e;
+  --heatmap-l3-border: #278c42;
+  --heatmap-l4: #216e39;
+  --heatmap-l4-border: #1a5c2f;
 }
 
 .dark {
   color-scheme: dark;
-  /* Sleek modern dark "academic night" palette */
-  --color-brand-primary: #f8fafc;        /* crisp off-white for headings & primary ink */
-  --color-brand-secondary: #94a3b8;      /* muted slate for labels & meta */
-  --color-brand-accent: #38bdf8;         /* glowing sky teal for interactive & accent */
-  --color-brand-accent-ink: #0a0f18;     /* dark contrast ink inside solid accent badges */
-  --color-brand-bg: #0a0e17;             /* deep obsidian canvas background */
-  --color-brand-surface-low: #101623;    /* recessed panels, inputs & sidebar */
-  --color-brand-surface-lowest: #141c2c; /* elevated cards, dialogs & reader canvas */
-  --color-brand-surface-high: #1c2638;   /* hover states & raised elements */
-  --color-brand-surface-highest: #243247;/* crisp hairline borders & dividers */
-  --color-brand-on-surface: #e2e8f0;     /* high-legibility body text */
-  --color-brand-on-surface-variant: #94a3b8; /* secondary / muted text */
-  --color-brand-nav: #101724;            /* floating dark nav pill */
-  --color-brand-nav-border: #223044;     /* outline around floating nav */
+  /* Antigravity IDE / VS Code Dark Modern palette */
+  --color-brand-primary: #ffffff;        /* crisp white for headings & primary ink */
+  --color-brand-secondary: #969696;      /* muted gray for labels & comments */
+  --color-brand-accent: #3794ff;         /* Antigravity IDE signature blue accent */
+  --color-brand-accent-ink: #ffffff;     /* white text on accent fills */
+  --color-brand-bg: #1e1e1e;             /* Antigravity IDE main editor canvas background */
+  --color-brand-surface-low: #1e1e1e;    /* match editor canvas background for seamless frame blending */
+  --color-brand-surface-lowest: #252526; /* elevated cards, dialogs & reader canvas */
+  --color-brand-surface-high: #2d2d2d;   /* hover states & raised elements */
+  --color-brand-surface-highest: #333333;/* crisp hairline borders & dividers */
+  --color-brand-on-surface: #d4d4d4;     /* high-legibility IDE body text */
+  --color-brand-on-surface-variant: #969696; /* secondary / muted text */
+  --color-brand-nav: #252526;            /* floating dark nav pill matching IDE surface */
+  --color-brand-nav-border: #333333;     /* outline around floating nav */
+
+  /* Heatmap levels (GitHub Dark Green) */
+  --heatmap-empty: #1e1e1e;
+  --heatmap-empty-border: #333333;
+  --heatmap-l1: #0e4429;
+  --heatmap-l1-border: #006d32;
+  --heatmap-l2: #006d32;
+  --heatmap-l2-border: #26a641;
+  --heatmap-l3: #26a641;
+  --heatmap-l3-border: #39d353;
+  --heatmap-l4: #39d353;
+  --heatmap-l4-border: #56e36d;
+}
+
+.orange, .claude {
+  color-scheme: light;
+  /* Claude.ai Warm Sand & Terracotta palette - Original soft warm parchment */
+  --color-brand-primary: #1f1e1d;        /* deep warm charcoal for headings & active titles */
+  --color-brand-secondary: #736b63;      /* muted warm stone for labels & meta */
+  --color-brand-accent: #c96442;         /* Claude signature terracotta / warm coral-orange */
+  --color-brand-accent-ink: #ffffff;     /* white text on solid accent badges */
+  --color-brand-bg: #faf7ee;             /* Claude warm light cream parchment canvas */
+  --color-brand-surface-low: #f1ebe0;    /* Claude recessed sidebar & inputs */
+  --color-brand-surface-lowest: #f7f3ea; /* Claude soft warm cream card tone */
+  --color-brand-surface-high: #e9e1d1;   /* Claude hover states & raised elements */
+  --color-brand-surface-highest: #ded4c2;/* Claude subtle hairline borders */
+  --color-brand-on-surface: #383533;     /* Claude soft readable warm body text */
+  --color-brand-on-surface-variant: #6b635c; /* Claude secondary descriptions */
+  --color-brand-nav: #f1ebe0;            /* Claude floating warm nav pill */
+  --color-brand-nav-border: #ded4c2;     /* Claude outline around floating nav */
+
+  /* Heatmap levels (Claude Warm Terracotta / Sand Gradients) */
+  --heatmap-empty: #f1ebe0;
+  --heatmap-empty-border: #ded4c2;
+  --heatmap-l1: #fbd5c6;
+  --heatmap-l1-border: #f4ab92;
+  --heatmap-l2: #ea8a67;
+  --heatmap-l2-border: #dd7149;
+  --heatmap-l3: #c96442;
+  --heatmap-l3-border: #b55333;
+  --heatmap-l4: #983f23;
+  --heatmap-l4-border: #7e3118;
+}
+
+.sakura {
+  color-scheme: light;
+  /* Sakura Blossom Pastel Pink palette - Full harmonic pink, no stark white boxes */
+  --color-brand-primary: #501d2d;        /* deep rosewood plum for headings & active titles */
+  --color-brand-secondary: #9a5d70;      /* muted rose-mauve for labels & meta */
+  --color-brand-accent: #e05380;         /* vibrant sakura petal pink for interactive buttons/badges */
+  --color-brand-accent-ink: #ffffff;     /* white text on solid accent badges */
+  --color-brand-bg: #fdf0f3;             /* soft dreamy pale sakura blush pink background */
+  --color-brand-surface-low: #f4d7e1;    /* recessed sidebar & search inputs */
+  --color-brand-surface-lowest: #fae5eb; /* harmonious pastel pink cards & containers (no stark white) */
+  --color-brand-surface-high: #edd0dc;   /* hover states & raised elements */
+  --color-brand-surface-highest: #e4bdcc;/* soft sakura petal hairline borders */
+  --color-brand-on-surface: #3f242c;     /* deep warm readable rose-charcoal body text */
+  --color-brand-on-surface-variant: #805664; /* secondary descriptions */
+  --color-brand-nav: #fae5eb;            /* floating soft blush nav pill */
+  --color-brand-nav-border: #e4bdcc;     /* outline around floating nav */
+
+  /* Heatmap levels (Sakura Blossom Pink Gradients - Clear distinct contrast for Level 1) */
+  --heatmap-empty: #ecd1da;
+  --heatmap-empty-border: #deb5c2;
+  --heatmap-l1: #f472b6;
+  --heatmap-l1-border: #ec4899;
+  --heatmap-l2: #e0448e;
+  --heatmap-l2-border: #cc2b78;
+  --heatmap-l3: #be185d;
+  --heatmap-l3-border: #9d174d;
+  --heatmap-l4: #881337;
+  --heatmap-l4-border: #700f2b;
 }
 
 @theme {

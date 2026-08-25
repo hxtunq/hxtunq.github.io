@@ -20,8 +20,11 @@ import {
   Github,
   Linkedin,
   Menu,
+  X,
   Sun,
   Moon,
+  Sparkles,
+  Flower2,
   Monitor,
   Check,
   Settings,
@@ -415,11 +418,11 @@ export default function BookdownView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 bg-brand-surface-lowest flex flex-col h-screen w-screen overflow-hidden"
+            className="fixed inset-0 z-30 bg-brand-surface-lowest flex flex-col h-[100dvh] w-full overflow-hidden"
           >
             {/* Top Header Bar */}
-            <div className="h-12 border-b border-brand-surface-highest flex items-center justify-between w-full bg-brand-surface-lowest shrink-0 select-none">
-              {/* Left Header segment (above sidebar) */}
+            <div className="h-12 border-b border-brand-surface-highest flex items-center justify-between w-full bg-brand-surface-lowest shrink-0 select-none z-20">
+              {/* Left Header segment (above sidebar on desktop) */}
               {showSidebar && (
                 <div className="hidden md:flex w-[300px] shrink-0 border-r border-brand-surface-highest h-full items-center px-6 bg-brand-surface-low">
                   <button
@@ -433,14 +436,14 @@ export default function BookdownView({
               )}
 
               {/* Right Header segment (above content canvas) */}
-              <div className="flex-1 flex items-center justify-between px-6 h-full">
+              <div className="flex-1 flex items-center justify-between px-4 sm:px-6 h-full min-w-0">
                 {/* Left Group: Navigation & Search */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                   {/* Toggle Sidebar Button */}
                   <button
                     onClick={() => setShowSidebar(!showSidebar)}
                     title="Toggle Table of Contents"
-                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
+                    className="text-brand-on-surface-variant/70 hover:text-sky-600 transition-colors cursor-pointer outline-none p-1"
                   >
                     <Menu className="w-[18px] h-[18px]" />
                   </button>
@@ -449,16 +452,21 @@ export default function BookdownView({
                   <button
                     onClick={() => navigate("/docs")}
                     title="Docs Catalog"
-                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
+                    className="text-brand-on-surface-variant/70 hover:text-sky-600 transition-colors cursor-pointer outline-none p-1"
                   >
                     <Home className="w-[18px] h-[18px]" />
                   </button>
+
+                  {/* Book title on mobile header */}
+                  <span className="md:hidden font-sans font-medium text-xs text-brand-primary truncate max-w-[140px] sm:max-w-[200px]">
+                    {selectedBook.title}
+                  </span>
 
                   {/* Local search within Bookdown */}
                   <button
                     onClick={() => setShowSearch(!showSearch)}
                     title="Search within book..."
-                    className="text-brand-on-surface-variant/40 hover:text-sky-600 transition-colors cursor-pointer outline-none"
+                    className="hidden sm:block text-brand-on-surface-variant/70 hover:text-sky-600 transition-colors cursor-pointer outline-none p-1"
                   >
                     <Search className="w-[18px] h-[18px]" />
                   </button>
@@ -471,13 +479,13 @@ export default function BookdownView({
                       onChange={(e) => setBookSearchQuery(e.target.value)}
                       placeholder="Search within book..."
                       autoFocus
-                      className="bg-brand-surface-low border border-brand-surface-highest focus:border-sky-500 outline-none text-xs px-2.5 py-1 rounded w-[180px] text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-all font-sans"
+                      className="bg-brand-surface-low border border-brand-surface-highest focus:border-sky-500 outline-none text-xs px-2.5 py-1 rounded w-[150px] sm:w-[180px] text-brand-on-surface placeholder:text-brand-on-surface-variant/40 transition-all font-sans"
                     />
                   )}
                 </div>
 
                 {/* Right Group: Settings Popover & Social Media */}
-                <div className="flex items-center gap-3.5 sm:gap-4">
+                <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
                   {onSetTheme && (
                     <div className="relative" ref={themeMenuRef}>
                       <button
@@ -501,15 +509,17 @@ export default function BookdownView({
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: 6 }}
                             transition={{ duration: 0.15, ease: "easeOut" }}
-                            className="absolute right-0 top-9 z-50 w-52 p-2 rounded-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-xl overflow-hidden font-sans space-y-1.5"
+                            className="absolute right-0 top-9 z-50 w-[325px] p-2 rounded-2xl bg-brand-surface-lowest border border-brand-surface-highest shadow-xl overflow-hidden font-sans space-y-1.5"
                           >
                             <div className="flex items-center gap-1.5 px-1 py-0.5 text-xs text-brand-secondary font-medium">
                               <Palette className="w-3.5 h-3.5" />
                               <span>Theme</span>
                             </div>
-                            <div className="grid grid-cols-3 gap-1 p-0.5 bg-brand-surface-low rounded-lg border border-brand-surface-highest/80">
+                            <div className="grid grid-cols-5 gap-1 p-0.5 bg-brand-surface-low rounded-lg border border-brand-surface-highest/80">
                               {[
                                 { key: "light" as ThemePreference, label: "Light", Icon: Sun },
+                                { key: "orange" as ThemePreference, label: "Orange", Icon: Sparkles },
+                                { key: "sakura" as ThemePreference, label: "Sakura", Icon: Flower2 },
                                 { key: "dark" as ThemePreference, label: "Dark", Icon: Moon },
                                 { key: "system" as ThemePreference, label: "System", Icon: Monitor },
                               ].map(({ key, label, Icon }) => {
@@ -518,14 +528,28 @@ export default function BookdownView({
                                   <button
                                     key={key}
                                     onClick={() => onSetTheme(key)}
-                                    className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded text-[10px] transition-colors cursor-pointer ${
+                                    className={`flex flex-col items-center justify-center gap-0.5 py-1 px-0.5 rounded text-[9.5px] transition-colors cursor-pointer ${
                                       isSelected
                                         ? "bg-brand-surface-lowest text-brand-primary font-bold shadow-xs"
                                         : "text-brand-on-surface-variant hover:text-brand-primary"
                                     }`}
                                   >
-                                    <Icon className="w-3 h-3" />
-                                    <span>{label}</span>
+                                    <Icon
+                                      className={`w-3 h-3 ${
+                                        isSelected
+                                          ? key === "sakura"
+                                            ? "text-[#e85d88]"
+                                            : key === "dark"
+                                            ? "text-sky-400"
+                                            : key === "orange"
+                                            ? "text-[#c96442]"
+                                            : key === "light"
+                                            ? "text-amber-500"
+                                            : "text-brand-accent"
+                                          : "text-brand-secondary"
+                                      }`}
+                                    />
+                                    <span className="truncate max-w-full">{label}</span>
                                   </button>
                                 );
                               })}
@@ -557,11 +581,108 @@ export default function BookdownView({
               </div>
             </div>
 
-            {/* Main content grid split */}
-            <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-              {/* Left Hand: Book chapters index listing hierarchy */}
+            {/* Mobile TOC Drawer overlay (when showSidebar is true on mobile) */}
+            <AnimatePresence>
               {showSidebar && (
-                <div className="w-full md:w-[300px] shrink-0 bg-brand-surface-low border-b md:border-b-0 md:border-r border-brand-surface-highest flex flex-col h-[350px] md:h-full overflow-hidden">
+                <div className="md:hidden fixed inset-0 top-12 z-40 flex">
+                  {/* Backdrop */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => setShowSidebar(false)}
+                    className="fixed inset-0 top-12 bg-black/40 backdrop-blur-xs"
+                  />
+                  {/* Drawer Panel */}
+                  <motion.div
+                    initial={{ x: "-100%" }}
+                    animate={{ x: 0 }}
+                    exit={{ x: "-100%" }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="relative w-[85%] max-w-[320px] h-full bg-brand-surface-low border-r border-brand-surface-highest flex flex-col shadow-2xl overflow-hidden z-10"
+                  >
+                    <div className="p-3.5 border-b border-brand-surface-highest flex items-center justify-between bg-brand-surface-lowest">
+                      <span className="font-sans font-semibold text-xs text-brand-primary truncate">
+                        {selectedBook.title}
+                      </span>
+                      <button
+                        onClick={() => setShowSidebar(false)}
+                        aria-label="Close table of contents"
+                        className="p-1 text-brand-secondary hover:text-brand-primary rounded cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    {/* Scrollable list */}
+                    <div className="flex-1 px-4 py-4 overflow-y-auto scrollbar-subtle">
+                      <div className="space-y-1">
+                        {filteredChapters.map((chap, idx) => {
+                          const isRootActive = activePage?.id === chap.id;
+                          const prevChap = idx > 0 ? filteredChapters[idx - 1] : null;
+                          const showSectionHeader = chap.section && (!prevChap || prevChap.section !== chap.section);
+
+                          return (
+                            <div key={chap.id} className="space-y-0.5">
+                              {showSectionHeader && (
+                                <div className={`font-sans text-[10.5px] font-bold text-brand-secondary/80 tracking-wider uppercase px-2 select-none ${idx === 0 ? "pt-1 pb-0.5" : "pt-3.5 pb-0.5"}`}>
+                                  {chap.section}
+                                </div>
+                              )}
+                              <button
+                                onClick={() => goToChapter(chap.id)}
+                                style={{ textAlign: "left" }}
+                                className={`w-full font-sans text-[13.5px] px-2 py-1 transition-colors block cursor-pointer truncate ${isRootActive
+                                  ? "text-sky-600 font-semibold"
+                                  : "text-brand-on-surface font-normal hover:text-sky-600"
+                                  }`}
+                              >
+                                {renderTOCTitle(chap.title)}
+                              </button>
+
+                              {/* Subsections list (always visible, fully expanded) */}
+                              {chap.subsections && chap.subsections.length > 0 && (
+                                <div className="space-y-0.5">
+                                  {chap.subsections.map((sub) => {
+                                    const isSubActive = activePage?.id === sub.id;
+
+                                    return (
+                                      <button
+                                        key={sub.id}
+                                        onClick={() => goToChapter(sub.id)}
+                                        style={{ textAlign: "left" }}
+                                        className={`w-full font-sans text-[13px] pl-5 pr-2 py-0.5 transition-colors block cursor-pointer truncate ${isSubActive
+                                          ? "text-sky-600 font-semibold"
+                                          : "text-brand-on-surface font-normal hover:text-sky-600"
+                                          }`}
+                                      >
+                                        {renderTOCTitle(sub.title)}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    {/* Bottom drawer footer */}
+                    <div className="border-t border-brand-surface-highest flex items-center bg-brand-surface-low/60 py-2.5 px-4 shrink-0 w-full">
+                      <span className="font-sans text-[10px] text-brand-on-surface-variant/40 uppercase tracking-wider font-medium">
+                        © 2026 Xuan Tung Hoang
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+              )}
+            </AnimatePresence>
+
+            {/* Main content grid split */}
+            <div className="flex flex-1 min-h-0 overflow-hidden relative">
+              {/* Left Hand: Desktop Book chapters index listing hierarchy */}
+              {showSidebar && (
+                <div className="hidden md:flex w-[300px] shrink-0 bg-brand-surface-low border-r border-brand-surface-highest flex-col h-full overflow-hidden">
                   {/* Scrollable list */}
                   <div className="flex-1 px-4 py-5 overflow-y-auto scrollbar-subtle">
                     {/* Table of Chapters list */}
@@ -629,13 +750,11 @@ export default function BookdownView({
               )}
 
               {/* Right Hand: Sub-document scrolling reader canvas */}
-              <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+              <div className="flex-1 flex flex-col min-w-0 min-h-0 h-full overflow-hidden">
                 {/* Scrollable content container */}
-                <div className="flex-1 p-6 md:p-10 lg:px-16 xl:pl-36 xl:pr-8 overflow-y-auto">
+                <div className="flex-1 p-5 sm:p-8 md:p-10 lg:px-16 xl:pl-36 xl:pr-8 overflow-y-auto">
                   {currentChapter ? (
-                    <div className="space-y-6 max-w-2xl xl:max-w-[984px] w-full mx-auto">
-
-
+                    <div className="space-y-6 max-w-2xl xl:max-w-[984px] w-full mx-auto pb-8">
                       <h3 className="font-sans font-medium text-2xl text-brand-primary tracking-tight">
                         {currentChapter.title}
                       </h3>
@@ -644,8 +763,6 @@ export default function BookdownView({
                       <div className="prose prose-slate max-w-none text-sm leading-relaxed text-brand-on-surface font-sans">
                         <RenderMarkdown markdown={currentChapter.contents} />
                       </div>
-
-
                     </div>
                   ) : (
                     <div className="text-center py-20 text-brand-on-surface-variant">
@@ -655,17 +772,20 @@ export default function BookdownView({
                   )}
                 </div>
 
-                {/* Prev / Next controls for chapter index inside ebook reader */}
-                <div className="border-t border-brand-surface-highest flex justify-between items-center bg-brand-surface-low/30 py-2.5 px-4 shrink-0 w-full">
+                {/* Prev / Next controls for chapter index inside ebook reader bottom sticky bar */}
+                <div className="border-t border-brand-surface-highest flex justify-between items-center bg-brand-surface-low/60 backdrop-blur-xs py-2.5 px-4 shrink-0 w-full select-none z-10">
                   <button
                     disabled={activePageIndex === 0}
                     onClick={() => {
                       const prevPage = flatPages[activePageIndex - 1];
                       if (prevPage) {
                         navigate(`/docs/${selectedBook.id}/${prevPage.id}`);
+                        if (typeof window !== "undefined" && window.innerWidth < 768) {
+                          setShowSidebar(false);
+                        }
                       }
                     }}
-                    className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase text-left"
+                    className="font-sans font-bold text-[10px] tracking-widest text-brand-secondary hover:text-brand-primary transition-all disabled:opacity-35 cursor-pointer uppercase text-left py-1"
                   >
                     &larr; Prev Page
                   </button>
@@ -678,9 +798,12 @@ export default function BookdownView({
                       const nextPage = flatPages[activePageIndex + 1];
                       if (nextPage) {
                         navigate(`/docs/${selectedBook.id}/${nextPage.id}`);
+                        if (typeof window !== "undefined" && window.innerWidth < 768) {
+                          setShowSidebar(false);
+                        }
                       }
                     }}
-                    className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase text-right"
+                    className="font-sans font-bold text-[10px] tracking-widest text-brand-primary hover:text-brand-secondary transition-all disabled:opacity-35 cursor-pointer uppercase text-right py-1"
                   >
                     Next Page &rarr;
                   </button>
