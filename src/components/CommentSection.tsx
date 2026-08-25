@@ -36,6 +36,7 @@ const EMOJI_REACTIONS = [
 ];
 
 const AUTHOR_AVATAR = "/assets/images/user-nam8.png";
+const DEFAULT_USER_AVATAR = "/assets/images/user.jpg";
 
 function formatCommentDate(isoString: string): string {
   try {
@@ -375,26 +376,17 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       >
         {/* Left: YouTube-style Prominent Circular Avatar */}
         <div className="shrink-0 pt-0.5">
-          {item.user_avatar ? (
-            <img
-              src={item.user_avatar}
-              alt={item.user_name}
-              className={`${
-                isReply ? "w-6 h-6 sm:w-7 sm:h-7" : "w-8 h-8 sm:w-9 sm:h-9"
-              } rounded-full object-cover border border-brand-surface-highest shrink-0`}
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div
-              className={`${
-                isReply
-                  ? "w-6 h-6 sm:w-7 sm:h-7 text-[11px]"
-                  : "w-8 h-8 sm:w-9 sm:h-9 text-xs"
-              } rounded-full bg-brand-surface-highest text-brand-primary flex items-center justify-center font-bold uppercase shrink-0 border border-brand-surface-highest/60`}
-            >
-              {item.user_name ? item.user_name.charAt(0) : "U"}
-            </div>
-          )}
+          <img
+            src={item.user_avatar || DEFAULT_USER_AVATAR}
+            alt={item.user_name}
+            className={`${
+              isReply ? "w-6 h-6 sm:w-7 sm:h-7" : "w-8 h-8 sm:w-9 sm:h-9"
+            } rounded-full object-cover border border-brand-surface-highest shrink-0`}
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = DEFAULT_USER_AVATAR;
+            }}
+          />
         </div>
 
         {/* Right: Content Column (Name + Body + Reactions + Replies) */}
@@ -627,18 +619,15 @@ export default function CommentSection({ postId }: CommentSectionProps) {
       <div className="mb-8 flex gap-3 sm:gap-3.5 items-start">
         {/* Left: Prominent Avatar */}
         <div className="shrink-0 pt-0.5">
-          {getUserAvatar() ? (
-            <img
-              src={getUserAvatar()}
-              alt="avatar"
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-brand-surface-highest shrink-0"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-brand-surface-highest text-brand-primary flex items-center justify-center text-xs font-bold uppercase shrink-0 border border-brand-surface-highest/60">
-              {user ? (getUserDisplayName().charAt(0) || "U") : "?"}
-            </div>
-          )}
+          <img
+            src={getUserAvatar() || DEFAULT_USER_AVATAR}
+            alt="avatar"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover border border-brand-surface-highest shrink-0"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = DEFAULT_USER_AVATAR;
+            }}
+          />
         </div>
 
         {/* Right: Textarea + Action buttons */}
@@ -646,28 +635,29 @@ export default function CommentSection({ postId }: CommentSectionProps) {
           {user ? (
             /* User Logged In Form */
             <form onSubmit={handleSubmit} className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-brand-secondary pb-0.5">
-                <span className="text-brand-on-surface">
-                  Commenting as: <strong className="text-brand-primary">{getUserDisplayName()}</strong>
-                </span>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="text-brand-secondary hover:text-brand-primary underline transition-colors cursor-pointer text-[11.5px]"
-                >
-                  Sign out
-                </button>
-              </div>
-
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                rows={3}
+                rows={2}
                 placeholder="Share your perspective or leave a comment..."
-                className="w-full p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
+                className="w-full p-2.5 sm:p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
               />
 
-              <div className="flex items-center justify-end pt-0.5">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5 text-xs">
+                <div className="flex items-center gap-1.5 text-brand-secondary">
+                  <span className="text-brand-on-surface text-[11.5px]">
+                    Commenting as: <strong className="text-brand-primary font-semibold">{getUserDisplayName()}</strong>
+                  </span>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="text-brand-secondary hover:text-brand-primary underline transition-colors cursor-pointer text-[11px]"
+                  >
+                    Sign out
+                  </button>
+                </div>
+
                 <button
                   type="submit"
                   disabled={submitting || !commentText.trim()}
@@ -683,9 +673,9 @@ export default function CommentSection({ postId }: CommentSectionProps) {
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
-                rows={3}
+                rows={2}
                 placeholder="Share your perspective or leave a comment..."
-                className="w-full p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
+                className="w-full p-2.5 sm:p-3 rounded-none bg-brand-surface-lowest border border-brand-surface-highest text-brand-on-surface text-xs sm:text-[13px] leading-relaxed focus:outline-none focus:border-brand-primary transition-colors placeholder:text-brand-on-surface-variant/60 resize-y"
               />
 
               <div className="flex flex-wrap items-center justify-between gap-3 pt-0.5">

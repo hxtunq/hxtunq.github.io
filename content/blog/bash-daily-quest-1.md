@@ -1,6 +1,6 @@
 ---
 id: "bash-daily-quest-1"
-title: "[Daily Bash #1] Phân tích cú pháp tìm và đếm số lượng biến thể trùng nhau giữa các file VCF"
+title: "[Daily Bash #1] Chuỗi lệnh tìm và đếm số lượng biến thể trùng nhau giữa các file VCF"
 category: "Daily Quest"
 date: "2026-08-22"
 dateDisplay: "Aug 22, 2026"
