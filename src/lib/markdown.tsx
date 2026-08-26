@@ -413,17 +413,26 @@ export function renderInlineStyles(text: string): React.JSX.Element {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
+    .replace(/\*\*\*(.*?)\*\*\*/g, "<strong><em>$1</em></strong>")
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
+    .replace(/___(.*?)___/g, "<strong><em>$1</em></strong>")
+    .replace(/__(.*?)__/g, "<strong>$1</strong>")
+    .replace(/_([^_]+)_/g, "<em>$1</em>")
     // Markdown links: [text](url)
     .replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-      "<a href='$2' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors'>$1</a>"
+      "<a href='$2' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors break-all'>$1</a>"
     )
-    // Bare URLs: (https://...) or https://... standalone
+    // Bare URLs in parentheses: (https://...)
     .replace(
       /\((https?:\/\/[^\s)]+)\)/g,
-      "(<a href='$1' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors'>$1</a>)"
+      "(<a href='$1' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors break-all'>$1</a>)"
+    )
+    // Standalone URLs
+    .replace(
+      /(^|\s)(https?:\/\/[^\s<)]+)/g,
+      "$1<a href='$2' target='_blank' rel='noopener noreferrer' class='text-blue-600 hover:text-blue-800 underline underline-offset-2 decoration-blue-400/50 transition-colors break-all'>$2</a>"
     )
     // Custom inline coloring: [text]{style}
     .replace(

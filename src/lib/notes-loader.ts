@@ -80,7 +80,7 @@ for (const [path, raw] of Object.entries(markdownModules)) {
     ? rawTags.split(",").map((t) => t.trim().replace(/^["']|["']$/g, "")).filter(Boolean)
     : [];
 
-  const hasLinkPreview = !!(meta.linkPreviewUrl || meta.linkPreviewTitle);
+  const hasLinkPreview = !!(meta.linkPreviewUrl || meta.linkPreviewTitle || meta.linkPreviewDescription || meta.linkPreviewImageUrl);
 
   const post: NotesPost = {
     id: id,
@@ -90,9 +90,10 @@ for (const [path, raw] of Object.entries(markdownModules)) {
     tags: tags.length > 0 ? tags : undefined,
     imageUrl: (meta.imageUrl as string) || undefined,
     paperPreview: (meta.paperPreview as string) || undefined,
+    urlPreview: (meta.urlPreview as string) || (meta.previewUrl as string) || undefined,
     linkPreview: hasLinkPreview
       ? {
-          url: (meta.linkPreviewUrl as string) || "",
+          url: (meta.linkPreviewUrl as string) || (meta.urlPreview as string) || "",
           title: (meta.linkPreviewTitle as string) || "",
           description: (meta.linkPreviewDescription as string) || "",
           siteName: (meta.linkPreviewSiteName as string) || undefined,

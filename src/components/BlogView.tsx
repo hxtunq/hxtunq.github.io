@@ -469,15 +469,6 @@ export default function BlogView({
 
               {/* Right Column: Listing Items */}
               <section className="flex-1 min-w-0 space-y-3.5">
-                {/* Highlighted info box */}
-                <div className="border border-amber-200 dark:border-amber-900/40 bg-amber-500/5 dark:bg-amber-500/10 p-3 flex items-center md:items-start gap-2.5 rounded-[0.25rem]">
-                  <span className="font-mono text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-950/60 px-1.5 py-0.5 shrink-0 select-none">
-                    NOTICE
-                  </span>
-                  <p className="font-sans text-xs text-amber-950 dark:text-amber-200">
-                    This website is currently under construction. Some details may be incomplete. Thank you for your patience!
-                  </p>
-                </div>
 
                 {paginatedPosts.length === 0 ? (
                   <div className="p-10 text-center border border-brand-surface-highest rounded-[0.25rem] bg-brand-surface-low">

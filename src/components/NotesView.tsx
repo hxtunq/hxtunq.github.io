@@ -3,6 +3,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { Share2, MoreHorizontal, ExternalLink, Copy, Check, Send, X } from "lucide-react";
 import { Facebook, Twitter } from "./BrandIcons";
 import { notesPosts } from "../lib/notes-loader";
+import { renderInlineStyles } from "../lib/markdown";
+
+// Helper to extract YouTube thumbnail
+const getYouTubeThumbnail = (url: string): string | null => {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
+};
 
 // Helper to format date relative or formatted like X (e.g. 5m, 2h, 1d, 12-Feb-2026)
 const formatRelativeDate = (dateString: string) => {
@@ -29,7 +36,7 @@ const formatRelativeDate = (dateString: string) => {
 
   const diffHours = Math.floor(diffMinutes / 60);
   if (diffHours < 24) return `${diffHours}h`;
-  
+
   const diffDaysRound = Math.floor(diffHours / 24);
   return `${diffDaysRound}d`;
 };
@@ -93,7 +100,7 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
     }
 
     // 2. Check localStorage cache
-    const cacheKey = `link-preview:${targetUrl}`;
+    const cacheKey = `link-preview-v4:${targetUrl}`;
     const cached = localStorage.getItem(cacheKey);
     if (cached) {
       try {
@@ -111,7 +118,43 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
       }
     }
 
-    // 3. Fetch from microlink
+    // 3. YouTube oEmbed support for fast, exact YouTube video titles and channels
+    const isYouTube = targetUrl.includes("youtube.com") || targetUrl.includes("youtu.be");
+    if (isYouTube) {
+      setLoading(true);
+      fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(targetUrl)}&format=json`)
+        .then(res => res.json())
+        .then(oembed => {
+          const ytThumb = getYouTubeThumbnail(targetUrl) || oembed.thumbnail_url || "";
+          const cleanAuthor = (oembed.author_name || "").replace(/\s*•\s*YouTube/gi, "").trim();
+          const parsedData = {
+            url: targetUrl,
+            title: manualPreview?.title || oembed.title || "YouTube Video",
+            description: manualPreview?.description || "",
+            siteName: manualPreview?.siteName || cleanAuthor || "YouTube",
+            imageUrl: manualPreview?.imageUrl || ytThumb,
+          };
+          localStorage.setItem(cacheKey, JSON.stringify(parsedData));
+          setPreview(parsedData);
+        })
+        .catch(() => {
+          const ytThumb = getYouTubeThumbnail(targetUrl) || "";
+          const fallback = {
+            url: targetUrl,
+            title: manualPreview?.title || "YouTube Video",
+            description: manualPreview?.description || "",
+            siteName: manualPreview?.siteName || "YouTube",
+            imageUrl: manualPreview?.imageUrl || ytThumb,
+          };
+          setPreview(fallback);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+      return;
+    }
+
+    // 4. Fetch from microlink for other URLs
     setLoading(true);
     const apiEndpoint = `https://api.microlink.io?url=${encodeURIComponent(targetUrl)}`;
 
@@ -125,12 +168,13 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
             imgUrl = typeof data.image === "object" ? data.image.url : data.image;
           }
 
+          const ytThumb = getYouTubeThumbnail(targetUrl);
           const parsedData = {
             url: targetUrl,
-            title: manualPreview?.title || data.title || "",
+            title: manualPreview?.title || data.title || (ytThumb ? "YouTube Video" : ""),
             description: manualPreview?.description || data.description || "",
-            siteName: manualPreview?.siteName || data.publisher || new URL(targetUrl).hostname.replace("www.", ""),
-            imageUrl: manualPreview?.imageUrl || imgUrl || "",
+            siteName: manualPreview?.siteName || data.publisher || (ytThumb ? "YouTube" : new URL(targetUrl).hostname.replace("www.", "")),
+            imageUrl: manualPreview?.imageUrl || imgUrl || ytThumb || "",
           };
 
           localStorage.setItem(cacheKey, JSON.stringify(parsedData));
@@ -141,12 +185,13 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
       })
       .catch(err => {
         console.error("Error scraping preview link: ", err);
+        const ytThumb = getYouTubeThumbnail(targetUrl);
         const fallback = {
           url: targetUrl,
-          title: manualPreview?.title || new URL(targetUrl).hostname,
-          description: manualPreview?.description || targetUrl,
-          siteName: manualPreview?.siteName || new URL(targetUrl).hostname.replace("www.", ""),
-          imageUrl: manualPreview?.imageUrl || "",
+          title: manualPreview?.title || (ytThumb ? "YouTube Video" : new URL(targetUrl).hostname),
+          description: manualPreview?.description || "",
+          siteName: manualPreview?.siteName || (ytThumb ? "YouTube" : new URL(targetUrl).hostname.replace("www.", "")),
+          imageUrl: manualPreview?.imageUrl || ytThumb || "",
         };
         setPreview(fallback);
       })
@@ -166,6 +211,18 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
   }
 
   if (!preview || (!preview.title && !preview.imageUrl)) return null;
+
+  const cleanSiteName = (preview.siteName || "")
+    .replace(/\s*•\s*YouTube/gi, "")
+    .trim();
+
+  const rawDesc = (preview.description || "").trim();
+  const cleanDescription =
+    rawDesc.startsWith("Kênh:") ||
+    rawDesc.includes("• YouTube") ||
+    rawDesc.toLowerCase() === cleanSiteName.toLowerCase()
+      ? ""
+      : rawDesc;
 
   return (
     <a
@@ -187,17 +244,17 @@ function AutoLinkPreview({ content, manualPreview }: AutoLinkPreviewProps) {
       )}
       {/* Link Preview Texts */}
       <div className="p-3.5 flex flex-col justify-center min-w-0 flex-1">
-        {preview.siteName && (
+        {cleanSiteName && (
           <span className="font-sans text-[10.5px] font-bold text-brand-secondary/70 uppercase tracking-wider mb-0.5">
-            {preview.siteName}
+            {cleanSiteName}
           </span>
         )}
-        <h4 className="font-sans text-[13px] font-bold text-brand-primary line-clamp-1 leading-snug group-hover:text-brand-accent transition-colors">
+        <h4 className="font-sans text-[13px] font-bold text-brand-primary line-clamp-2 leading-snug group-hover:text-brand-accent transition-colors">
           {preview.title}
         </h4>
-        {preview.description && (
+        {cleanDescription && (
           <p className="font-serif text-xs text-brand-secondary/80 line-clamp-2 leading-relaxed mt-1">
-            {preview.description}
+            {cleanDescription}
           </p>
         )}
         <span className="font-sans text-[10.5px] text-brand-secondary/40 truncate mt-2.5">
@@ -373,7 +430,7 @@ export default function NotesView() {
                         {formatRelativeDate(post.createdAt)}
                       </span>
                     </div>
-                    
+
                     {/* Share action dropdown triggered by ... */}
                     <div className="relative" ref={activeShareMenu === post.id ? menuRef : null}>
                       <button
@@ -410,7 +467,7 @@ export default function NotesView() {
                                 </>
                               )}
                             </button>
-                            
+
                             <a
                               href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getShareUrl(post.id))}`}
                               target="_blank"
@@ -450,9 +507,9 @@ export default function NotesView() {
                   </div>
 
                   {/* Body Text (styled as system-sans font-sans matching Facebook/Threads) */}
-                  <p className="font-sans text-[14px] sm:text-[14.5px] leading-relaxed text-brand-on-surface whitespace-pre-wrap mt-1.5">
-                    {post.content}
-                  </p>
+                  <div className="font-sans text-[13px] sm:text-[13.5px] leading-relaxed text-brand-on-surface text-justify mt-1.5 break-words">
+                    {renderInlineStyles(post.content)}
+                  </div>
 
                   {/* Attached Image (Facebook/Threads style image preview) */}
                   {post.imageUrl && (
@@ -474,8 +531,24 @@ export default function NotesView() {
                     <AutoLinkPreview content="" manualPreview={{ url: post.paperPreview }} />
                   )}
 
-                  {/* Automatic Link Preview (regular links) */}
-                  <AutoLinkPreview content={post.content} manualPreview={post.linkPreview} />
+                  {/* URL Preview (general URL preview from frontmatter) */}
+                  {post.urlPreview && !post.paperPreview && (
+                    <AutoLinkPreview
+                      content=""
+                      manualPreview={{
+                        url: post.urlPreview,
+                        title: post.linkPreview?.title,
+                        description: post.linkPreview?.description,
+                        siteName: post.linkPreview?.siteName,
+                        imageUrl: post.linkPreview?.imageUrl,
+                      }}
+                    />
+                  )}
+
+                  {/* Automatic Link Preview (regular links detected from content when neither paperPreview nor urlPreview is specified) */}
+                  {!post.paperPreview && !post.urlPreview && (
+                    <AutoLinkPreview content={post.content} manualPreview={post.linkPreview} />
+                  )}
 
                 </div>
               </motion.div>

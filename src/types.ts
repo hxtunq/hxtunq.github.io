@@ -84,6 +84,7 @@ export interface NotesPost {
   tags?: string[];
   imageUrl?: string;
   paperPreview?: string; // URL to an academic paper (for paper counting & preview)
+  urlPreview?: string; // URL for general link preview (e.g. YouTube, article)
   linkPreview?: {
     url: string;
     title: string;
