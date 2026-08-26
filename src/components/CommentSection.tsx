@@ -25,6 +25,7 @@ interface CommentSectionProps {
 const EMOJI_REACTIONS = [
   { emoji: "👍", label: "Like" },
   { emoji: "❤️", label: "Love" },
+  { emoji: "🌸", label: "Blossom" },
   { emoji: "💡", label: "Insight" },
   { emoji: "👏", label: "Clap" },
   { emoji: "😂", label: "Haha" },
@@ -34,6 +35,14 @@ const EMOJI_REACTIONS = [
   { emoji: "🐍", label: "Snake" },
   { emoji: "🪨", label: "Rock" },
 ];
+
+function NativeEmoji({ emoji, className = "" }: { emoji: string; className?: string }) {
+  return (
+    <span className={`inline-flex items-center justify-center leading-none ${className}`}>
+      {emoji}
+    </span>
+  );
+}
 
 const AUTHOR_AVATAR = "/assets/images/user-nam8.png";
 const DEFAULT_USER_AVATAR = "/assets/images/chii-meme.jpg";
@@ -103,27 +112,51 @@ export default function CommentSection({ postId }: CommentSectionProps) {
     };
   }, []);
 
-  // Fetch comments
-  const loadComments = useCallback(async () => {
+  // Fetch comments + Subscribe to Realtime updates
+  const loadComments = useCallback(async (showLoading = true) => {
     if (!isSupabaseConfigured) {
       setComments([]);
-      setLoading(false);
+      if (showLoading) setLoading(false);
       return;
     }
 
-    setLoading(true);
+    if (showLoading) setLoading(true);
     const { data, error } = await fetchComments(postId);
     if (!error && data) {
       setComments(data);
     } else {
       setComments([]);
     }
-    setLoading(false);
+    if (showLoading) setLoading(false);
   }, [postId]);
 
   useEffect(() => {
-    loadComments();
-  }, [loadComments]);
+    loadComments(true);
+
+    if (!supabase || !isSupabaseConfigured) return;
+
+    // Realtime channel: listen to INSERT, UPDATE (reactions), DELETE on comments table for this post
+    const channel = supabase
+      .channel(`realtime-comments-${postId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "comments",
+          filter: `post_id=eq.${postId}`,
+        },
+        () => {
+          // Refresh comments in the background silently
+          loadComments(false);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [loadComments, postId]);
 
   const handleLogin = async (provider: "google" | "github") => {
     setStatusMessage(null);
@@ -294,7 +327,19 @@ export default function CommentSection({ postId }: CommentSectionProps) {
 
     if (isSupabaseConfigured) {
       const comment = comments.find((c) => c.id === commentId);
-      await toggleReaction(commentId, emoji, user.id, comment?.reactions);
+      const { error, updatedReactions } = await toggleReaction(commentId, emoji, user.id, comment?.reactions);
+      if (error) {
+        setStatusMessage({
+          type: "error",
+          text: `Cannot save reaction: ${error.message}. Check Supabase RLS policy for UPDATE.`
+        });
+        setTimeout(() => setStatusMessage(null), 5000);
+        loadComments(false);
+      } else {
+        setComments((prev) =>
+          prev.map((c) => (c.id === commentId ? { ...c, reactions: updatedReactions } : c))
+        );
+      }
     }
   };
 
@@ -413,12 +458,28 @@ export default function CommentSection({ postId }: CommentSectionProps) {
           </div>
 
           {/* Comment Body */}
-          <p className="font-sans text-xs sm:text-[13px] leading-relaxed text-brand-on-surface whitespace-pre-wrap mb-2">
+          <p className="font-sans text-xs sm:text-[13px] leading-relaxed text-justify text-brand-on-surface whitespace-pre-wrap break-words mb-2">
             {item.content}
           </p>
 
           {/* Actions Row: Reactions + Author Heart Badge + Reply Button */}
           <div className="flex flex-wrap items-center gap-3 text-[11px] text-brand-secondary relative">
+            {/* Like Button */}
+            <button
+              type="button"
+              onClick={() => {
+                if (!user) {
+                  setStatusMessage({ type: "error", text: "Please sign in to like comments." });
+                  setTimeout(() => setStatusMessage(null), 3000);
+                  return;
+                }
+                handleToggleReaction(item.id, "👍");
+              }}
+              className={`hover:text-brand-primary transition-colors cursor-pointer flex items-center gap-1 font-medium ${hasUserReacted("👍") ? "text-brand-primary" : ""}`}
+            >
+              <span>Like</span>
+            </button>
+
             {/* Reaction Bar / Button (Auth Guarded with 1-click toggle) */}
             <div data-reaction-container="true" className="relative inline-block">
               <button
@@ -436,27 +497,31 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                 <span>React</span>
               </button>
 
-              {/* Floating Facebook-style Reactions Popover */}
+              {/* Floating Facebook iOS-style Reactions Popover Dock */}
               {isPickerOpen && (
                 <div
                   ref={pickerRef}
-                  className="absolute bottom-full left-0 mb-1.5 z-30 flex items-center gap-1 px-2.5 py-1.5 bg-brand-surface-lowest border border-brand-surface-highest rounded-full shadow-lg animate-in fade-in zoom-in-95 duration-150 max-w-[90vw] overflow-x-auto"
+                  className="absolute bottom-full left-0 mb-2.5 z-40 flex items-center gap-1 px-2.5 py-1.5 bg-brand-surface-lowest/95 backdrop-blur-md border border-brand-surface-highest rounded-full shadow-[0_10px_35px_rgba(0,0,0,0.2)] animate-in fade-in zoom-in-95 duration-150 max-w-[90vw] overflow-x-auto scrollbar-none"
                 >
                   {EMOJI_REACTIONS.map(({ emoji, label }) => (
                     <button
                       key={emoji}
                       onClick={() => handleToggleReaction(item.id, emoji)}
                       title={label}
-                      className="text-base sm:text-lg hover:scale-125 transition-transform duration-100 p-0.5 cursor-pointer"
+                      className="group/emoji relative flex flex-col items-center justify-center p-1 hover:scale-140 hover:-translate-y-2.5 transition-all duration-150 ease-out cursor-pointer outline-none"
                     >
-                      {emoji}
+                      {/* iOS-style floating tooltip label on hover */}
+                      <span className="opacity-0 group-hover/emoji:opacity-100 pointer-events-none absolute -top-7 bg-black/85 text-white text-[9.5px] font-sans font-medium px-2 py-0.5 rounded-full whitespace-nowrap shadow-md transition-opacity duration-150">
+                        {label}
+                      </span>
+                      <NativeEmoji emoji={emoji} className="text-lg sm:text-xl w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Render Active Reaction Badges */}
+            {/* Render Active Reaction Badges (iOS Style) */}
             {reactionEntries.length > 0 && (
               <div className="flex flex-wrap items-center gap-1.5">
                 {reactionEntries.map(([emoji, userList]) => {
@@ -472,13 +537,13 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                         }
                         handleToggleReaction(item.id, emoji);
                       }}
-                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10.5px] font-mono border transition-all cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono border transition-all cursor-pointer ${
                         active
                           ? "bg-brand-surface-low border-brand-primary/60 text-brand-primary font-bold shadow-2xs"
                           : "bg-brand-surface-lowest border-brand-surface-highest text-brand-secondary hover:border-brand-primary/40"
                       }`}
                     >
-                      <span>{emoji}</span>
+                      <NativeEmoji emoji={emoji} className="text-[13px] w-3.5 h-3.5" />
                       <span>{userList.length}</span>
                     </button>
                   );
@@ -497,9 +562,7 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                   alt="Author"
                   className="w-4.5 h-4.5 rounded-full object-cover border border-brand-surface-highest bg-brand-bg shadow-2xs"
                 />
-                <span className="absolute -bottom-1 -right-1 text-[9px] leading-none select-none">
-                  ❤️
-                </span>
+                <NativeEmoji emoji="❤️" className="text-[10px] w-2.5 h-2.5 absolute -bottom-1 -right-1 drop-shadow-xs" />
               </div>
             )}
 

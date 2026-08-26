@@ -155,39 +155,60 @@ export async function toggleReaction(
   userId: string,
   currentReactions: Record<string, string[]> = {}
 ): Promise<{ error: Error | null; updatedReactions: Record<string, string[]> }> {
-  const updated = { ...currentReactions };
-  const userList = updated[emoji] ? [...updated[emoji]] : [];
-  const existingIndex = userList.indexOf(userId);
-
-  if (existingIndex >= 0) {
-    // Remove reaction if already reacted
-    userList.splice(existingIndex, 1);
-  } else {
-    // Add reaction
-    userList.push(userId);
-  }
-
-  if (userList.length > 0) {
-    updated[emoji] = userList;
-  } else {
-    delete updated[emoji];
-  }
-
   if (!supabase) {
+    const updated = { ...currentReactions };
+    const userList = updated[emoji] ? [...updated[emoji]] : [];
+    const idx = userList.indexOf(userId);
+    if (idx >= 0) userList.splice(idx, 1);
+    else userList.push(userId);
+    if (userList.length > 0) updated[emoji] = userList;
+    else delete updated[emoji];
     return { error: null, updatedReactions: updated };
   }
 
   try {
-    const { error } = await supabase
+    // 1. Fetch freshest reactions from Supabase to prevent race-condition overwrite
+    const { data: latestComment, error: fetchErr } = await supabase
+      .from("comments")
+      .select("reactions")
+      .eq("id", commentId)
+      .single();
+
+    const baseReactions: Record<string, string[]> =
+      !fetchErr && latestComment?.reactions && typeof latestComment.reactions === "object"
+        ? latestComment.reactions
+        : currentReactions;
+
+    const updated = { ...baseReactions };
+    const userList = Array.isArray(updated[emoji]) ? [...updated[emoji]] : [];
+    const existingIndex = userList.indexOf(userId);
+
+    if (existingIndex >= 0) {
+      userList.splice(existingIndex, 1);
+    } else {
+      userList.push(userId);
+    }
+
+    if (userList.length > 0) {
+      updated[emoji] = userList;
+    } else {
+      delete updated[emoji];
+    }
+
+    // 2. Perform database update
+    const { error: updateErr } = await supabase
       .from("comments")
       .update({ reactions: updated })
       .eq("id", commentId);
 
-    if (error) {
-      return { error: new Error(error.message), updatedReactions: currentReactions };
+    if (updateErr) {
+      console.error("[Supabase toggleReaction Error]:", updateErr);
+      return { error: new Error(updateErr.message), updatedReactions: currentReactions };
     }
+
     return { error: null, updatedReactions: updated };
   } catch (err: any) {
+    console.error("[Supabase toggleReaction Exception]:", err);
     return { error: err, updatedReactions: currentReactions };
   }
 }

@@ -38,16 +38,16 @@ Có thể thấy rằng, file VCF luôn gồm 2 phần:
 1. **Header (các dòng bắt đầu bằng `#`):** Chứa thông tin cấu hình, phiên bản và tên các cột dữ liệu.
 2. **Phần dữ liệu chính:** Mỗi dòng đại diện cho một biến thể với 8 cột thông tin chuẩn:
 
-| Cột | Tên trường | Ý nghĩa / Mô tả | Ví dụ |
+| Cột | Tên trường | Mô tả | Ví dụ |
 | :--- | :--- | :--- | :--- |
-| `$1` | `#CHROM` | Tên nhiễm sắc thể chứa biến thể | `chr1` |
-| `$2` | `POS` | Tọa độ / vị trí biến thể trên nhiễm sắc thể | `10439` |
-| `$3` | `ID` | Mã định danh biến thể (như mã rsID từ dbSNP) | `rs12345` hoặc `.` |
-| `$4` | `REF` | Alen tham chiếu / nucleotide gốc trên hệ gen chuẩn | `A` |
-| `$5` | `ALT` | Alen đột biến / nucleotide bị thay thế | `C` |
-| `$6` | `QUAL` | Điểm chất lượng gọi biến thể (Phred-score) | `60` |
-| `$7` | `FILTER` | Trạng thái kiểm duyệt chất lượng | `PASS` |
-| `$8` | `INFO` | Các trường thông tin chú giải bổ sung | `DP=45` |
+| `$1` | CHROM | Tên nhiễm sắc thể chứa biến thể | `chr1` |
+| `$2` | POS | Tọa độ / vị trí biến thể trên nhiễm sắc thể | `10439` |
+| `$3` | ID | Mã định danh biến thể (như mã rsID từ dbSNP) | `rs12345` hoặc `.` |
+| `$4` | REF | Alen tham chiếu / nucleotide gốc trên hệ gen chuẩn | `A` |
+| `$5` | ALT | Alen đột biến / nucleotide bị thay thế | `C` |
+| `$6` | QUAL | Điểm chất lượng gọi biến thể (Phred-score) | `60` |
+| `$7` | FILTER | Trạng thái lọc chất lượng | `PASS` |
+| `$8` | INFO | Các trường thông tin chú giải bổ sung | `DP=45` |
 
 ## 3. Phân tích chi tiết câu lệnh
 
@@ -67,7 +67,7 @@ Ký tự `^` trong biểu thức chính quy (Regex) đại diện cho điểm b�
 
 **Bước 3**: `awk '{print $1 "\t" $2 "\t" $5}'` — Trích xuất tọa độ biến thể
 
-Lệnh `awk` mặc định chia từng dòng thành các cột được đánh số `$1, $2, $3...` dựa trên khoảng trắng hoặc tab. Với lệnh trên, ta chỉ in ra: Cột 1 (Nhiễm sắc thể), Cột 2 (Vị trí) và Cột 5 (Alen đột biến), ngăn cách nhau bởi ký tự tab `\t`.
+Lệnh `awk` mặc định chia từng dòng thành các cột được đánh số `$1, $2, $3...` dựa trên khoảng trắng hoặc tab. Ở đây, ta chỉ cần in ra: Cột 1 (Nhiễm sắc thể), Cột 2 (Vị trí) và Cột 5 (Alen đột biến), ngăn cách nhau bởi ký tự tab `\t`. Sở dĩ ta chỉ cần lấy 3 cột này là vì bộ ba thông tin này đã đủ để định danh duy nhất một biến thể. Việc gạt bỏ các cột khác giúp đơn giản hóa dữ liệu và loại trừ các khác biệt nhiễu (bởi vì lệnh `uniq` quét và so sánh toàn bộ nội dung của cả hàng; nếu ta để nguyên cả dòng, hai biến thể giống hệt nhau nhưng có điểm số QUAL hoặc cột INFO khác nhau sẽ bị `uniq` coi là hai dòng khác biệt và không nhóm lại được), từ đó đảm bảo việc so sánh và đếm các biến thể trùng lặp ở các bước sau diễn ra chính xác tuyệt đối.
 
 **Bước 4**: `sort` — Sắp xếp các dòng
 

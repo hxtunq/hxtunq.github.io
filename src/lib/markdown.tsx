@@ -399,7 +399,7 @@ export function renderInlineStyles(text: string): React.JSX.Element {
   let processed = text.replace(/`([^`]+)`/g, (_, code) => {
     const placeholder = `___INLINE_CODE_${codeSnippets.length}___`;
     codeSnippets.push(
-      `<code class='font-mono bg-brand-surface-low px-1.5 py-0.5 rounded text-xs text-brand-secondary'>${code
+      `<code class='font-mono text-[0.88em] px-1.5 py-0.5 rounded-xs bg-brand-surface-high/30 text-brand-secondary font-medium'>${code
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")}</code>`
