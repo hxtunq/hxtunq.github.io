@@ -748,7 +748,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                   >
                     <div className="p-4 overflow-auto text-xs leading-relaxed max-h-[300px]">
                       <pre
-                        className="font-mono text-left whitespace-pre text-brand-on-surface-variant"
+                        className="font-mono text-left whitespace-pre-wrap break-words text-brand-on-surface-variant"
                         dangerouslySetInnerHTML={{ __html: highlightOutputCode(block.code || "") }}
                       />
                     </div>
