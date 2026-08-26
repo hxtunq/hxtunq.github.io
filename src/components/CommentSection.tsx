@@ -36,7 +36,7 @@ const EMOJI_REACTIONS = [
 ];
 
 const AUTHOR_AVATAR = "/assets/images/user-nam8.png";
-const DEFAULT_USER_AVATAR = "/assets/images/user.jpg";
+const DEFAULT_USER_AVATAR = "/assets/images/chii-meme.jpg";
 
 function formatCommentDate(isoString: string): string {
   try {

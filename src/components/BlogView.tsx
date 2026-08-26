@@ -15,7 +15,11 @@ import {
   Copy,
   Check,
   Code2,
-  Quote
+  Quote,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
+  X
 } from "lucide-react";
 import { blogPosts } from "../lib/blog-loader";
 import { slugify, parseMarkdown, renderInlineStyles, RenderMarkdown } from "../lib/markdown";
@@ -48,7 +52,15 @@ export default function BlogView({
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [activeLanguage, setActiveLanguage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  // copyCodeSuccess state is now handled internally in RenderMarkdown
+  const [showFilters, setShowFilters] = useState(false);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (activeCategory) count++;
+    if (activeTag) count++;
+    if (activeLanguage) count++;
+    return count;
+  }, [activeCategory, activeTag, activeLanguage]);
 
   // Dynamic TOC items based on Markdown content headings (H2)
   const tocItems = useMemo(() => {
@@ -172,8 +184,8 @@ export default function BlogView({
 
 
 
-  // Pagination bounds (6 items per page)
-  const postsPerPage = 6;
+  // Pagination bounds (5 items per page)
+  const postsPerPage = 5;
   const totalPages = Math.ceil(filteredPosts.length / postsPerPage) || 1;
   const paginatedPosts = useMemo(() => {
     const start = (currentPage - 1) * postsPerPage;
@@ -196,155 +208,263 @@ export default function BlogView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="max-w-container-max mx-auto px-4 md:px-6 py-12"
+            className="max-w-container-max mx-auto px-4 md:px-6 pt-6 md:pt-8 pb-12"
           >
             <div className="flex flex-col md:flex-row gap-6 lg:gap-8 relative">
-              {/* Left Column: Sidebar Filters (Flushed to left, compact width: 240px) */}
-              <aside className="w-full md:w-[240px] shrink-0 space-y-6 md:sticky md:top-24 h-fit">
+              {/* Left Column: Sidebar Filters (Collapsible on all media sizes, in left sidebar) */}
+              <aside className="w-full md:w-[280px] lg:w-[300px] shrink-0 space-y-3 md:sticky md:top-24 h-fit">
+                {/* Search Bar + Filter Toggle */}
+                <div className="flex flex-row md:flex-col gap-2">
+                  {/* Live Search Form */}
+                  <div className="relative flex-1 md:w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-on-surface-variant/50 w-4 h-4" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      placeholder="Search posts..."
+                      className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none py-2.5 pl-9 pr-8 text-xs font-sans tracking-wide text-brand-on-surface transition-all placeholder:text-brand-on-surface-variant/40"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        aria-label="Clear search"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-brand-on-surface-variant hover:text-brand-primary cursor-pointer p-0.5"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
 
-
-                {/* Live Search Form */}
-                <div className="relative w-full">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-on-surface-variant/50 w-4 h-4" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    placeholder="Search posts..."
-                    className="w-full bg-brand-surface-low border border-brand-surface-highest focus:border-brand-primary outline-none py-2.5 pl-9 pr-4 text-xs font-sans tracking-wide text-brand-on-surface transition-all placeholder:text-brand-on-surface-variant/40"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-brand-secondary hover:text-brand-primary"
-                    >
-                      CLEAR
-                    </button>
-                  )}
+                  {/* Filter Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={() => setShowFilters((prev) => !prev)}
+                    aria-expanded={showFilters}
+                    className={`flex items-center justify-between gap-1.5 px-3 py-2.5 text-xs font-sans font-medium border transition-colors cursor-pointer shrink-0 md:w-full ${
+                      showFilters || activeFiltersCount > 0
+                        ? "bg-brand-surface-high border-brand-primary text-brand-primary"
+                        : "bg-brand-surface-low border-brand-surface-highest text-brand-on-surface-variant hover:text-brand-primary hover:border-brand-primary/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      <span>Filters</span>
+                      {activeFiltersCount > 0 && (
+                        <span className="w-4 h-4 rounded-full bg-brand-accent text-brand-accent-ink font-mono text-[9.5px] font-bold flex items-center justify-center">
+                          {activeFiltersCount}
+                        </span>
+                      )}
+                    </div>
+                    {showFilters ? (
+                      <ChevronUp className="w-3.5 h-3.5 opacity-60" />
+                    ) : (
+                      <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                    )}
+                  </button>
                 </div>
 
-                {/* Categories filtering links */}
-                <div className="space-y-3">
-                  <h3 className="font-sans text-[10.5px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                    CATEGORIES
-                  </h3>
-                  <div className="flex flex-col gap-1.5">
-                    {/* All Categories Option */}
+                {/* Active Filter Chips (if any active filters exist) */}
+                {(activeCategory || activeTag || activeLanguage) && (
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    {activeCategory && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand-surface-high border border-brand-surface-highest text-brand-primary text-[11px] font-sans">
+                        <span>Cat: <strong>{activeCategory}</strong></span>
+                        <button
+                          onClick={() => {
+                            setActiveCategory(null);
+                            setCurrentPage(1);
+                          }}
+                          aria-label="Remove category filter"
+                          className="hover:text-brand-accent cursor-pointer p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {activeTag && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand-surface-high border border-brand-surface-highest text-brand-primary text-[11px] font-sans">
+                        <span>Tag: <strong>{activeTag}</strong></span>
+                        <button
+                          onClick={() => {
+                            setActiveTag(null);
+                            setCurrentPage(1);
+                          }}
+                          aria-label="Remove tag filter"
+                          className="hover:text-brand-accent cursor-pointer p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {activeLanguage && (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm bg-brand-surface-high border border-brand-surface-highest text-brand-primary text-[11px] font-sans">
+                        <span>Lang: <strong>{activeLanguage}</strong></span>
+                        <button
+                          onClick={() => {
+                            setActiveLanguage(null);
+                            setCurrentPage(1);
+                          }}
+                          aria-label="Remove language filter"
+                          className="hover:text-brand-accent cursor-pointer p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
                     <button
                       onClick={() => {
                         setActiveCategory(null);
+                        setActiveTag(null);
+                        setActiveLanguage(null);
                         setCurrentPage(1);
                       }}
-                      className={`flex justify-between items-center text-left text-xs tracking-wide py-0.5 group transition-all cursor-pointer ${activeCategory === null
-                        ? "font-bold text-brand-primary"
-                        : "text-brand-on-surface-variant hover:text-brand-primary"
-                        }`}
+                      className="text-[10px] font-mono text-brand-secondary hover:text-brand-primary underline ml-0.5 cursor-pointer"
                     >
-                      <span className="group-hover:translate-x-0.5 transition-transform">All Posts</span>
-                      <span className="font-mono text-[10px] bg-brand-surface-low px-1.5 py-0.5 text-brand-secondary">
-                        {blogPosts.length}
-                      </span>
+                      Clear all
                     </button>
-
-                    {Object.entries(categoriesList).map(([catName, count]) => {
-                      const isActive = activeCategory?.toLowerCase() === catName.toLowerCase();
-
-                      return (
-                        <button
-                          key={catName}
-                          onClick={() => {
-                            setActiveCategory(catName);
-                            setCurrentPage(1);
-                          }}
-                          className={`flex justify-between items-center text-left text-xs tracking-wide py-0.5 group transition-all cursor-pointer ${isActive
-                            ? "font-bold text-brand-primary"
-                            : "text-brand-on-surface-variant hover:text-brand-primary"
-                            }`}
-                        >
-                          <span className="group-hover:translate-x-0.5 transition-transform">{catName}</span>
-                          <span className="font-mono text-[10px] bg-brand-surface-low px-1.5 py-0.5 text-brand-secondary">
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
                   </div>
-                </div>
+                )}
 
-                {/* Keywords Chips */}
-                <div className="space-y-3">
-                  <h3 className="font-sans text-[10.5px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                    KEYWORDS
-                  </h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {keywordsList.map((tag) => {
-                      const isActive = activeTag?.toLowerCase() === tag.toLowerCase();
-                      return (
-                        <button
-                          key={tag}
-                          onClick={() => {
-                            setActiveTag(isActive ? null : tag);
-                            setCurrentPage(1);
-                          }}
-                          className={`px-2.5 py-1 border font-mono text-[9.5px] uppercase transition-all tracking-wider cursor-pointer ${isActive
-                            ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
-                            : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
-                            }`}
-                        >
-                          {tag}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Language filtering */}
-                {Object.keys(languagesList).length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="font-sans text-[10.5px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
-                      LANGUAGE
-                    </h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {Object.entries(languagesList).map(([langName, count]) => {
-                        const isActive = activeLanguage?.toLowerCase() === langName.toLowerCase();
-                        return (
+                {/* Collapsible Filter Panel inside Left Sidebar */}
+                <AnimatePresence>
+                  {showFilters && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2, ease: "easeOut" }}
+                      className="overflow-hidden space-y-6 bg-brand-surface-lowest p-4 rounded-md border border-brand-surface-highest shadow-sm"
+                    >
+                      {/* Categories filtering links */}
+                      <div className="space-y-3">
+                        <h3 className="font-sans text-[10.5px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
+                          CATEGORIES
+                        </h3>
+                        <div className="flex flex-col gap-1.5 max-h-52 overflow-y-auto pr-1">
+                          {/* All Categories Option */}
                           <button
-                            key={langName}
                             onClick={() => {
-                              setActiveLanguage(isActive ? null : langName);
+                              setActiveCategory(null);
                               setCurrentPage(1);
                             }}
-                            className={`px-2.5 py-1 border font-mono text-[9.5px] uppercase transition-all tracking-wider cursor-pointer ${isActive
-                              ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
-                              : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
-                              }`}
+                            className={`flex justify-between items-center text-left text-xs tracking-wide py-0.5 group transition-all cursor-pointer ${
+                              activeCategory === null
+                                ? "font-bold text-brand-primary"
+                                : "text-brand-on-surface-variant hover:text-brand-primary"
+                            }`}
                           >
-                            {langName} ({count})
+                            <span className="group-hover:translate-x-0.5 transition-transform">All Posts</span>
+                            <span className="font-mono text-[10px] bg-brand-surface-low px-1.5 py-0.5 text-brand-secondary">
+                              {blogPosts.length}
+                            </span>
                           </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
 
-                {/* Helper reset prompt */}
-                {(activeCategory || activeTag || activeLanguage || searchQuery) && (
-                  <button
-                    onClick={() => {
-                      setActiveCategory(null);
-                      setActiveTag(null);
-                      setActiveLanguage(null);
-                      setSearchQuery("");
-                      setCurrentPage(1);
-                    }}
-                    className="font-mono text-[10px] font-bold tracking-widest uppercase text-brand-accent border border-brand-accent hover:bg-brand-accent hover:text-brand-accent-ink transition-all py-2 w-full text-center block cursor-pointer"
-                  >
-                    Reset Active Filters
-                  </button>
-                )}
+                          {Object.entries(categoriesList).map(([catName, count]) => {
+                            const isActive = activeCategory?.toLowerCase() === catName.toLowerCase();
+
+                            return (
+                              <button
+                                key={catName}
+                                onClick={() => {
+                                  setActiveCategory(catName);
+                                  setCurrentPage(1);
+                                }}
+                                className={`flex justify-between items-center text-left text-xs tracking-wide py-0.5 group transition-all cursor-pointer ${
+                                  isActive
+                                    ? "font-bold text-brand-primary"
+                                    : "text-brand-on-surface-variant hover:text-brand-primary"
+                                }`}
+                              >
+                                <span className="group-hover:translate-x-0.5 transition-transform">{catName}</span>
+                                <span className="font-mono text-[10px] bg-brand-surface-low px-1.5 py-0.5 text-brand-secondary">
+                                  {count}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Keywords Chips */}
+                      <div className="space-y-3">
+                        <h3 className="font-sans text-[10.5px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
+                          KEYWORDS
+                        </h3>
+                        <div className="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto pr-1">
+                          {keywordsList.map((tag) => {
+                            const isActive = activeTag?.toLowerCase() === tag.toLowerCase();
+                            return (
+                              <button
+                                key={tag}
+                                onClick={() => {
+                                  setActiveTag(isActive ? null : tag);
+                                  setCurrentPage(1);
+                                }}
+                                className={`px-2.5 py-1 border font-mono text-[9.5px] uppercase transition-all tracking-wider cursor-pointer ${
+                                  isActive
+                                    ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
+                                    : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
+                                }`}
+                              >
+                                {tag}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Language filtering */}
+                      {Object.keys(languagesList).length > 0 && (
+                        <div className="space-y-3">
+                          <h3 className="font-sans text-[10.5px] font-bold text-brand-secondary tracking-widest uppercase border-b border-brand-surface-highest pb-1.5">
+                            LANGUAGE
+                          </h3>
+                          <div className="flex flex-wrap gap-1.5">
+                            {Object.entries(languagesList).map(([langName, count]) => {
+                              const isActive = activeLanguage?.toLowerCase() === langName.toLowerCase();
+                              return (
+                                <button
+                                  key={langName}
+                                  onClick={() => {
+                                    setActiveLanguage(isActive ? null : langName);
+                                    setCurrentPage(1);
+                                  }}
+                                  className={`px-2.5 py-1 border font-mono text-[9.5px] uppercase transition-all tracking-wider cursor-pointer ${
+                                    isActive
+                                      ? "border-brand-accent bg-brand-accent text-brand-accent-ink font-bold"
+                                      : "border-brand-surface-highest hover:border-brand-primary text-brand-on-surface hover:text-brand-primary bg-brand-surface-lowest"
+                                  }`}
+                                >
+                                  {langName} ({count})
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Helper reset prompt */}
+                      {(activeCategory || activeTag || activeLanguage || searchQuery) && (
+                        <button
+                          onClick={() => {
+                            setActiveCategory(null);
+                            setActiveTag(null);
+                            setActiveLanguage(null);
+                            setSearchQuery("");
+                            setCurrentPage(1);
+                          }}
+                          className="font-mono text-[10px] font-bold tracking-widest uppercase text-brand-accent border border-brand-accent hover:bg-brand-accent hover:text-brand-accent-ink transition-all py-2 w-full text-center block cursor-pointer"
+                        >
+                          Reset Active Filters
+                        </button>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </aside>
 
               {/* Right Column: Listing Items */}
@@ -537,7 +657,7 @@ export default function BlogView({
                     <h1 className="font-sans text-xl sm:text-2xl leading-snug text-brand-primary font-bold tracking-tight mb-3.5">
                       {selectedPost.title}
                     </h1>
-                    <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed font-light">
+                    <p className="font-sans text-brand-on-surface-variant text-sm leading-relaxed text-justify font-light">
                       {selectedPost.abstract}
                     </p>
                   </header>

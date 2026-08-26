@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
 export interface MarkdownBlock {
-  type: "heading" | "paragraph" | "code" | "quote" | "image" | "list" | "details" | "hr";
+  type: "heading" | "paragraph" | "code" | "quote" | "image" | "list" | "details" | "hr" | "table";
   level?: number;
   text?: string;
   items?: string[];
@@ -20,6 +20,9 @@ export interface MarkdownBlock {
   caption?: string;
   note?: string;
   noteOffset?: number;
+  headers?: string[];
+  rows?: string[][];
+  aligns?: ("left" | "center" | "right")[];
 }
 
 export function slugify(text: string): string {
@@ -260,6 +263,54 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
       }
     }
 
+    // Markdown Tables (| Col1 | Col2 | ... |)
+    if (
+      line.trim().includes("|") &&
+      i + 1 < lines.length &&
+      /^\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?$/.test(lines[i + 1].trim())
+    ) {
+      const headerLine = lines[i].trim();
+      const delimiterLine = lines[i + 1].trim();
+
+      const parseCells = (row: string) => {
+        let trimmed = row.trim();
+        if (trimmed.startsWith("|")) trimmed = trimmed.slice(1);
+        if (trimmed.endsWith("|")) trimmed = trimmed.slice(0, -1);
+        return trimmed.split("|").map(cell => cell.trim());
+      };
+
+      const headers = parseCells(headerLine);
+      const delimiterCells = parseCells(delimiterLine);
+
+      const aligns: ("left" | "center" | "right")[] = delimiterCells.map(cell => {
+        const left = cell.startsWith(":");
+        const right = cell.endsWith(":");
+        if (left && right) return "center";
+        if (right) return "right";
+        return "left";
+      });
+
+      const rows: string[][] = [];
+      i += 2; // skip header and delimiter
+
+      while (i < lines.length && lines[i].trim() && lines[i].trim().includes("|")) {
+        const rowCells = parseCells(lines[i].trim());
+        while (rowCells.length < headers.length) {
+          rowCells.push("");
+        }
+        rows.push(rowCells.slice(0, headers.length));
+        i++;
+      }
+
+      blocks.push({
+        type: "table",
+        headers,
+        rows,
+        aligns,
+      });
+      continue;
+    }
+
     // Paragraph
     let pText = "";
     while (
@@ -273,7 +324,12 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
       !/^\d+\.\s+/.test(lines[i].trim()) &&
       !/^(---|___|\*\*\*)$/.test(lines[i].trim()) &&
       !lines[i].trim().startsWith("<details>") &&
-      !(lines[i].trim().startsWith("![") && lines[i].trim().includes("]("))
+      !(lines[i].trim().startsWith("![") && lines[i].trim().includes("](")) &&
+      !(
+        lines[i].trim().includes("|") &&
+        i + 1 < lines.length &&
+        /^\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?$/.test(lines[i + 1].trim())
+      )
     ) {
       pText += (pText ? " " : "") + lines[i].trim();
       i++;
@@ -629,7 +685,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
             }
             case "paragraph":
               return (
-                <p className="font-sans text-[14px] leading-relaxed">
+                <p className="font-sans text-[14px] leading-relaxed text-justify">
                   {renderInlineStyles(block.text || "")}
                 </p>
               );
@@ -703,7 +759,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                 <blockquote
                   className="pl-4 border-l-4 border-brand-surface-highest text-brand-on-surface-variant"
                 >
-                  <p className="font-sans text-[13px] leading-relaxed">
+                  <p className="font-sans text-[13px] leading-relaxed text-justify">
                     {renderInlineStyles(block.text || "")}
                   </p>
                 </blockquote>
@@ -731,7 +787,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                 return (
                   <ol className="list-decimal pl-6 space-y-2 my-3" start={block.start || 1}>
                     {block.items?.map((item, idx) => (
-                      <li key={idx} className="font-sans text-[13.5px] leading-relaxed text-brand-on-surface pl-1">
+                      <li key={idx} className="font-sans text-[13.5px] leading-relaxed text-justify text-brand-on-surface pl-1">
                         {renderInlineStyles(item)}
                       </li>
                     ))}
@@ -741,7 +797,7 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
               return (
                 <ul className="list-disc pl-6 space-y-2 my-3">
                   {block.items?.map((item, idx) => (
-                    <li key={idx} className="font-sans text-[13.5px] leading-relaxed text-brand-on-surface pl-1">
+                    <li key={idx} className="font-sans text-[13.5px] leading-relaxed text-justify text-brand-on-surface pl-1">
                       {renderInlineStyles(item)}
                     </li>
                   ))}
@@ -762,6 +818,65 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
                   </div>
                 </details>
               );
+            case "table": {
+              return (
+                <div className="w-full my-4 overflow-x-auto border border-brand-surface-highest rounded-[0.25rem] bg-brand-surface-lowest shadow-xs">
+                  <table className="w-full text-left border-collapse text-xs sm:text-[13px] font-sans">
+                    {block.headers && block.headers.length > 0 && (
+                      <thead className="bg-brand-surface-high/60 border-b border-brand-surface-highest">
+                        <tr>
+                          {block.headers.map((header, hIdx) => {
+                            const align = block.aligns?.[hIdx] || "left";
+                            return (
+                              <th
+                                key={hIdx}
+                                className={`py-2.5 px-3.5 font-semibold text-brand-primary tracking-wide ${
+                                  align === "center"
+                                    ? "text-center"
+                                    : align === "right"
+                                    ? "text-right"
+                                    : "text-left"
+                                }`}
+                              >
+                                {renderInlineStyles(header)}
+                              </th>
+                            );
+                          })}
+                        </tr>
+                      </thead>
+                    )}
+                    {block.rows && block.rows.length > 0 && (
+                      <tbody className="divide-y divide-brand-surface-highest">
+                        {block.rows.map((row, rIdx) => (
+                          <tr
+                            key={rIdx}
+                            className="hover:bg-brand-surface-low/30 transition-colors"
+                          >
+                            {row.map((cell, cIdx) => {
+                              const align = block.aligns?.[cIdx] || "left";
+                              return (
+                                <td
+                                  key={cIdx}
+                                  className={`py-2 px-3.5 text-brand-on-surface leading-relaxed ${
+                                    align === "center"
+                                      ? "text-center"
+                                      : align === "right"
+                                      ? "text-right"
+                                      : "text-left"
+                                  }`}
+                                >
+                                  {renderInlineStyles(cell)}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    )}
+                  </table>
+                </div>
+              );
+            }
             default:
               return null;
           }
@@ -787,6 +902,8 @@ export function RenderMarkdown({ markdown }: { markdown: string }): React.JSX.El
         } else if (block.type === "hr") {
           wrapperMargin = "my-4";
         } else if (block.type === "details") {
+          wrapperMargin = "my-4";
+        } else if (block.type === "table") {
           wrapperMargin = "my-4";
         }
 

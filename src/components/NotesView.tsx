@@ -350,11 +350,11 @@ export default function NotesView() {
                 className="flex gap-4 py-6 px-5 sm:px-6 scroll-mt-20 hover:bg-brand-surface-low/10 transition-colors"
               >
                 {/* Left Side: Avatar Image */}
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-brand-surface-highest shrink-0 select-none bg-brand-surface-low">
+                <div className="w-10 h-10 rounded-full overflow-hidden border border-brand-surface-highest shrink-0 select-none bg-brand-bg flex items-center justify-center">
                   <img
-                    src="/assets/images/chii-meme.jpg"
+                    src="/assets/images/user-nam8.png"
                     alt={post.authorName}
-                    className="w-full h-full object-cover object-center"
+                    className="w-full h-full object-cover object-center scale-[1.2]"
                     loading="lazy"
                   />
                 </div>

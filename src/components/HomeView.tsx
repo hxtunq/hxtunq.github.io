@@ -68,10 +68,10 @@ export default function HomeView(_props: HomeViewProps) {
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   exit={{ opacity: 0, x: 8, scale: 0.95 }}
                   transition={{ duration: 0.18, ease: "easeOut" }}
-                  className="absolute sm:right-full sm:top-1/2 sm:-translate-y-1/2 sm:mr-3.5 max-sm:bottom-full max-sm:mb-2.5 z-30 px-3.5 py-2 rounded-md bg-brand-surface-lowest border border-brand-surface-highest shadow-md text-center sm:text-right font-sans text-[11.5px] leading-tight whitespace-nowrap pointer-events-auto"
+                  className="absolute right-full top-1/2 -translate-y-1/2 mr-2.5 sm:mr-3.5 z-30 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-md bg-brand-surface-lowest border border-brand-surface-highest shadow-md text-right font-sans text-[10.5px] sm:text-[11.5px] leading-tight max-w-[105px] sm:max-w-none break-words sm:whitespace-nowrap pointer-events-auto"
                 >
                   <div className="font-semibold text-brand-primary">Chiikawa HUSTer</div>
-                  <div className="text-[10px] text-brand-secondary mt-0.5">(Edited by Minh Ngọc)</div>
+                  <div className="text-[9px] sm:text-[10px] text-brand-secondary mt-0.5">(Edited by Minh Ngọc)</div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -100,7 +100,7 @@ export default function HomeView(_props: HomeViewProps) {
 
             {/* Bottom narrative (Justified) */}
             <p className="font-sans text-brand-on-surface-variant text-[13px] sm:text-[13.5px] leading-relaxed text-justify">
-              …and other fascinating areas of science. I created this website out of a desire to share interdisciplinary knowledge with friends, colleagues, and anyone curious, while consolidating a solid foundation for my future graduate studies. If you have any questions, spot any conceptual inaccuracies, or wish to discuss the topics, feel free to reach out via{" "}
+              and other fascinating areas of science. I created this website out of a desire to share interdisciplinary knowledge with friends, colleagues, and anyone curious, while consolidating a solid foundation for my future graduate studies. If you have any questions, spot any conceptual inaccuracies, or wish to discuss the topics, feel free to reach out via{" "}
               <a
                 href="mailto:hxtunq@gmail.com"
                 className="text-brand-primary font-medium underline underline-offset-3 decoration-brand-surface-highest hover:decoration-brand-primary transition-all"

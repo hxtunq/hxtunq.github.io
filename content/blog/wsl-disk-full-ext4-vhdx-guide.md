@@ -8,12 +8,12 @@ abstract: "Explaining why your storage drive suddenly runs out of disk space whe
 author: "Xuan Tung Hoang"
 language: "English"
 status: "Published"
-tags: ["WSL", "Linux", "Windows", "Troubleshooting"]
+tags: ["WSL", "Windows", "Troubleshooting"]
 ---
 
-I use WSL on Windows for my bioinformatics work. Recently, I ran into a frustrating issue where my storage drive suddenly ran out of space, dropping from over 100 GB free down to just 8 GB. This made no sense at the time because I had not downloaded any new datasets, installed new software, or run heavy analysis pipelines.
+I use WSL on Windows for my bioinformatics work. Recently, I ran into a frustrating issue where my storage drive suddenly ran out of space, dropping from over 100 GB free down to just 8 GB. This made no sense at the time because I had not downloaded any new datasets, installed new tools, or run any heavy pipelines.
 
-I started by checking the storage distribution inside Ubuntu using commands like `du -sh ~/* | sort -h` to inspect my project directories. Then I checked Windows using WizTree and Windows Settings. Windows Settings indicated that Installed apps was taking up hundreds of gigabytes, but clicking into the list only showed regular applications that I had installed months ago.
+I started by checking the storage distribution inside Ubuntu using commands like `du -sh ~/* | sort -h`. Then I checked Windows using Windows Settings, which indicated that Installed apps was taking up hundreds of GB, but clicking into the list only showed regular applications that I had installed months ago.
 
 I tried the common fixes recommended on Google, such as clearing temporary files with `%temp%`, cleaning system caches, and uninstalling unused Windows programs. When that did nothing, I even went back into Ubuntu and deleted several large project files and datasets with `rm -rf`. Still, my Windows drive remained completely full. None of the active files seemed to explain where the 92 GB had gone.
 
@@ -25,13 +25,9 @@ The VHDX format is designed as a dynamically expanding virtual disk. When you in
 
 The catch is that dynamic virtual disks only expand automatically; they do not shrink automatically when you delete files. When you run `rm` inside Linux, the ext4 filesystem only marks those sectors as free internally for future Linux writes. The physical `ext4.vhdx` file on Windows stays at its historical peak size. Virtual disk formats are designed this way intentionally to avoid constant disk fragmentation and performance overhead from shrinking the file on every small deletion.
 
-Another thing that confused me was when I scanned `\\wsl.localhost` in WizTree. Large files showed up twice, once in my home folder and once in `\mnt\wslg\distro`. This is just a bind mount used by WSL to support Linux GUI applications. There is only one physical file on the disk, so trying to delete things in `wslg` is unnecessary.
+To reclaim the lost space, we need to clean up inside Linux first and then manually compact the virtual disk from Windows. Here is the exact workflow.
 
-To actually reclaim the lost space, I needed to clean up inside Linux first and then manually compact the virtual disk from Windows.
-
-Here is the exact workflow I used to resolve it.
-
-## 1. Clean up inside WSL
+## 1. Clean up inside WSL (optional)
 
 Open your WSL terminal and run the following commands to remove leftover caches:
 
@@ -47,9 +43,9 @@ You can also check for obsolete project files or checkpoints with `du -sh ~/* | 
 ## 2. Locate the ext4.vhdx file
 
 1. Press Windows + R on your keyboard to open the Run dialog.
-2. Paste `%LOCALAPPDATA%\Packages` and press Enter.
-3. Open the folder for your Linux distribution (for example `CanonicalGroupLimited.Ubuntu22.04LTS_...`).
-4. Open the `LocalState` subfolder.
+2. Paste `%LOCALAPPDATA%` and press Enter.
+3. Open the folder for your Linux distribution (for example `wsl`).
+4. Open the subfolder (for example `{dbc973c-g9c2-123d-fb8225c0caac}`).
 5. Right-click the `ext4.vhdx` file and select Copy as path.
 
 ## 3. Compact the virtual disk
@@ -85,4 +81,4 @@ detach vdisk
 exit
 ```
 
-After running these commands, I checked my storage drive and immediately got my free space back.
+After running these commands, you immediately got your free space back.
