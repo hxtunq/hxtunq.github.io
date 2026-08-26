@@ -119,8 +119,8 @@ export default function Navbar({
 
           {/* Quick Actions (Settings Popover, Search, Mobile Hamburger) */}
           <div className="flex items-center gap-1 sm:gap-1.5 relative">
-            {/* Settings Gear Popover Container */}
-            <div className="relative" ref={settingsMenuRef}>
+            {/* Settings Gear Popover Container (Desktop/Laptop only, mobile has it in drawer) */}
+            <div className="hidden md:block relative" ref={settingsMenuRef}>
               <button
                 onClick={() => setSettingsMenuOpen(!settingsMenuOpen)}
                 aria-label="Theme settings"
@@ -221,36 +221,34 @@ export default function Navbar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden fixed inset-0 top-16 bg-black/20 z-40"
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="md:hidden fixed inset-0 top-16 bg-black/25 z-40 backdrop-blur-[2px]"
               onClick={() => setMobileMenuOpen(false)}
             />
 
-            {/* Menu panel */}
+            {/* Menu panel with fluid hardware-accelerated spring opening */}
             <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="md:hidden absolute top-[60px] left-4 right-4 z-50 rounded-2xl overflow-hidden bg-brand-nav border border-brand-nav-border shadow-lg"
+              initial={{ opacity: 0, scale: 0.96, y: -8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -8 }}
+              transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              style={{ willChange: "transform, opacity", transformOrigin: "top right" }}
+              className="md:hidden absolute top-[60px] left-4 right-4 z-50 rounded-2xl overflow-hidden bg-brand-nav border border-brand-nav-border shadow-xl"
             >
-              <div className="px-4 py-4 flex flex-col gap-1">
-                {navItems.map(({ key, label, path, Icon }, idx) => {
+              <div className="px-3.5 py-3.5 flex flex-col gap-0.5">
+                {navItems.map(({ key, label, path, Icon }) => {
                   const active = activeTab === key;
                   return (
-                    <motion.button
+                    <button
                       key={key}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.2, delay: idx * 0.04, ease: "easeOut" }}
                       onClick={() => {
                         onNavigate(path);
                         setMobileMenuOpen(false);
                       }}
-                      className={`group flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all duration-200 cursor-pointer ${
+                      className={`group flex items-center gap-3.5 px-3.5 py-3 rounded-xl transition-colors duration-150 cursor-pointer ${
                         active
                           ? "bg-brand-accent/10 text-brand-primary"
-                          : "text-brand-on-surface-variant hover:bg-brand-surface-high active:scale-[0.98]"
+                          : "text-brand-on-surface-variant hover:bg-brand-surface-high active:bg-brand-surface-high/70"
                       }`}
                     >
                       <div
@@ -266,17 +264,14 @@ export default function Navbar({
                         {label}
                       </span>
                       {active && (
-                        <motion.span
-                          layoutId="mobile-active-dot"
-                          className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-accent"
-                        />
+                        <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-accent" />
                       )}
-                    </motion.button>
+                    </button>
                   );
                 })}
 
                 {/* Divider */}
-                <div className="h-px bg-brand-surface-highest my-2 mx-2" />
+                <div className="h-px bg-brand-surface-highest my-1.5 mx-2" />
 
                 {/* Theme Control inside Mobile Drawer */}
                 {onSetTheme && (
