@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Share2, MoreHorizontal, ExternalLink, Copy, Check, Facebook, Twitter, Send, X } from "lucide-react";
+import { Share2, MoreHorizontal, ExternalLink, Copy, Check, Send, X } from "lucide-react";
+import { Facebook, Twitter } from "./BrandIcons";
 import { notesPosts } from "../lib/notes-loader";
 
 // Helper to format date relative or formatted like X (e.g. 5m, 2h, 1d, 12-Feb-2026)

@@ -17,8 +17,6 @@ import {
   LayoutGrid,
   BookOpenText,
   Home,
-  Github,
-  Linkedin,
   Menu,
   X,
   Sun,
@@ -30,6 +28,7 @@ import {
   Settings,
   Palette
 } from "lucide-react";
+import { Github, Linkedin } from "./BrandIcons";
 import { bookItems } from "../lib/book-loader";
 import { RenderMarkdown, parseMarkdown, slugify, highlightBashCode } from "../lib/markdown";
 import { ThemePreference, ResolvedTheme } from "../lib/theme";
