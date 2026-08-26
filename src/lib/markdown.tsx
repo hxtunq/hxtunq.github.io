@@ -396,8 +396,8 @@ export function parseMarkdown(md: string): MarkdownBlock[] {
 export function renderInlineStyles(text: string): React.JSX.Element {
   // Protect inline code from other replacements
   const codeSnippets: string[] = [];
-  let processed = text.replace(/`([^`]+)`/g, (_, code) => {
-    const placeholder = `___INLINE_CODE_${codeSnippets.length}___`;
+  const processed = text.replace(/`([^`]+)`/g, (_, code) => {
+    const placeholder = `%%INLINETOKEN${codeSnippets.length}TOKEN%%`;
     codeSnippets.push(
       `<code class='font-mono text-[0.88em] px-1.5 py-0.5 rounded-xs bg-brand-surface-high/30 text-brand-secondary font-medium'>${code
         .replace(/&/g, "&amp;")
@@ -462,7 +462,7 @@ export function renderInlineStyles(text: string): React.JSX.Element {
     .replace(/\n/g, "<br class='my-0.5' />");
 
   codeSnippets.forEach((snippet, idx) => {
-    html = html.replace(`___INLINE_CODE_${idx}___`, snippet);
+    html = html.replaceAll(`%%INLINETOKEN${idx}TOKEN%%`, () => snippet);
   });
 
   return <span dangerouslySetInnerHTML={{ __html: html }} />;
@@ -508,7 +508,7 @@ function highlightBashLine(line: string): string {
   escapedCode = escapedCode.replace(/(\s)(-\w+|\-\-[\w\-]+)/g, '$1<span class="text-fuchsia-400">$2</span>');
 
   strings.forEach((strHtml, index) => {
-    escapedCode = escapedCode.replace(`___STR_PLACEHOLDER_${index}___`, strHtml);
+    escapedCode = escapedCode.replaceAll(`___STR_PLACEHOLDER_${index}___`, () => strHtml);
   });
 
   return escapedCode + commentPart;
@@ -572,7 +572,7 @@ function highlightRLine(line: string): string {
   escapedCode = escapedCode.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="text-[#ae81ff]">$1</span>');
 
   strings.forEach((strHtml, index) => {
-    escapedCode = escapedCode.replace(`___STR_PLACEHOLDER_${index}___`, strHtml);
+    escapedCode = escapedCode.replaceAll(`___STR_PLACEHOLDER_${index}___`, () => strHtml);
   });
 
   return escapedCode + commentPart;
