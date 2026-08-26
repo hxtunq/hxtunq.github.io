@@ -83,7 +83,7 @@ Lệnh `wc` (*word count*) với cờ `-l` (*lines*) đếm tổng số dòng c�
 
 ## 4. Một số lưu ý
 
-- **Khi muốn biết chính xác số lần lặp (tần số biến thể):** Khi làm việc với tập mẫu lớn (chẳng hạn 50 hay 100 file VCF), ta cần quan tâm cả đến việc biến thể đó lặp lại với tần số bao nhiêu, cao hay thấp, để có thể đưa ra được các tiêu chuẩn đánh giá và sàng lọc phù hợp chứ không phải chỉ cần biết mỗi thông tin là nó có trùng lặp hay không. Lúc này, ta có thể thay `uniq -d | wc -l` bằng `uniq -c | sort -nr` để vừa đếm số lần xuất hiện ở mỗi mẫu, vừa sắp xếp các biến thể phổ biến nhất lên đầu.
-- **Khi file VCF bị nén (`.vcf.gz`):** Thay vì `cat`, ta dùng `zcat *.vcf.gz` (hoặc `gzcat` trên macOS) để giải nén trực tiếp vào luồng pipeline mà không cần tốn dung lượng giải nén ra đĩa cứng.
-- **Nếu một file đơn lẻ vốn đã chứa dòng trùng lặp:** Để tránh trường hợp 1 biến thể xuất hiện 2 lần trong cùng một file bị tính nhầm là xuất hiện ở 2 mẫu, ta có thể tiền xử lý từng file bằng `sort -u` trước khi gom chung.
-- **Đối với tập dữ liệu lớn hàng trăm mẫu:** Nên sử dụng các công cụ chuyên dụng như `bcftools isec` để vừa đảm bảo tốc độ cao, vừa xuất được báo cáo chi tiết theo từng cặp mẫu.
+- Khi làm việc với tập mẫu lớn (chẳng hạn 50-100 file VCF), ta cần quan tâm cả đến việc biến thể đó lặp lại với tần số bao nhiêu, cao hay thấp, để có thể đưa ra được các tiêu chuẩn đánh giá và sàng lọc phù hợp chứ không phải chỉ cần biết mỗi thông tin là nó có trùng lặp hay không. Lúc này, ta có thể thay `uniq -d | wc -l` bằng `uniq -c | sort -nr` để vừa đếm số lần xuất hiện, vừa sắp xếp các biến thể phổ biến nhất lên đầu.
+- Khi file VCF bị nén (`.vcf.gz`) ta dùng `zcat *.vcf.gz` (hoặc `gzcat` trên macOS) thay vì `cat` để giải nén trực tiếp vào luồng pipeline mà không cần tốn dung lượng giải nén ra đĩa cứng.
+- Để tránh trường hợp 1 biến thể xuất hiện 2 lần trong cùng một file bị tính nhầm là xuất hiện ở 2 mẫu, ta có thể tiền xử lý từng file bằng `sort -u` trước khi gom chung.
+- Đối với tập dữ liệu lớn có hàng trăm mẫu, nên sử dụng các công cụ chuyên dụng như `bcftools isec` để vừa đảm bảo tốc độ cao, vừa xuất được báo cáo chi tiết theo từng cặp mẫu.

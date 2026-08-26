@@ -249,3 +249,25 @@ pre, code {
 .prose p, .prose li, .prose blockquote p {
   text-align: justify;
 }
+
+/* Continuous horizontal marquee ticker for mobile tags */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee:hover,
+.animate-marquee:active {
+  animation-play-state: paused;
+}

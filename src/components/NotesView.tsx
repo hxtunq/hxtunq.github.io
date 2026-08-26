@@ -385,12 +385,12 @@ export default function NotesView() {
             <div>
               <span className="font-bold text-brand-primary">{calculatePapersCount()}</span> {calculatePapersCount() === 1 ? "paper" : "papers"} mentioned <span className="text-green-600 font-semibold">({getPapersYearlyPercentageChange()} vs {new Date().getFullYear() - 1})</span>
             </div>
-            <span className="text-brand-surface-highest" aria-hidden="true">•</span>
-            <div>
+            <span className="text-brand-surface-highest hidden sm:inline" aria-hidden="true">•</span>
+            <div className="hidden sm:block">
               <span className="font-bold text-brand-primary">{calculateTopicsCount()}</span> {calculateTopicsCount() === 1 ? "topic" : "topics"} covered
             </div>
-            <span className="text-brand-surface-highest" aria-hidden="true">•</span>
-            <div>
+            <span className="text-brand-surface-highest hidden sm:inline" aria-hidden="true">•</span>
+            <div className="hidden sm:block">
               <span className="font-bold text-brand-primary">{calculateDaysActive()}</span> {calculateDaysActive() === 1 ? "day" : "days"} active
             </div>
           </div>
@@ -405,10 +405,10 @@ export default function NotesView() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.35, delay: idx * 0.08, ease: "easeOut" }}
-                className="flex gap-4 py-6 px-5 sm:px-6 scroll-mt-20 hover:bg-brand-surface-low/10 transition-colors"
+                className="flex flex-col sm:flex-row sm:gap-4 py-5 px-4 sm:py-6 sm:px-6 scroll-mt-20 hover:bg-brand-surface-low/10 transition-colors"
               >
-                {/* Left Side: Avatar Image */}
-                <div className="w-10 h-10 rounded-full overflow-hidden border border-brand-surface-highest shrink-0 select-none bg-brand-bg flex items-center justify-center">
+                {/* Left Side: Avatar Image (Desktop only) */}
+                <div className="hidden sm:flex w-10 h-10 rounded-full overflow-hidden border border-brand-surface-highest shrink-0 select-none bg-brand-bg items-center justify-center">
                   <img
                     src="/assets/images/user-nam8.png"
                     alt={post.authorName}
@@ -417,22 +417,35 @@ export default function NotesView() {
                   />
                 </div>
 
-                {/* Right Side: Post Contents */}
+                {/* Right Side / Main Contents */}
                 <div className="flex-1 min-w-0">
-                  {/* Top line metadata */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-sans font-semibold text-[13.5px] text-brand-primary">
-                        {post.authorName}
-                      </span>
-                      <span className="text-brand-surface-highest" aria-hidden="true">·</span>
-                      <span className="font-mono text-xs text-brand-on-surface-variant/40 hover:underline">
-                        {formatRelativeDate(post.createdAt)}
-                      </span>
+                  {/* Top line metadata (with inline avatar on mobile only) */}
+                  <div className="flex items-center justify-between gap-3 mb-1.5 sm:mb-0">
+                    <div className="flex items-center gap-2.5 sm:gap-2 min-w-0">
+                      {/* Mobile-only inline Avatar */}
+                      <div className="sm:hidden w-9 h-9 rounded-full overflow-hidden border border-brand-surface-highest shrink-0 select-none bg-brand-bg flex items-center justify-center">
+                        <img
+                          src="/assets/images/user-nam8.png"
+                          alt={post.authorName}
+                          className="w-full h-full object-cover object-center scale-[1.2]"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      {/* Author Name and Date */}
+                      <div className="flex items-center gap-2 truncate">
+                        <span className="font-sans font-semibold text-[13.5px] text-brand-primary truncate">
+                          {post.authorName}
+                        </span>
+                        <span className="text-brand-surface-highest" aria-hidden="true">·</span>
+                        <span className="font-mono text-xs text-brand-on-surface-variant/40 hover:underline shrink-0">
+                          {formatRelativeDate(post.createdAt)}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Share action dropdown triggered by ... */}
-                    <div className="relative" ref={activeShareMenu === post.id ? menuRef : null}>
+                    <div className="relative shrink-0" ref={activeShareMenu === post.id ? menuRef : null}>
                       <button
                         onClick={() => setActiveShareMenu(activeShareMenu === post.id ? null : post.id)}
                         className="text-brand-on-surface-variant/40 hover:text-brand-primary p-1 rounded-full hover:bg-brand-surface-high transition-colors cursor-pointer"
@@ -549,7 +562,6 @@ export default function NotesView() {
                   {!post.paperPreview && !post.urlPreview && (
                     <AutoLinkPreview content={post.content} manualPreview={post.linkPreview} />
                   )}
-
                 </div>
               </motion.div>
             );

@@ -268,7 +268,7 @@ export default function ActivityHeatmap({
           {/* GitHub Card Container */}
           <div className="flex-1 bg-brand-surface-lowest border border-brand-surface-highest rounded-md px-3.5 sm:px-4 py-2.5 sm:py-3 shadow-sm flex flex-col justify-between">
             {/* Heatmap Grid Wrapper */}
-            <div className="w-full overflow-x-auto scrollbar-subtle flex flex-col items-center">
+            <div className="w-full overflow-x-auto scrollbar-subtle flex flex-col items-start sm:items-center pb-1">
               <div className="min-w-[580px] w-full max-w-full">
                 {/* Month Labels aligned directly with week columns */}
                 <div className="flex gap-[3px] items-center mb-2.5 sm:mb-3 text-[10px] font-mono text-brand-on-surface-variant/70 h-3.5">
